@@ -1,0 +1,19 @@
+{
+  "name": "rpg-modular-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma modular de RPG de mesa com campanhas independentes, fichas dinâmicas, regras configuráveis e VTT",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=server",
+    "dev:all": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "test": "npm run test --workspace=server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
