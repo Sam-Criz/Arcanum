@@ -8,10 +8,10 @@
     "client"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=server",
-    "dev:all": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
-    "build": "npm run build --workspace=server && npm run build --workspace=client",
-    "test": "npm run test --workspace=server"
+    "dev": "npm --prefix server run dev",
+    "dev:all": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "test": "npm --prefix server test"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
