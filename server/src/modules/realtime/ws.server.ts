@@ -145,14 +145,19 @@ export class RealtimeServer {
             isMaster
           );
 
-          this.broadcast(client.campaignId, {
-            type: 'token:moved',
-            tokenId: updated.id,
-            x: updated.x,
-            y: updated.y,
-            token: updated,
-            timestamp: Date.now(),
-            movedBy: client.username
+          this.broadcastFiltered(client.campaignId, (targetClient) => {
+            const targetIsMaster = targetClient.role === 'owner' || targetClient.role === 'master' || targetClient.role === 'assistant';
+            const clientToken = this.vttService!.getTokenById(client.campaignId, updated.id, targetIsMaster);
+            if (!clientToken) return null;
+            return {
+              type: 'token:moved',
+              tokenId: clientToken.id,
+              x: clientToken.x,
+              y: clientToken.y,
+              token: clientToken,
+              timestamp: Date.now(),
+              movedBy: client.username
+            };
           }, ws);
         } catch (err: any) {
           ws.send(JSON.stringify({ type: 'error', message: err.message || 'Erro ao mover token.' }));

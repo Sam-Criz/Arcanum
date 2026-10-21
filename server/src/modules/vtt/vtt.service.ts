@@ -1,3 +1,4 @@
+import { sanitizeNpcDataForPlayer } from '../bestiary/bestiary.service';
 import { DatabaseSync } from 'node:sqlite';
 import crypto from 'crypto';
 import { CharacterService } from '../characters/character.service';
@@ -589,31 +590,7 @@ export class VttService {
         maxHp = null;
       }
       notes = '';
-      const sanitizedNpcData = { ...npcData };
-      delete sanitizedNpcData.gm_notes;
-      delete sanitizedNpcData.private_notes;
-
-      if (!revealed.attributes || sanitizedNpcData.hide_stats === true) {
-        delete sanitizedNpcData.attributes;
-      }
-      if (!revealed.defenses || sanitizedNpcData.hide_stats === true) {
-        delete sanitizedNpcData.defense;
-        delete sanitizedNpcData.damage_reduction;
-        delete sanitizedNpcData.resistances;
-        delete sanitizedNpcData.vulnerabilities;
-        delete sanitizedNpcData.immunities;
-      }
-      if (!revealed.formulas) {
-        delete sanitizedNpcData.damage_components;
-        if (Array.isArray(sanitizedNpcData.actions)) {
-          sanitizedNpcData.actions = sanitizedNpcData.actions.map((a: any) => ({
-            name: a.name,
-            description: a.description || '',
-            type: a.type || 'attack'
-          }));
-        }
-      }
-      npcData = sanitizedNpcData;
+      npcData = sanitizeNpcDataForPlayer(npcData, revealed);
     }
 
     return {

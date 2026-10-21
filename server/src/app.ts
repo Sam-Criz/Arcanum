@@ -1218,13 +1218,12 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
       const token = vttService.createToken(req.params.campaignId, req.params.sceneId, req.body);
       const rt = getRealtime();
       if (rt) {
-        // Se o token for oculto, envia apenas para mestres
-        rt.broadcast(
-          req.params.campaignId,
-          { type: 'token:created', token },
-          undefined,
-          { masterOnly: !token.is_visible }
-        );
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const clientToken = vttService.getTokenById(req.params.campaignId, token.id, clientIsMaster);
+          if (!clientToken) return null;
+          return { type: 'token:created', token: clientToken };
+        });
       }
       res.status(201).json({ token });
     } catch (err: any) {
@@ -1246,12 +1245,12 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
 
       const rt = getRealtime();
       if (rt) {
-        rt.broadcast(
-          req.params.campaignId,
-          { type: 'token:updated', token },
-          undefined,
-          { masterOnly: !token.is_visible }
-        );
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const clientToken = vttService.getTokenById(req.params.campaignId, token.id, clientIsMaster);
+          if (!clientToken) return null;
+          return { type: 'token:updated', token: clientToken };
+        });
       }
       res.json({ token });
     } catch (err: any) {
@@ -1410,12 +1409,12 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
       const encounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, true);
       const rt = getRealtime();
       if (rt) {
-        rt.broadcast(
-          req.params.campaignId,
-          { type: 'combat:combatant_added', combatant, encounter },
-          undefined,
-          { masterOnly: combatant.is_hidden }
-        );
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const clientCombatant = combatService.getCombatantById(req.params.campaignId, combatant.id, clientIsMaster);
+          if (!clientCombatant) return null;
+          return { type: 'combat:combatant_added', combatant: clientCombatant, encounter };
+        });
       }
       res.status(201).json({ combatant, encounter });
     } catch (err: any) {
@@ -1430,7 +1429,12 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
       const encounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, true);
       const rt = getRealtime();
       if (rt) {
-        rt.broadcast(req.params.campaignId, { type: 'combat:combatant_updated', combatant, encounter });
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const clientCombatant = combatService.getCombatantById(req.params.campaignId, combatant.id, clientIsMaster);
+          if (!clientCombatant) return null;
+          return { type: 'combat:combatant_updated', combatant: clientCombatant, encounter };
+        });
       }
       res.json({ combatant, encounter });
     } catch (err: any) {
@@ -1445,7 +1449,12 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
       const encounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, true);
       const rt = getRealtime();
       if (rt) {
-        rt.broadcast(req.params.campaignId, { type: 'combat:combatant_updated', combatant, encounter });
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const clientCombatant = combatService.getCombatantById(req.params.campaignId, combatant.id, clientIsMaster);
+          if (!clientCombatant) return null;
+          return { type: 'combat:combatant_updated', combatant: clientCombatant, encounter };
+        });
       }
       res.json({ combatant, encounter });
     } catch (err: any) {

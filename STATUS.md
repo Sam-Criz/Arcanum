@@ -1,7 +1,7 @@
 # Status do Projeto — Plataforma Modular de RPG de Mesa
 
 **Data da última atualização:** 2026-10-21  
-**Versão:** 0.13.0 (Bestiário Seguro, Visibilidade Oculta por Padrão, Revelação Progressiva e Fichas Completas de NPCs/Monstros)
+**Versão:** 0.14.0 (Blindagem de Atributos Secretos de NPCs, Sanitização Centralizada no Backend, Proteção em Profundidade no Frontend e Eliminação de Fallbacks Hardcoded)
 
 ---
 
@@ -825,3 +825,42 @@ Implementação robusta da biblioteca de criaturas reutilizáveis da campanha e 
 15. **Cenário 15 — Armas e equipamentos salvos:** Valida persistência de armas, tipos de dano e bônus defensivos no modelo.
 16. **Cenário 16 — Combate com ações e armas de NPCs:** Valida ataque de NPC contra personagem herói no combate.
 17. **Cenário 17 — Ausência de vazamento via WebSockets e Logs:** Valida filtragem no WebSocket e sanitização de dados nos logs.
+
+---
+
+## 10. Correção de Vazamento de Atributos Secretos de NPCs (Versão 0.14.0)
+
+### 10.1 Causa Raiz Identificada e Corrigida
+1. **Fallbacks Hardcoded no Frontend (`BestiaryManager.tsx`):**
+   - Quando o backend sanitizava e removia campos como `vida`, `defesa`, `rd` e `iniciativa_formula` de criaturas para jogadores comuns, o frontend utilizava expressões de fallback estáticas:
+     ```typescript
+     const hp = stats.vida ?? stats.pv ?? stats.hp ?? stats.max_hp ?? 20;
+     const def = stats.defesa ?? stats.ca ?? stats.defense ?? 12;
+     const rd = stats.rd ?? stats.armadura ?? stats.damage_reduction ?? 0;
+     const init = stats.iniciativa_formula || stats.initiative_formula || '1d20 + 2';
+     ```
+   - Isso fazia com que, mesmo sem receber nenhum dado do backend, a interface renderizasse exatamente: **PV: 20**, **Defesa: 12**, **RD: 0** e **Inic.: 1d20 + 2** para os jogadores.
+2. **Vazamento Parcial de `raw_data` e Fórmulas no Backend (`bestiary.service.ts`):**
+   - Quando `revealed.attributes` estava ativo, o backend copiava `raw_data` para `sanitizedRaw`. Caso `revealed.defenses` ou `revealed.formulas` estivessem desmarcados, chaves como `defesa`, `rd` e `iniciativa_formula` não eram removidas de `raw_data`, vazando dados sensíveis via JSON.
+3. **Vazamento em Logs de Combate (`combat.service.ts`):**
+   - O objeto `log.details` incluía `target_defense` e `damage_reduction` mesmo quando o alvo era um NPC com defesas secretas.
+4. **Vazamento em Transmissões WebSocket (`ws.server.ts` e `app.ts`):**
+   - Eventos de criação de token, movimentação e reforços de combate transmitiam payloads unsanitizados mapeados com visão de mestre (`isMaster: true`).
+
+### 10.2 Soluções Implementadas
+1. **Camada Centralizada de Sanitização (`sanitizeNpcDataForPlayer`):**
+   - Função utilitária canônica compartilhada entre `bestiary.service.ts`, `vtt.service.ts` e `combat.service.ts`.
+   - Remove sistematicamente todas as variações de chaves de HP (`hp`, `vida`, `pv`, `current_hp`, `max_hp`, `pv_maximo`, `vida_maxima`, etc.) quando `!revealed.exact_hp`.
+   - Remove chaves de defesa e armadura (`defense`, `defesa`, `ca`, `rd`, `damage_reduction`, `armadura`, `resistances`, `vulnerabilities`, `immunities`) quando `!revealed.defenses`.
+   - Remove fórmulas de iniciativa e combate (`iniciativa_formula`, `initiative_formula`, `attack_formula`, `damage_formula`, `damage_components`) quando `!revealed.formulas`.
+   - Remove atributos numéricos quando `!revealed.attributes`.
+   - Remove notas do mestre (`gm_notes`, `private_notes`) incondicionalmente para jogadores.
+2. **Proteção em Profundidade no Frontend (`BestiaryManager.tsx`, `VirtualTabletop.tsx`, `CombatTracker.tsx`):**
+   - Removidos todos os fallbacks numéricos enganosos (`20`, `12`, `0`, `1d20 + 2`).
+   - Se o campo não estiver revelado, exibe `??` ou `---` para jogadores, sem gerar dados fictícios.
+   - O selo "Nome visto pelos jogadores" é exibido exclusivamente para o mestre; jogadores comuns visualizam diretamente o nome mascarado no título sem quebra de imersão.
+   - Logs de combate omitem a Defesa do alvo NPC para jogadores quando não revelada.
+3. **WebSocket com Filtragem por Papel (`broadcastFiltered`):**
+   - Todas as transmissões de tokens, movimentações e combatentes utilizam `broadcastFiltered` para que mestres recebam o payload completo e jogadores recebam a versão estritamente sanitizada.
+4. **Cobertura Completa de Testes de Regressão:**
+   - Adicionado o **Cenário 18** em `server/tests/bestiary-visibility-and-security.test.ts` validando ponta a ponta o caso real relatado com nome mascarado ("luix") e ocultação de PV, Defesa, RD e Iniciativa no Bestiário, Mapa e Combate.

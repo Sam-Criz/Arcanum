@@ -2383,7 +2383,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     </p>
                     {log.details?.attack_roll && (
                       <div className="text-[10px] text-slate-400 mt-1 font-mono bg-slate-900 p-1.5 rounded border border-slate-800">
-                        Atq: {log.details.attack_roll.expression} = {log.details.attack_roll.total} vs Def {log.details.target_defense} ({log.details.hit ? 'ACERTO' : 'FALHA'})
+                        Atq: {log.details.attack_roll.expression ? `${log.details.attack_roll.expression} = ` : ''}{log.details.attack_roll.total}{log.details.target_defense !== undefined ? ` vs Def ${log.details.target_defense}` : ''} ({log.details.hit ? 'ACERTO' : 'FALHA'})
                       </div>
                     )}
                     {Array.isArray(log.details?.componentsBreakdown) && log.details.componentsBreakdown.length > 0 && (

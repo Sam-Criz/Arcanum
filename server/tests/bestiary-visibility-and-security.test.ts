@@ -8,7 +8,7 @@ import { RealtimeServer } from '../src/modules/realtime/ws.server';
 import { AuthService } from '../src/modules/auth/auth.service';
 import { RbacService } from '../src/modules/permissions/rbac.service';
 
-test('Segurança do Bestiário, Visibilidade e Proteção de Segredos (17 Cenários Obrigatórios)', async () => {
+test('Segurança do Bestiário, Visibilidade e Proteção de Segredos (18 Cenários Obrigatórios)', async () => {
   const db = getDatabase(':memory:');
   const server = http.createServer();
   const authService = new AuthService(db);
@@ -486,6 +486,107 @@ test('Segurança do Bestiário, Visibilidade e Proteção de Segredos (17 Cenár
       (m: any) => m.type === 'bestiary:updated' && m.creature && !m.creature.is_revealed
     );
     assert.strictEqual(hiddenCreatureWsMsg, undefined, 'Cenário 17: WebSocket nunca envia criatura oculta para jogadores');
+
+    // =============================================================
+    // CENÁRIO 18: Caso Real - Mascaramento total ("luix", PV, Defesa, RD e Iniciativa ocultos)
+    // =============================================================
+    console.log('--- CENÁRIO 18 ---');
+    // Mestre cria criatura com dados reais e nome mascarado
+    const luixCreature = bestiaryService.createCreature(campaign.id, {
+      name: 'Luix o Imortal',
+      display_name_players: 'luix',
+      description: 'Um chefe lendário e perigoso.',
+      category: 'chefe',
+      is_revealed: true, // Revelado no bestiário porém com campos mascarados
+      revealed_fields: {
+        name: false,
+        exact_hp: false,
+        defenses: false,
+        formulas: false,
+        attributes: false,
+        damage_types: false,
+        equipment: false,
+        abilities: false,
+        notes: false
+      },
+      raw_data: {
+        vida: 150,
+        pv_maximo: 150,
+        defesa: 18,
+        rd: 5,
+        forca: 20,
+        iniciativa_formula: '1d20 + 8'
+      },
+      computed_data: {
+        vida: 150,
+        max_hp: 150,
+        defesa: 18,
+        rd: 5,
+        iniciativa_formula: '1d20 + 8'
+      },
+      properties: {
+        iniciativa_formula: '1d20 + 8',
+        gm_notes: 'Ponto fraco no coração'
+      }
+    });
+
+    // 1. Jogador requisita a criatura pelo Bestiário
+    const playerLuixRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/bestiary/${luixCreature.id}`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    });
+    assert.strictEqual(playerLuixRes.status, 200);
+    const { creature: playerLuix } = await playerLuixRes.json();
+
+    // Nome deve ser "luix" e "Luix o Imortal" não pode aparecer
+    assert.strictEqual(playerLuix.name, 'luix', 'Cenário 18: Nome mascarado deve ser exibido como luix');
+    assert.strictEqual(JSON.stringify(playerLuix).includes('Luix o Imortal'), false, 'Cenário 18: Nome real não pode vazar');
+    assert.strictEqual(JSON.stringify(playerLuix).includes('Ponto fraco no coração'), false, 'Cenário 18: Notas do mestre não vazam');
+
+    // Estatísticas secretas não podem estar em raw_data nem em computed_data
+    assert.strictEqual(playerLuix.raw_data.vida, undefined, 'Cenário 18: Vida removida de raw_data');
+    assert.strictEqual(playerLuix.raw_data.defesa, undefined, 'Cenário 18: Defesa removida de raw_data');
+    assert.strictEqual(playerLuix.raw_data.rd, undefined, 'Cenário 18: RD removido de raw_data');
+    assert.strictEqual(playerLuix.raw_data.iniciativa_formula, undefined, 'Cenário 18: Formula removida de raw_data');
+    assert.strictEqual(playerLuix.computed_data.vida, undefined, 'Cenário 18: Vida removida de computed_data');
+    assert.strictEqual(playerLuix.computed_data.defesa, undefined, 'Cenário 18: Defesa removida de computed_data');
+    assert.strictEqual(playerLuix.computed_data.rd, undefined, 'Cenário 18: RD removido de computed_data');
+    assert.strictEqual(playerLuix.computed_data.iniciativa_formula, undefined, 'Cenário 18: Formula removida de computed_data');
+
+    // 2. Mestre instancia "luix" no combate e no mapa
+    const spawnedLuix = combatService.spawnCreaturesToEncounter(campaign.id, encounter.id, luixCreature.id, 1, {
+      scene_id: scene.id,
+      name_prefix: luixCreature.name
+    });
+    assert.strictEqual(spawnedLuix.length, 1);
+    const luixCombatantId = spawnedLuix[0].id;
+
+    // 3. Jogador inspeciona a lista de combatentes
+    const combatantsRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/combatants`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    });
+    const { combatants: playerCombatants } = await combatantsRes.json();
+    const playerLuixCombatant = playerCombatants.find((c: any) => c.id === luixCombatantId);
+    assert.ok(playerLuixCombatant, 'Combatente deve existir');
+    assert.strictEqual(playerLuixCombatant.name, 'luix', 'Cenário 18: Nome mascarado no combate');
+    assert.strictEqual(playerLuixCombatant.current_hp, null, 'Cenário 18: PV exato oculto no combate');
+    assert.strictEqual(playerLuixCombatant.max_hp, null, 'Cenário 18: Max PV oculto no combate');
+    assert.strictEqual(playerLuixCombatant.defense, 0, 'Cenário 18: Defesa sanitizada para 0 no combate');
+    assert.strictEqual(playerLuixCombatant.damage_reduction, 0, 'Cenário 18: RD sanitizado para 0 no combate');
+    assert.strictEqual(playerLuixCombatant.initiative_formula, '---', 'Cenário 18: Formula de iniciativa sanitizada');
+
+    // 4. Jogador inspeciona os tokens da cena no mapa
+    const tokensRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/scenes/${scene.id}/tokens`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    });
+    const { tokens: playerTokens } = await tokensRes.json();
+    const playerLuixToken = playerTokens.find((t: any) => t.id === playerLuixCombatant.token_id);
+    assert.ok(playerLuixToken, 'Token do luix deve existir');
+    assert.strictEqual(playerLuixToken.name, 'luix', 'Cenário 18: Nome do token mascarado');
+    assert.strictEqual(playerLuixToken.current_hp, null, 'Cenário 18: PV do token mascarado');
+    assert.strictEqual(playerLuixToken.max_hp, null, 'Cenário 18: Max HP do token mascarado');
+    assert.strictEqual(playerLuixToken.npc_data.defense, undefined, 'Cenário 18: Defesa do token removida');
+    assert.strictEqual(playerLuixToken.npc_data.damage_reduction, undefined, 'Cenário 18: RD do token removido');
+    assert.strictEqual(playerLuixToken.npc_data.iniciativa_formula, undefined, 'Cenário 18: Formula do token removida');
 
   } finally {
     if (masterClient?.ws) masterClient.ws.close();

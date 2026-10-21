@@ -56,7 +56,7 @@ O **Arcanum VTT** é uma plataforma monolítica modular projetada para mestres e
 - **Proteção Rigorosa de Segredos:**
   - **Nome Mascarado:** Nome real protegido; jogadores visualizam apenas a identidade mascarada (ex: *"Figura Encapuzada"*).
   - **Vida Exata Oculta:** `current_hp: null` e `max_hp: null` enviados aos jogadores, mantendo apenas percentual e estado visual (`healthy`, `injured`, `bloodied`, `critical`, `defeated`).
-  - **Defesas e Atributos Protegidos:** Estatísticas mecânicas e fórmulas de dados censuradas nos payloads e logs de combate.
+  - **Defesas e Atributos Protegidos:** Estatísticas mecânicas (Defesa, RD, atributos) e fórmulas de iniciativa e dados censuradas nos payloads HTTP, eventos WebSocket e logs de combate, com eliminação de fallbacks fictícios na interface.
   - **Notas Privadas:** Anotações confidenciais do mestre são 100% expurgadas antes de qualquer transmissão.
 - **Revelação Progressiva Granular:** O mestre pode selecionar pontualmente quais campos deseja revelar aos jogadores conforme testes narrativos (Nome, Categoria, Imagem, Descrição, Atributos, PV Exato, Defesas, Tipos de Dano, Equipamentos, Habilidades, Fórmulas ou Notas).
 

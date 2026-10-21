@@ -1,3 +1,4 @@
+import { sanitizeNpcDataForPlayer } from '../bestiary/bestiary.service';
 import { DatabaseSync } from 'node:sqlite';
 import crypto from 'crypto';
 import { RulesService } from '../rules-engine/rules.service';
@@ -3607,40 +3608,8 @@ export class CombatService {
         sanitizedInitFormula = '---';
       }
 
-      // 5. Sanitização de atributos secretos, notas privadas e detalhes não revelados
-      const sanitizedNpcData = { ...npcData };
-      delete sanitizedNpcData.gm_notes;
-      delete sanitizedNpcData.private_notes;
-
-      if (!revealed.attributes || sanitizedNpcData.hide_stats === true) {
-        delete sanitizedNpcData.attributes;
-        const knownAttrs = [
-          'forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma',
-          'agilidade', 'vigor', 'intelecto', 'presenca', 'for', 'des', 'con', 'int', 'sab', 'car',
-          'str', 'dex', 'agi', 'vig', 'pre', 'sanidade', 'mana', 'vida', 'pv', 'hp', 'pv_maximo', 'vida_maxima',
-          'defesa', 'rd', 'armadura', 'ca'
-        ];
-        for (const k of Object.keys(sanitizedNpcData)) {
-          if (knownAttrs.includes(k.toLowerCase()) || (typeof sanitizedNpcData[k] === 'number' && k !== 'size')) {
-            delete sanitizedNpcData[k];
-          }
-        }
-      }
-      if (!revealed.equipment) {
-        delete sanitizedNpcData.equipment;
-      }
-      if (!revealed.damage_types) {
-        delete sanitizedNpcData.damage_components;
-        delete sanitizedNpcData.resistances;
-        delete sanitizedNpcData.vulnerabilities;
-        delete sanitizedNpcData.immunities;
-      }
-      if (!revealed.notes) {
-        delete sanitizedNpcData.public_notes;
-      }
-      if (!revealed.description) {
-        delete sanitizedNpcData.description;
-      }
+      // 5. Sanitização centralizada de atributos secretos, notas privadas e detalhes não revelados
+      const sanitizedNpcData = sanitizeNpcDataForPlayer(npcData, revealed);
 
       return {
         id: row.id,
@@ -3755,6 +3724,24 @@ export class CombatService {
                 details.message = details.message.split(realName).join(actorName);
               }
             }
+            if (!nd.revealed_fields?.formulas) {
+              if (details.attack_roll) {
+                delete details.attack_roll.expression;
+                delete details.attack_roll.rolls;
+              }
+              if (details.damage_roll) {
+                delete details.damage_roll.expression;
+                delete details.damage_roll.rolls;
+              }
+              delete details.formula;
+              delete details.attack_formula;
+              if (Array.isArray(details.componentsBreakdown)) {
+                details.componentsBreakdown = details.componentsBreakdown.map((cb: any) => ({
+                  damage_type: cb.damage_type,
+                  amount: cb.amount
+                }));
+              }
+            }
           }
         } catch {}
       }
@@ -3770,6 +3757,11 @@ export class CombatService {
               if (details.message && typeof details.message === 'string') {
                 details.message = details.message.split(realName).join(targetName);
               }
+            }
+            if (!nd.revealed_fields?.defenses) {
+              delete details.target_defense;
+              delete details.damage_reduction;
+              delete details.target_rd;
             }
           }
         } catch {}

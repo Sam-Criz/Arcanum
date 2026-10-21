@@ -74,6 +74,88 @@ export interface BestiaryCreature {
   updated_at: string;
 }
 
+export function sanitizeNpcDataForPlayer(npcData: Record<string, any>, revealed: CreatureRevealedFields = {}): Record<string, any> {
+  const result: Record<string, any> = { ...npcData };
+
+  // Sempre remove notas secretas do mestre
+  delete result.gm_notes;
+  delete result.private_notes;
+
+  // 1. HP / Vida
+  const hpKeys = ['hp', 'vida', 'pv', 'current_hp', 'max_hp', 'pv_maximo', 'vida_maxima', 'vida_max', 'pv_max', 'vida_atual', 'pv_atual', 'hp_max', 'cur_hp'];
+  if (!revealed.exact_hp || result.hide_exact_hp === true) {
+    for (const k of hpKeys) {
+      delete result[k];
+    }
+  }
+
+  // 2. Defesas & RD
+  const defKeys = ['defense', 'defesa', 'ca', 'armor_class', 'damage_reduction', 'rd', 'armadura'];
+  if (!revealed.defenses || result.hide_stats === true) {
+    for (const k of defKeys) {
+      delete result[k];
+    }
+    delete result.resistances;
+    delete result.vulnerabilities;
+    delete result.immunities;
+  }
+
+  // 3. Fórmulas de iniciativa e dados
+  const formulaKeys = ['iniciativa_formula', 'initiative_formula', 'iniciativa', 'initiative', 'attack_formula', 'damage_formula', 'damage_components', 'formula'];
+  if (!revealed.formulas) {
+    for (const k of formulaKeys) {
+      delete result[k];
+    }
+    if (Array.isArray(result.actions)) {
+      result.actions = result.actions.map((act: any) => ({
+        name: act.name,
+        description: act.description || '',
+        type: act.type || 'attack'
+      }));
+    }
+  }
+
+  // 4. Tipos de dano
+  if (!revealed.damage_types) {
+    delete result.damage_components;
+    delete result.resistances;
+    delete result.vulnerabilities;
+    delete result.immunities;
+  }
+
+  // 5. Atributos mecânicos
+  if (!revealed.attributes || result.hide_stats === true) {
+    delete result.attributes;
+    const knownAttrs = [
+      'forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma',
+      'agilidade', 'vigor', 'intelecto', 'presenca', 'for', 'des', 'con', 'int', 'sab', 'car',
+      'str', 'dex', 'con', 'int', 'wis', 'cha', 'agi', 'vig', 'pre', 'sanidade', 'mana'
+    ];
+    for (const k of Object.keys(result)) {
+      if (knownAttrs.includes(k.toLowerCase()) || (typeof result[k] === 'number' && k !== 'size')) {
+        delete result[k];
+      }
+    }
+  }
+
+  // 6. Equipamentos
+  if (!revealed.equipment) {
+    delete result.equipment;
+  }
+
+  // 7. Notas públicas
+  if (!revealed.notes) {
+    delete result.public_notes;
+  }
+
+  // 8. Descrição
+  if (!revealed.description) {
+    delete result.description;
+  }
+
+  return result;
+}
+
 export class BestiaryService {
   constructor(
     private db: DatabaseSync,
@@ -422,49 +504,66 @@ export class BestiaryService {
     const tokenUrl = revealed.avatar ? creature.token_url : null;
     const description = revealed.description ? creature.description : '';
 
-    const sanitizedRaw: Record<string, any> = {};
-    const sanitizedComputed: Record<string, any> = {};
+    let sanitizedRaw: Record<string, any> = {};
+    let sanitizedComputed: Record<string, any> = {};
 
     if (revealed.attributes) {
-      for (const [k, v] of Object.entries(creature.raw_data || {})) {
-        sanitizedRaw[k] = v;
-      }
-      for (const [k, v] of Object.entries(creature.computed_data || {})) {
-        sanitizedComputed[k] = v;
-      }
+      sanitizedRaw = sanitizeNpcDataForPlayer(creature.raw_data || {}, revealed);
+      sanitizedComputed = sanitizeNpcDataForPlayer(creature.computed_data || {}, revealed);
+    } else {
+      sanitizedRaw = {};
+      sanitizedComputed = {};
     }
 
     if (revealed.exact_hp) {
-      if (creature.computed_data?.hp !== undefined) sanitizedComputed.hp = creature.computed_data.hp;
-      if (creature.computed_data?.vida !== undefined) sanitizedComputed.vida = creature.computed_data.vida;
-      if (creature.computed_data?.pv !== undefined) sanitizedComputed.pv = creature.computed_data.pv;
-      if (creature.computed_data?.max_hp !== undefined) sanitizedComputed.max_hp = creature.computed_data.max_hp;
+      const cd = creature.computed_data || {};
+      const rd = creature.raw_data || {};
+      const hp = cd.hp ?? cd.vida ?? cd.pv ?? rd.vida ?? rd.pv ?? rd.hp;
+      const maxHp = cd.max_hp ?? cd.vida_maxima ?? cd.pv_maximo ?? rd.vida_maxima ?? rd.pv_maximo;
+      if (hp !== undefined) sanitizedComputed.vida = hp;
+      if (maxHp !== undefined) sanitizedComputed.vida_maxima = maxHp;
     } else {
-      delete sanitizedComputed.hp;
-      delete sanitizedComputed.vida;
-      delete sanitizedComputed.pv;
-      delete sanitizedComputed.max_hp;
-      delete sanitizedRaw.hp;
-      delete sanitizedRaw.vida;
-      delete sanitizedRaw.pv;
-      delete sanitizedRaw.max_hp;
       sanitizedComputed.hp_status = 'healthy';
       sanitizedComputed.hp_percent = 100;
+      const hpKeys = ['hp', 'vida', 'pv', 'current_hp', 'max_hp', 'pv_maximo', 'vida_maxima', 'vida_max', 'pv_max', 'vida_atual', 'pv_atual', 'hp_max', 'cur_hp'];
+      for (const k of hpKeys) {
+        delete sanitizedRaw[k];
+        delete sanitizedComputed[k];
+      }
     }
 
     if (revealed.defenses) {
-      if (creature.computed_data?.defense !== undefined) sanitizedComputed.defense = creature.computed_data.defense;
-      if (creature.computed_data?.defesa !== undefined) sanitizedComputed.defesa = creature.computed_data.defesa;
-      if (creature.computed_data?.damage_reduction !== undefined) sanitizedComputed.damage_reduction = creature.computed_data.damage_reduction;
-      if (creature.computed_data?.rd !== undefined) sanitizedComputed.rd = creature.computed_data.rd;
+      const cd = creature.computed_data || {};
+      const rd = creature.raw_data || {};
+      const def = cd.defense ?? cd.defesa ?? rd.defesa ?? rd.defense;
+      const dr = cd.damage_reduction ?? cd.rd ?? rd.rd ?? rd.damage_reduction;
+      if (def !== undefined) sanitizedComputed.defesa = def;
+      if (dr !== undefined) sanitizedComputed.rd = dr;
       if (creature.properties?.resistances) sanitizedComputed.resistances = creature.properties.resistances;
       if (creature.properties?.vulnerabilities) sanitizedComputed.vulnerabilities = creature.properties.vulnerabilities;
       if (creature.properties?.immunities) sanitizedComputed.immunities = creature.properties.immunities;
     } else {
-      delete sanitizedComputed.defense;
-      delete sanitizedComputed.defesa;
-      delete sanitizedComputed.damage_reduction;
-      delete sanitizedComputed.rd;
+      const defKeys = ['defense', 'defesa', 'ca', 'armor_class', 'damage_reduction', 'rd', 'armadura'];
+      for (const k of defKeys) {
+        delete sanitizedRaw[k];
+        delete sanitizedComputed[k];
+      }
+      delete sanitizedComputed.resistances;
+      delete sanitizedComputed.vulnerabilities;
+      delete sanitizedComputed.immunities;
+    }
+
+    if (revealed.formulas) {
+      const cd = creature.computed_data || {};
+      const rd = creature.raw_data || {};
+      const init = cd.iniciativa_formula || cd.initiative_formula || rd.iniciativa_formula || rd.initiative_formula || creature.properties?.iniciativa_formula;
+      if (init) sanitizedComputed.iniciativa_formula = init;
+    } else {
+      const formKeys = ['iniciativa_formula', 'initiative_formula', 'iniciativa', 'initiative'];
+      for (const k of formKeys) {
+        delete sanitizedRaw[k];
+        delete sanitizedComputed[k];
+      }
     }
 
     let sanitizedActions: any[] = [];

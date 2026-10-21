@@ -482,11 +482,34 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {creatures.map((creature) => {
             const stats = { ...creature.raw_data, ...creature.computed_data, ...creature.properties };
-            const hp = stats.vida ?? stats.pv ?? stats.hp ?? stats.max_hp ?? 20;
-            const def = stats.defesa ?? stats.ca ?? stats.defense ?? 12;
-            const rd = stats.rd ?? stats.armadura ?? stats.damage_reduction ?? 0;
-            const init = stats.iniciativa_formula || stats.initiative_formula || '1d20 + 2';
+            const revealed = creature.revealed_fields || {};
             const isRevealed = Boolean(creature.is_revealed);
+
+            // Permissões de visualização por campo
+            const showExactHp = isMaster || revealed.exact_hp;
+            const showDef = isMaster || revealed.defenses;
+            const showRd = isMaster || revealed.defenses;
+            const showInit = isMaster || revealed.formulas;
+
+            const rawHp = stats.vida ?? stats.pv ?? stats.hp ?? stats.max_hp;
+            const hpDisplay = showExactHp
+              ? (rawHp !== undefined ? rawHp : (isMaster ? 20 : '??'))
+              : (stats.hp_status ? (stats.hp_status === 'healthy' ? 'Saudável' : stats.hp_status) : '??');
+
+            const rawDef = stats.defesa ?? stats.ca ?? stats.defense;
+            const defDisplay = showDef
+              ? (rawDef !== undefined ? rawDef : (isMaster ? 12 : '??'))
+              : '??';
+
+            const rawRd = stats.rd ?? stats.armadura ?? stats.damage_reduction;
+            const rdDisplay = showRd
+              ? (rawRd !== undefined ? rawRd : (isMaster ? 0 : '??'))
+              : '??';
+
+            const rawInit = stats.iniciativa_formula || stats.initiative_formula;
+            const initDisplay = showInit
+              ? (rawInit || (isMaster ? '1d20 + 2' : '---'))
+              : '---';
 
             return (
               <div 
@@ -551,8 +574,8 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                     )}
                   </div>
 
-                  {/* Nome Mascarado se houver */}
-                  {creature.display_name_players && (
+                  {/* Nome Mascarado se houver (visível apenas para o mestre para conferência) */}
+                  {isMaster && creature.display_name_players && (
                     <div className="bg-slate-950/80 border border-slate-800 rounded-lg px-2.5 py-1 mb-2.5 text-[11px] text-slate-400">
                       Nome visto pelos jogadores: <strong className="text-amber-300">"{creature.display_name_players}"</strong>
                     </div>
@@ -572,33 +595,33 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                         <Heart className="w-3 h-3 text-rose-500" />
                         <span>PV</span>
                       </span>
-                      <span className="text-xs font-bold text-white mt-0.5 block">{hp}</span>
+                      <span className="text-xs font-bold text-white mt-0.5 block">{hpDisplay}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-400 flex items-center justify-center space-x-0.5">
                         <Shield className="w-3 h-3 text-indigo-400" />
                         <span>Defesa</span>
                       </span>
-                      <span className="text-xs font-bold text-white mt-0.5 block">{def}</span>
+                      <span className="text-xs font-bold text-white mt-0.5 block">{defDisplay}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-400 flex items-center justify-center space-x-0.5">
                         <Shield className="w-3 h-3 text-amber-400" />
                         <span>RD</span>
                       </span>
-                      <span className="text-xs font-bold text-white mt-0.5 block">{rd}</span>
+                      <span className="text-xs font-bold text-white mt-0.5 block">{rdDisplay}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-400 flex items-center justify-center space-x-0.5">
                         <Zap className="w-3 h-3 text-emerald-400" />
                         <span>Inic.</span>
                       </span>
-                      <span className="text-[11px] font-bold text-emerald-300 mt-0.5 block truncate" title={init}>{init}</span>
+                      <span className="text-[11px] font-bold text-emerald-300 mt-0.5 block truncate" title={String(initDisplay)}>{initDisplay}</span>
                     </div>
                   </div>
 
                   {/* Equipamentos & Armas */}
-                  {creature.equipment && creature.equipment.length > 0 && (
+                  {creature.equipment && creature.equipment.length > 0 && (isMaster || revealed.equipment) && (
                     <div className="space-y-1 mb-3">
                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Armas & Equipamentos ({creature.equipment.length})</span>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -606,7 +629,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                           <span key={i} className="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 border border-slate-700/60 flex items-center space-x-1">
                             <Swords className="w-3 h-3 text-indigo-400" />
                             <span>{eq.name}</span>
-                            {eq.damage_formula && <span className="text-slate-500 font-mono text-[10px]">({eq.damage_formula})</span>}
+                            {showInit && eq.damage_formula && <span className="text-slate-500 font-mono text-[10px]">({eq.damage_formula})</span>}
                           </span>
                         ))}
                       </div>
@@ -614,7 +637,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   )}
 
                   {/* Lista de Ações / Habilidades da Criatura */}
-                  {creature.actions && creature.actions.length > 0 && (
+                  {creature.actions && creature.actions.length > 0 && (isMaster || revealed.abilities) && (
                     <div className="space-y-1 mb-3">
                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ações ({creature.actions.length})</span>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -622,7 +645,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                           <span key={i} className="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 border border-slate-700/60 flex items-center space-x-1">
                             <Swords className="w-3 h-3 text-rose-400" />
                             <span>{act.name}</span>
-                            {act.formula && <span className="text-slate-500 font-mono text-[10px]">({act.formula})</span>}
+                            {showInit && act.formula && <span className="text-slate-500 font-mono text-[10px]">({act.formula})</span>}
                           </span>
                         ))}
                         {creature.actions.length > 3 && (
