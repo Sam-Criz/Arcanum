@@ -86,6 +86,16 @@ O **Arcanum VTT** é uma plataforma monolítica modular projetada para mestres e
 - Catálogo de itens com controle de estoque limitado, compra por jogadores e aprovação pelo mestre.
 - Imbuição de armas com consumíveis e rastreamento de cargas de uso.
 
+### 🎨 7. Design Moderno & Experiência Imersiva (Apple-inspired UI)
+- **Visual Glassmorphism & Imersão:**
+  - Painéis semitransparentes com desfoque de fundo inteligente (`backdrop-blur-md` e `bg-slate-900/80`), integrando o mapa, cartas e fichas sem poluição visual.
+- **Micro-interações Fluídas:**
+  - Animações refinadas e táteis em botões e controles (`hover:scale-[1.02] active:scale-[0.98] transition-all`).
+  - Cantos arredondados orgânicos e harmônicos (`rounded-xl`, `rounded-2xl` e `rounded-3xl`).
+- **Otimizações com React 19:**
+  - Auditoria estrita de renderização sob tráfego WebSocket de combate e movimentação em tempo real.
+  - Chaves (`key`) únicas e determinísticas em todas as listas de combatentes, itens, rolagens e tokens.
+
 ---
 
 ## 🛠️ Arquitetura Técnica
