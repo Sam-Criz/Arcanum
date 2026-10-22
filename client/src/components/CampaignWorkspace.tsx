@@ -3,7 +3,7 @@ import { Campaign, Ruleset, Character, CharacterTemplate, RollResult, api, User 
 import { 
   Dices, Shield, Sparkles, UserPlus, 
   Send, Copy, Check, MessageSquare, Terminal, Eye, EyeOff, Plus, ChevronRight,
-  Package, LayoutTemplate, Map as MapIcon, Flame, Skull
+  Package, LayoutTemplate, Map as MapIcon, Flame, Skull, BookOpen, Headphones
 } from 'lucide-react';
 import { InventoryView } from './InventoryView';
 import { CatalogManager } from './CatalogManager';
@@ -22,15 +22,15 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
   user,
   onBack
 }) => {
-  const [activeTab, setActiveTabState] = useState<'sheets' | 'vtt' | 'inventory' | 'catalog' | 'bestiary' | 'templates' | 'rules' | 'roller' | 'chat'>(() => {
+  const [activeTab, setActiveTabState] = useState<'vtt' | 'sheets' | 'inventory' | 'catalog' | 'bestiary' | 'templates' | 'rules' | 'roller' | 'chat'>(() => {
     const hashMatch = window.location.hash.match(/tab=([^&]+)/);
     const hashTab = hashMatch ? (hashMatch[1] as any) : null;
     const saved = hashTab || localStorage.getItem(`arcanum_active_tab_${campaign.id}`);
-    const validTabs = ['sheets', 'vtt', 'inventory', 'catalog', 'bestiary', 'templates', 'rules', 'roller', 'chat'];
-    return (saved && validTabs.includes(saved)) ? (saved as any) : 'sheets';
+    const validTabs = ['vtt', 'sheets', 'inventory', 'catalog', 'bestiary', 'templates', 'rules', 'roller', 'chat'];
+    return (saved && validTabs.includes(saved)) ? (saved as any) : 'vtt';
   });
 
-  const setActiveTab = (tab: 'sheets' | 'vtt' | 'inventory' | 'catalog' | 'bestiary' | 'templates' | 'rules' | 'roller' | 'chat') => {
+  const setActiveTab = (tab: 'vtt' | 'sheets' | 'inventory' | 'catalog' | 'bestiary' | 'templates' | 'rules' | 'roller' | 'chat') => {
     setActiveTabState(tab);
     localStorage.setItem(`arcanum_active_tab_${campaign.id}`, tab);
     window.location.hash = `campaign=${campaign.id}&tab=${tab}`;
@@ -496,202 +496,151 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
     setChatInput('');
   };
 
+  const navItems = [
+    { id: 'vtt', label: 'Mesa', icon: MapIcon },
+    { id: 'sheets', label: 'Fichas', icon: Shield },
+    { id: 'inventory', label: 'Mochila', icon: Package },
+    { id: 'roller', label: 'Rolagens', icon: Dices, badge: unreadRollCount > 0 ? unreadRollCount : undefined },
+    { id: 'catalog', label: 'Catálogo', icon: Sparkles },
+    { id: 'bestiary', label: 'Bestiário', icon: Skull },
+    { id: 'templates', label: 'Modelos', icon: LayoutTemplate, count: templates.length },
+    { id: 'rules', label: 'Regras', icon: Terminal },
+    { id: 'chat', label: 'Chat', icon: MessageSquare, count: messages.length },
+    { id: 'lore', label: 'Lore', icon: BookOpen, disabled: true, sublabel: 'em breve' },
+    { id: 'audio', label: 'Áudio', icon: Headphones, disabled: true, sublabel: 'em breve' },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6">
-      {/* Notificação Flutuante de Rolagem Secreta para o Mestre */}
-      {secretRollToast && (
-        <div className="fixed top-5 right-5 z-50 bg-amber-950/95 border-2 border-amber-500 rounded-2xl p-4 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-sm animate-bounce-short">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 shrink-0">
-            <Dices className="w-5 h-5 animate-spin" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">🎲 Rolagem Secreta Recebida</span>
-            <p className="text-xs text-white font-medium truncate">
-              <strong>{secretRollToast.author}</strong>
-              {secretRollToast.characterName ? ` (${secretRollToast.characterName})` : ''}: {secretRollToast.expression} = <span className="font-bold text-amber-300 text-sm">{secretRollToast.total}</span>
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              setActiveTab('roller');
-              setUnreadRollCount(0);
-              setSecretRollToast(null);
-            }}
-            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold shrink-0 transition-all shadow-md"
-          >
-            Ver
-          </button>
-        </div>
-      )}
+    <div className="flex h-[calc(100vh-65px)] overflow-hidden bg-[#131211] text-[#ece3d0]">
+      {/* Menu Lateral Estilo Arcanum / Apple Glass */}
+      <aside className="w-20 md:w-24 shrink-0 bg-[#1a1816]/95 border-r border-[#2c2825] flex flex-col items-center py-4 space-y-1.5 overflow-y-auto z-30 select-none">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          const isDisabled = item.disabled;
 
-      {/* Top Bar da Campanha */}
-      <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 mb-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
-        <div>
-          <div className="flex items-center space-x-3 mb-1">
+          return (
             <button
-              onClick={onBack}
-              className="text-xs font-semibold px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/80 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              key={item.id}
+              disabled={isDisabled}
+              onClick={() => {
+                if (!isDisabled) {
+                  setActiveTab(item.id as any);
+                  if (item.id === 'roller') setUnreadRollCount(0);
+                }
+              }}
+              className={`w-16 md:w-20 py-2.5 px-1 rounded-xl flex flex-col items-center justify-center transition-all duration-200 group relative ${
+                isDisabled
+                  ? 'opacity-40 cursor-not-allowed text-[#a89984]'
+                  : isActive
+                    ? 'bg-[#2c2825] text-[#c9a04e] border-l-2 border-[#c9a04e] shadow-sm'
+                    : 'text-[#a89984] hover:text-[#ece3d0] hover:bg-[#2c2825]/60 hover:scale-[1.03] active:scale-[0.97]'
+              }`}
             >
-              ← Voltar às Campanhas
+              <div className="relative">
+                <Icon className={`w-5 h-5 mb-1 transition-colors ${
+                  isActive ? 'text-[#c9a04e]' : 'text-[#a89984] group-hover:text-[#ece3d0]'
+                }`} />
+                {item.badge && (
+                  <span className="absolute -top-1 -right-2 px-1.5 py-0.2 bg-[#b24a52] text-white text-[9px] font-bold rounded-full font-mono animate-pulse">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[11px] font-medium tracking-tight text-center truncate w-full ${
+                isActive ? 'text-[#c9a04e] font-semibold' : 'text-[#a89984] group-hover:text-[#ece3d0]'
+              }`}>
+                {item.label}
+              </span>
+              {item.sublabel && (
+                <span className="text-[9px] text-[#a89984]/70 leading-none">
+                  {item.sublabel}
+                </span>
+              )}
             </button>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              {ruleset?.config.systemName || 'Sistema Customizado'}
-            </span>
-          </div>
-          <h1 className="text-2xl font-black text-white">{campaign.name}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{campaign.description || 'Ambiente ativo com isolamento de regras.'}</p>
-        </div>
+          );
+        })}
+      </aside>
 
-        {/* Ações de Mestre / Convite */}
-        <div className="flex items-center space-x-3">
-          {inviteCode ? (
-            <div className="flex items-center space-x-2 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-indigo-500/50 backdrop-blur-sm">
-              <span className="text-xs text-slate-400">Código:</span>
-              <span className="font-mono text-sm font-bold text-indigo-300">{inviteCode}</span>
-              <button
-                onClick={() => copyToClipboard(inviteCode)}
-                className="p-1 text-slate-400 hover:text-white transition-colors"
-                title="Copiar código"
-              >
-                {copiedInvite ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-              </button>
+      {/* Área Central / Conteúdo Reativo */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+        {/* Notificação Flutuante de Rolagem Secreta para o Mestre */}
+        {secretRollToast && (
+          <div className="fixed top-5 right-5 z-50 bg-[#1a1816]/95 border-2 border-[#c9a04e] rounded-2xl p-4 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-sm animate-bounce-short">
+            <div className="w-10 h-10 rounded-xl bg-[#c9a04e]/20 border border-[#c9a04e]/50 flex items-center justify-center text-[#c9a04e] shrink-0">
+              <Dices className="w-5 h-5 animate-spin" />
             </div>
-          ) : (
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-bold text-[#c9a04e] uppercase tracking-wider block">🎲 Rolagem Secreta Recebida</span>
+              <p className="text-xs text-[#ece3d0] font-medium truncate">
+                <strong>{secretRollToast.author}</strong>
+                {secretRollToast.characterName ? ` (${secretRollToast.characterName})` : ''}: {secretRollToast.expression} = <span className="font-bold text-[#c9a04e] text-sm">{secretRollToast.total}</span>
+              </p>
+            </div>
             <button
-              onClick={handleGenerateInvite}
-              className="flex items-center space-x-2 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => {
+                setActiveTab('roller');
+                setUnreadRollCount(0);
+                setSecretRollToast(null);
+              }}
+              className="px-3 py-1.5 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs shrink-0 transition-all shadow-md"
             >
-              <UserPlus className="w-4 h-4 text-amber-400" />
-              <span>Gerar Convite</span>
+              Ver
             </button>
-          )}
+          </div>
+        )}
 
-          <button
-            onClick={() => setShowCreateCharModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Novo Personagem</span>
-          </button>
+        {/* Top Bar da Campanha */}
+        <div className="bg-[#1a1816]/90 backdrop-blur-md border border-[#2c2825] rounded-2xl p-5 mb-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
+          <div>
+            <div className="flex items-center space-x-3 mb-1">
+              <button
+                onClick={onBack}
+                className="text-xs font-semibold px-2.5 py-1 rounded-xl bg-[#2c2825] hover:bg-[#2c2825]/80 text-[#ece3d0] border border-[#2c2825] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                ← Voltar às Campanhas
+              </button>
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#c9a04e]/15 text-[#c9a04e] border border-[#c9a04e]/30">
+                {ruleset?.config.systemName || 'Sistema Customizado'}
+              </span>
+            </div>
+            <h1 className="text-2xl font-black text-[#ece3d0] font-serif">{campaign.name}</h1>
+            <p className="text-xs text-[#a89984] mt-0.5">{campaign.description || 'Ambiente ativo com isolamento de regras.'}</p>
+          </div>
+
+          {/* Ações de Mestre / Convite */}
+          <div className="flex items-center space-x-3">
+            {inviteCode ? (
+              <div className="flex items-center space-x-2 bg-[#131211] px-3 py-1.5 rounded-xl border border-[#c9a04e]/50 backdrop-blur-sm">
+                <span className="text-xs text-[#a89984]">Código:</span>
+                <span className="font-mono text-sm font-bold text-[#c9a04e]">{inviteCode}</span>
+                <button
+                  onClick={() => copyToClipboard(inviteCode)}
+                  className="p-1 text-[#a89984] hover:text-[#ece3d0] transition-colors"
+                  title="Copiar código"
+                >
+                  {copiedInvite ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleGenerateInvite}
+                className="flex items-center space-x-2 px-3.5 py-2 bg-[#2c2825] hover:bg-[#2c2825]/80 text-[#ece3d0] border border-[#2c2825] rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <UserPlus className="w-4 h-4 text-[#c9a04e]" />
+                <span>Gerar Convite</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => setShowCreateCharModal(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs shadow-lg shadow-[#c9a04e]/20 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Novo Personagem</span>
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Tabs de Navegação */}
-      <div className="flex space-x-2 border-b border-slate-800 mb-6 overflow-x-auto pb-1 sm:pb-0">
-        <button
-          onClick={() => setActiveTab('sheets')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'sheets'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Shield className="w-4 h-4" />
-          <span>Fichas</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('vtt')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'vtt'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <MapIcon className="w-4 h-4 text-emerald-400" />
-          <span>Mesa Virtual (VTT)</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('inventory')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'inventory'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Package className="w-4 h-4 text-amber-400" />
-          <span>Mochila & Inventário</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('catalog')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'catalog'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Sparkles className="w-4 h-4 text-indigo-400" />
-          <span>Catálogo da Campanha</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('bestiary')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'bestiary'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Skull className="w-4 h-4 text-rose-500" />
-          <span>Bestiário & Criaturas</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('templates')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'templates'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <LayoutTemplate className="w-4 h-4 text-purple-400" />
-          <span>Modelos de Ficha ({templates.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('rules')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'rules'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Terminal className="w-4 h-4" />
-          <span>Regras da Campanha</span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('roller');
-            setUnreadRollCount(0);
-          }}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap relative ${
-            activeTab === 'roller'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Dices className="w-4 h-4" />
-          <span>Rolador de Dados</span>
-          {unreadRollCount > 0 && activeTab !== 'roller' && (
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse ml-1" />
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveTab('chat')}
-          className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-semibold text-sm transition-all whitespace-nowrap ${
-            activeTab === 'chat'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>Mesa em Tempo Real ({messages.length})</span>
-        </button>
-      </div>
 
       {/* CONTEÚDO DA TAB 1: FICHAS & PERSONAGENS (ESTILO C.R.I.S.) */}
       {activeTab === 'sheets' && (
@@ -1409,6 +1358,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
