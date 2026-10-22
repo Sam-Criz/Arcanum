@@ -348,7 +348,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* Resumo do Inventário / Métricas de Carga */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center space-x-3">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-xl flex items-center space-x-3 transition-all">
           <div className="w-10 h-10 rounded-xl bg-indigo-950/50 border border-indigo-800/60 flex items-center justify-center text-indigo-400">
             <Package className="w-5 h-5" />
           </div>
@@ -358,7 +358,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center space-x-3">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-xl flex items-center space-x-3 transition-all">
           <div className="w-10 h-10 rounded-xl bg-sky-950/50 border border-sky-800/60 flex items-center justify-center text-sky-400">
             <Scale className="w-5 h-5" />
           </div>
@@ -368,7 +368,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center space-x-3">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-xl flex items-center space-x-3 transition-all">
           <div className="w-10 h-10 rounded-xl bg-emerald-950/50 border border-emerald-800/60 flex items-center justify-center text-emerald-400">
             <Shield className="w-5 h-5" />
           </div>
@@ -378,7 +378,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center space-x-3">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-xl flex items-center space-x-3 transition-all">
           <div className="w-10 h-10 rounded-xl bg-amber-950/50 border border-amber-800/60 flex items-center justify-center text-amber-400">
             <Coins className="w-5 h-5" />
           </div>
@@ -390,7 +390,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       </div>
 
       {/* Lista Principal de Itens do Inventário */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+      <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-xl transition-all">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-bold text-white text-base">Mochila de {selectedCharacter.name}</h3>
@@ -649,8 +649,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* MODAL: ADICIONAR ITEM */}
       {showAddItemModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-md relative">
             <h2 className="text-2xl font-bold text-white mb-2">Adicionar Item ao Inventário</h2>
             <p className="text-xs text-slate-400 mb-6">
               Adicione um item existente do catálogo oficial da campanha.
@@ -811,8 +811,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* MODAL: TRANSFERIR ITEM */}
       {showTransferModal && itemToTransfer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-md bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-md relative">
             <h2 className="text-xl font-bold text-white mb-1">Transferir Item</h2>
             <p className="text-xs text-slate-400 mb-6">
               Transfira unidades deste item de forma atômica para outro aventureiro na campanha.
@@ -890,8 +890,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* MODAL: IMBUIR ARMA COM CONSUMÍVEL */}
       {showImbueModal && consumableToImbue && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-md bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-md relative">
             <div className="flex items-center space-x-2 text-indigo-400 mb-1">
               <Wand2 className="w-5 h-5 text-indigo-400" />
               <h2 className="text-xl font-bold text-white">Imbuir Arma</h2>

@@ -728,11 +728,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
   const activeCombatant = encounter && encounter.turn_index >= 0 ? combatants[encounter.turn_index] : null;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl flex flex-col h-full max-h-[750px]">
+    <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-2xl flex flex-col h-full max-h-[750px] transition-all">
       {/* Cabeçalho do Encontro */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <div className="w-8 h-8 rounded-xl bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
             <Swords className="w-4 h-4" />
           </div>
           <div>
@@ -743,7 +743,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               <div className="flex items-center space-x-2 text-[10px]">
                 <span className="text-indigo-400 font-semibold">Rodada {encounter.round}</span>
                 <span className="text-slate-500">•</span>
-                <span className={`px-1.5 py-0.2 rounded font-medium ${
+                <span className={`px-1.5 py-0.2 rounded-lg font-medium ${
                   encounter.status === 'active' 
                     ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800'
                     : encounter.status === 'prep'
@@ -762,10 +762,10 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={() => setShowLogsDrawer(!showLogsDrawer)}
               title="Histórico de Ações"
-              className={`p-1.5 rounded-lg border transition-all ${
+              className={`p-1.5 rounded-xl border transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] ${
                 showLogsDrawer 
-                  ? 'bg-indigo-600 text-white border-indigo-500' 
-                  : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white'
+                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30' 
+                  : 'bg-slate-800/80 text-slate-400 border-slate-700/80 hover:text-white'
               }`}
             >
               <History className="w-4 h-4" />
@@ -775,7 +775,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           {isMaster && !encounter && (
             <button
               onClick={handleStartCombat}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-md shadow-indigo-600/30"
+              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-indigo-600/30"
             >
               <Play className="w-3.5 h-3.5" />
               <span>Iniciar</span>
@@ -786,7 +786,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={handleActivateCombat}
               title="Iniciar Combate e Validar Ordem de Iniciativa"
-              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-md shadow-emerald-600/30"
+              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-emerald-600/30"
             >
               <Play className="w-3.5 h-3.5" />
               <span>Iniciar Combate</span>
@@ -797,7 +797,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={() => setShowAddModal(true)}
               title="Adicionar Participante"
-              className="p-1.5 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-800/50 rounded-lg transition-all"
+              className="p-1.5 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-800/50 rounded-xl transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -807,7 +807,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={handleEndCombat}
               title="Encerrar Combate"
-              className="p-1.5 bg-rose-950/50 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 rounded-lg transition-all"
+              className="p-1.5 bg-rose-950/50 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 rounded-xl transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
             >
               <Square className="w-3.5 h-3.5" />
             </button>
@@ -821,7 +821,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           <button
             onClick={handlePrevTurn}
             title="Turno Anterior"
-            className="py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium flex items-center justify-center space-x-1 border border-slate-700 transition-all"
+            className="py-1.5 px-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-medium flex items-center justify-center space-x-1 border border-slate-700/80 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             <SkipBack className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Anterior</span>
@@ -830,7 +830,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           <button
             onClick={handleNextTurn}
             title="Próximo Turno"
-            className="py-1.5 px-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 shadow-md shadow-emerald-700/20 transition-all col-span-2"
+            className="py-1.5 px-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1 shadow-md shadow-emerald-700/20 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] col-span-2"
           >
             <SkipForward className="w-3.5 h-3.5" />
             <span>Próximo Turno</span>
@@ -839,7 +839,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           <button
             onClick={handleRollAllInitiative}
             title="Rolar Todas as Iniciativas"
-            className="py-1.5 px-2 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-700/50 rounded-lg text-xs font-medium flex items-center justify-center transition-all"
+            className="py-1.5 px-2 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-700/50 rounded-xl text-xs font-medium flex items-center justify-center transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
           >
             <Dices className="w-3.5 h-3.5" />
           </button>
@@ -954,12 +954,12 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             return (
               <div
                 key={c.id}
-                className={`p-2.5 rounded-xl border transition-all flex items-center justify-between ${
+                className={`p-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.01] flex items-center justify-between ${
                   isActive
-                    ? 'bg-indigo-950/40 border-indigo-500/80 shadow-md shadow-indigo-900/30 ring-1 ring-indigo-500/50'
+                    ? 'bg-indigo-950/60 border-indigo-500/80 shadow-md shadow-indigo-900/30 ring-1 ring-indigo-500/50'
                     : c.is_hidden
                       ? 'bg-slate-950/40 border-amber-800/40 opacity-80 hover:opacity-100 hover:border-amber-700/60'
-                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                      : 'bg-slate-950/70 border-slate-800/80 hover:border-slate-750'
                 }`}
               >
                 <div className="flex items-center space-x-2.5 min-w-0 flex-1">
@@ -1134,14 +1134,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
       {/* MODAL: Adicionar Combatente (com Atributos Defensivos de NPCs/Monstros) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <h3 className="font-bold text-base text-white flex items-center space-x-2">
                 <Plus className="w-4 h-4 text-indigo-400" />
                 <span>Adicionar Participante ao Combate</span>
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1477,17 +1477,17 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Adicionar ao Encontro
                 </button>
@@ -1500,9 +1500,9 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
       {/* MODAL: Central de Ações Unificadas de Combate */}
       {showActionModal && selectedTarget && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-xl p-6 shadow-2xl backdrop-blur-md max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <div>
                 <h3 className="font-bold text-base text-white flex items-center space-x-2">
                   <Target className="w-4 h-4 text-rose-400" />
@@ -1512,7 +1512,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   Alvo: {selectedTarget.current_hp !== null ? `${selectedTarget.current_hp} PV` : getHpStatusLabel(selectedTarget.hp_status)} {isMaster ? `• Defesa: ${selectedTarget.defense} • RD: ${selectedTarget.damage_reduction}` : ''}
                 </span>
               </div>
-              <button onClick={() => setShowActionModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowActionModal(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2252,11 +2252,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowActionModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
@@ -2271,7 +2271,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     <button
                       type="submit"
                       disabled={isBlocked}
-                      className={`px-5 py-2 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center space-x-1.5 ${
+                      className={`px-5 py-2 text-white rounded-xl text-xs font-bold shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center space-x-1.5 ${
                         isBlocked && !isApplyingAction
                           ? 'bg-slate-700 opacity-60 cursor-not-allowed'
                           : actionMode === 'manual' && manualActionType === 'heal'
@@ -2316,14 +2316,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
       {/* MODAL: Aplicar Condição / Efeito de Status */}
       {showConditionModal && selectedCombatantForCondition && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <h3 className="font-bold text-base text-white flex items-center space-x-2">
                 <Flame className="w-4 h-4 text-amber-400" />
                 <span>[Mestre] Intervenção Manual de Condição em {selectedCombatantForCondition.name}</span>
               </h3>
-              <button onClick={() => setShowConditionModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowConditionModal(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2400,18 +2400,18 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 </>
               )}
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowConditionModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-all"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isApplyingCondition}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-amber-600/30 flex items-center space-x-1.5"
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-600/30 flex items-center space-x-1.5"
                 >
                   <Flame className="w-4 h-4" />
                   <span>{isApplyingCondition ? 'Aplicando...' : 'Aplicar Condição'}</span>
@@ -2424,14 +2424,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
       {/* GAVETA / MODAL: Histórico de Ações do Combate */}
       {showLogsDrawer && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-end p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md h-[90vh] flex flex-col p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-end p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md h-[90vh] flex flex-col p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <h3 className="font-bold text-base text-white flex items-center space-x-2">
                 <History className="w-5 h-5 text-indigo-400" />
                 <span>Histórico de Combate</span>
               </h3>
-              <button onClick={() => setShowLogsDrawer(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowLogsDrawer(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>

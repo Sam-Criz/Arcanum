@@ -238,7 +238,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
       )}
 
       {/* Header do Módulo de Templates */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
         <div>
           <div className="flex items-center space-x-2 text-xs text-indigo-400 font-semibold mb-1">
             <LayoutTemplate className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
         {isMaster && !isEditing && (
           <button
             onClick={handleStartCreate}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Modelo de Ficha</span>
@@ -263,8 +263,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
 
       {isEditing ? (
         /* FORMULÁRIO DO VISUAL BUILDER */
-        <form onSubmit={handleSaveTemplate} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <form onSubmit={handleSaveTemplate} className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-6 transition-all">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
             <div>
               <h3 className="font-bold text-lg text-white">
                 {selectedTemplate ? 'Editando Modelo de Ficha' : 'Criando Novo Modelo de Ficha'}
@@ -275,13 +275,13 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-medium"
+                className="px-4 py-2 rounded-xl border border-slate-700/80 text-slate-300 hover:bg-slate-800/80 hover:text-white text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30"
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Salvar Modelo
               </button>
@@ -476,7 +476,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
       ) : (
         /* VISUALIZAÇÃO DOS MODELOS EXISTENTES */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl h-fit space-y-2">
+          <div className="lg:col-span-1 bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl h-fit space-y-2 transition-all">
             <h3 className="font-bold text-xs text-slate-400 uppercase tracking-wider mb-3">Modelos Disponíveis</h3>
 
             {templates.length === 0 ? (
@@ -486,10 +486,10 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                 <div
                   key={tmpl.id}
                   onClick={() => setSelectedTemplate(tmpl)}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${
                     selectedTemplate?.id === tmpl.id
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                      : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-sm'
+                      : 'bg-slate-950/80 border-slate-800/80 text-slate-300 hover:border-slate-700'
                   }`}
                 >
                   <p className="font-bold text-sm truncate">{tmpl.name}</p>
@@ -504,8 +504,8 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
 
           <div className="lg:col-span-2">
             {selectedTemplate ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-6 transition-all">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
                   <div>
                     <h3 className="text-xl font-bold text-white">{selectedTemplate.name}</h3>
                     <p className="text-xs text-slate-400 mt-0.5">{selectedTemplate.description || 'Modelo de ficha ativo'}</p>
@@ -514,7 +514,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleStartEdit(selectedTemplate)}
-                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all"
+                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 hover:text-white border border-slate-700/80 text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>Editar Estrutura</span>

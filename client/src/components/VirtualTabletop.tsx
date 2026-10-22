@@ -817,9 +817,9 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const mapHeight = activeScene?.height || 2000;
 
   return (
-    <div className="relative w-full h-[760px] bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col select-none">
+    <div className="relative w-full h-[760px] bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col select-none">
       {/* BARRA SUPERIOR DE FERRAMENTAS DO VTT */}
-      <div className="h-14 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+      <div className="h-14 bg-slate-900/70 border-b border-slate-800/80 px-4 flex items-center justify-between z-20 backdrop-blur-md">
         {/* Seletor de Cenas */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
@@ -834,7 +834,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     localStorage.setItem(`arcanum_active_scene_${campaign.id}`, match.id);
                   }
                 }}
-                className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500"
+                className="bg-slate-950/90 border border-slate-700/80 rounded-xl px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
               >
                 {scenes.map(s => (
                   <option key={s.id} value={s.id}>
@@ -843,7 +843,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 ))}
               </select>
             ) : (
-              <span className="text-xs font-bold text-white bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
+              <span className="text-xs font-bold text-white bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700/80">
                 {activeScene ? activeScene.name : 'Nenhuma Cena Ativa'}
               </span>
             )}
@@ -851,11 +851,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
           {/* Botões administrativos do Mestre */}
           {isMaster && (
-            <div className="flex items-center space-x-1 pl-2 border-l border-slate-800">
+            <div className="flex items-center space-x-1 pl-2 border-l border-slate-800/80">
               <button
                 onClick={handleOpenCreateScene}
                 title="Nova Cena"
-                className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs transition-all"
+                className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -865,7 +865,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   <button
                     onClick={() => handleOpenEditScene(activeScene)}
                     title="Configurar Cena"
-                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs transition-all"
+                    className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                   >
                     <Settings className="w-4 h-4" />
                   </button>
@@ -874,7 +874,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     <button
                       onClick={() => handleActivateScene(activeScene.id)}
                       title="Ativar para Jogadores"
-                      className="px-2 py-1 bg-amber-600/80 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold transition-all"
+                      className="px-2.5 py-1 bg-amber-600/90 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Ativar Mesa
                     </button>
@@ -884,7 +884,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     <button
                       onClick={() => handleDeleteScene(activeScene.id)}
                       title="Excluir Cena"
-                      className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-lg text-xs transition-all"
+                      className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -899,11 +899,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         <div className="flex items-center space-x-2">
           {/* Toggle de Fog of War (Mestre) */}
           {isMaster && activeScene && (
-            <div className="flex items-center bg-slate-950 rounded-lg border border-slate-800 p-0.5 space-x-0.5">
+            <div className="flex items-center bg-slate-950/80 rounded-xl border border-slate-800/80 p-0.5 space-x-0.5 backdrop-blur-sm">
               <button
                 onClick={() => setFogMode('view')}
-                className={`px-2 py-1 text-xs rounded font-medium transition-all ${
-                  fogMode === 'view' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
+                className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
+                  fogMode === 'view' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
                 title="Modo Navegação e Mover"
               >
@@ -911,8 +911,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </button>
               <button
                 onClick={() => setFogMode('hide')}
-                className={`px-2 py-1 text-xs rounded font-medium transition-all ${
-                  fogMode === 'hide' ? 'bg-rose-600 text-white font-bold' : 'text-slate-400 hover:text-rose-300'
+                className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
+                  fogMode === 'hide' ? 'bg-rose-600 text-white font-bold shadow-sm' : 'text-slate-400 hover:text-rose-300'
                 }`}
                 title="Arrastar no mapa para ocultar área com névoa"
               >
@@ -920,8 +920,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </button>
               <button
                 onClick={() => setFogMode('reveal')}
-                className={`px-2 py-1 text-xs rounded font-medium transition-all ${
-                  fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-emerald-300'
+                className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
+                  fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'text-slate-400 hover:text-emerald-300'
                 }`}
                 title="Arrastar no mapa para revelar área (abrir buraco na névoa)"
               >
@@ -929,14 +929,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </button>
               <button
                 onClick={handleFogHideAll}
-                className="px-1.5 py-1 text-[11px] text-slate-400 hover:text-rose-400 hover:bg-slate-900 rounded"
+                className="px-1.5 py-1 text-[11px] text-slate-400 hover:text-rose-400 hover:bg-slate-900 rounded-lg transition-all duration-150"
                 title="Ocultar todo o mapa de uma vez"
               >
                 Ocultar Tudo
               </button>
               <button
                 onClick={handleFogRevealAll}
-                className="px-1.5 py-1 text-[11px] text-slate-400 hover:text-emerald-400 hover:bg-slate-900 rounded"
+                className="px-1.5 py-1 text-[11px] text-slate-400 hover:text-emerald-400 hover:bg-slate-900 rounded-lg transition-all duration-150"
                 title="Revelar todo o mapa para os jogadores"
               >
                 Revelar Tudo
@@ -964,7 +964,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 }
                 setShowAddTokenModal(true);
               }}
-              className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-md shadow-indigo-600/30"
+              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-indigo-600/30"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Token</span>
@@ -975,10 +975,10 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           <button
             onClick={() => setShowGrid(!showGrid)}
             title="Alternar Grade"
-            className={`p-1.5 rounded-lg border transition-all ${
+            className={`p-1.5 rounded-xl border transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] ${
               showGrid 
                 ? 'bg-indigo-950/60 text-indigo-400 border-indigo-600/50' 
-                : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                : 'bg-slate-800/80 text-slate-400 border-slate-700/80 hover:text-white'
             }`}
           >
             <Grid className="w-4 h-4" />
@@ -988,18 +988,18 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           <button
             onClick={fitToScreen}
             title="Enquadrar Mapa (Centralizar e Ajustar Visão)"
-            className="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all"
+            className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center space-x-1 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Maximize2 className="w-3.5 h-3.5 text-indigo-400" />
             <span className="hidden sm:inline">Enquadrar</span>
           </button>
 
           {/* Controles de Zoom */}
-          <div className="flex items-center space-x-1 bg-slate-950 border border-slate-800 rounded-lg p-0.5">
+          <div className="flex items-center space-x-1 bg-slate-950/80 border border-slate-800/80 rounded-xl p-0.5 backdrop-blur-sm">
             <button
               onClick={() => handleZoom(-0.1)}
               title="Diminuir Zoom"
-              className="p-1 text-slate-400 hover:text-white rounded"
+              className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
@@ -1009,14 +1009,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             <button
               onClick={() => handleZoom(0.1)}
               title="Aumentar Zoom"
-              className="p-1 text-slate-400 hover:text-white rounded"
+              className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={resetView}
               title="Redefinir Visão (100%)"
-              className="p-1 text-slate-400 hover:text-white rounded border-l border-slate-800"
+              className="p-1 text-slate-400 hover:text-white rounded-lg border-l border-slate-800/80 transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -1025,10 +1025,10 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           {/* Botão de Alternar Painel de Combate */}
           <button
             onClick={() => setShowCombatDock(!showCombatDock)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border ${
               showCombatDock
                 ? 'bg-gradient-to-r from-rose-600 to-indigo-600 text-white border-transparent shadow-md'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+                : 'bg-slate-800/80 text-slate-300 border-slate-700/80 hover:text-white'
             }`}
           >
             <Swords className="w-4 h-4 text-amber-400" />
@@ -1311,8 +1311,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
         {/* POPOVER DE TOKEN SELECIONADO COM CONTROLES DE TAMANHO */}
         {selectedToken && (
-          <div className="absolute bottom-4 left-4 z-40 bg-slate-900/95 border border-slate-800 rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-md">
-            <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0 flex items-center justify-center">
+          <div className="absolute bottom-4 left-4 z-40 bg-slate-900/80 border border-slate-800/80 rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
+            <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 border border-slate-700/80 shrink-0 flex items-center justify-center">
               {selectedToken.avatar_url ? (
                 <img src={selectedToken.avatar_url} alt={selectedToken.name} className="w-full h-full object-cover" />
               ) : (
@@ -1343,12 +1343,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               {isMaster && (
                 <div className="flex items-center space-x-1.5 mt-1">
                   <span className="text-[10px] text-slate-400 font-semibold">Tamanho:</span>
-                  <div className="flex items-center bg-slate-950 border border-slate-700 rounded-md overflow-hidden">
+                  <div className="flex items-center bg-slate-950/80 border border-slate-700/80 rounded-lg overflow-hidden">
                     <button
                       onClick={() => handleResizeToken(selectedToken, -0.5)}
                       disabled={selectedToken.size <= 0.5}
                       title="Diminuir tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40"
+                      className="px-1.5 py-0.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
                     >
                       -
                     </button>
@@ -1359,7 +1359,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       onClick={() => handleResizeToken(selectedToken, 0.5)}
                       disabled={selectedToken.size >= 4}
                       title="Aumentar tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40"
+                      className="px-1.5 py-0.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
                     >
                       +
                     </button>
@@ -1374,28 +1374,28 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <button
                   onClick={() => openEditTokenModal(selectedToken)}
                   title="Configurar Atributos e Estatísticas do Token / NPC"
-                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs"
+                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handleToggleTokenVisibility(selectedToken)}
                   title={selectedToken.is_visible ? "Ocultar dos Jogadores" : "Revelar aos Jogadores"}
-                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs"
+                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-rose-400" />}
                 </button>
                 <button
                   onClick={() => handleToggleTokenLock(selectedToken)}
                   title={selectedToken.is_locked ? "Destravar Movimentação" : "Travar Movimentação"}
-                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs"
+                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-amber-400" /> : <Unlock className="w-3.5 h-3.5 text-slate-400" />}
                 </button>
                 <button
                   onClick={() => handleDeleteToken(selectedToken.id)}
                   title="Remover do Mapa"
-                  className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-lg text-xs"
+                  className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -1403,7 +1403,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             )}
             <button
               onClick={() => setSelectedToken(null)}
-              className="text-slate-500 hover:text-white"
+              className="text-slate-500 hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -1429,13 +1429,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
       {/* MODAL: Criar / Editar Cena */}
       {showSceneModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <h3 className="font-bold text-base text-white">
                 {isEditingScene ? 'Configurações da Cena' : 'Nova Cena do Mapa'}
               </h3>
-              <button onClick={() => setShowSceneModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowSceneModal(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1539,17 +1539,17 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowSceneModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isEditingScene ? 'Salvar Alterações' : 'Criar Cena'}
                 </button>
@@ -1561,11 +1561,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
       {/* MODAL: Adicionar Token no Mapa */}
       {showAddTokenModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <h3 className="font-bold text-base text-white">Posicionar Token no Mapa</h3>
-              <button onClick={() => setShowAddTokenModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowAddTokenModal(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1742,17 +1742,17 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowAddTokenModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Posicionar no Mapa
                 </button>
@@ -1764,11 +1764,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
       {/* MODAL: Configurar / Editar Token & Defesas do NPC */}
       {showEditTokenModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <h3 className="font-bold text-base text-white">Configurar Token / Estatísticas do NPC</h3>
-              <button onClick={() => setShowEditTokenModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowEditTokenModal(false)} className="text-slate-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1905,17 +1905,17 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowEditTokenModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Salvar Alterações
                 </button>

@@ -401,7 +401,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
   return (
     <div className="space-y-6">
       {/* Top Header / Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800/80 shadow-xl transition-all">
         <div>
           <div className="flex items-center space-x-2">
             <Skull className="w-6 h-6 text-rose-500" />
@@ -415,7 +415,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
         {isMaster && (
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-rose-600/30 transition-all whitespace-nowrap"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-rose-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             <span>Nova Criatura</span>
@@ -433,7 +433,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, raça, categoria ou descrição..."
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+            className="w-full bg-slate-900/80 backdrop-blur-sm border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-all duration-200"
           />
         </div>
 
@@ -444,10 +444,10 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap ${
                 selectedCategory === cat.id
                   ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                  : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800/80'
               }`}
             >
               {cat.label}
@@ -514,7 +514,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
             return (
               <div 
                 key={creature.id}
-                className="bg-slate-900/90 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all p-4 flex flex-col justify-between group shadow-lg"
+                className="bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800/80 hover:border-slate-700/80 transition-all duration-200 hover:scale-[1.01] p-4 flex flex-col justify-between group shadow-xl"
               >
                 <div>
                   {/* Cabeçalho do Card */}
@@ -736,9 +736,9 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
       {/* MODAL: CONFIGURAÇÃO DE REVELAÇÃO PROGRESSIVA */}
       {showRevealFieldsModal && creatureForReveal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
               <div className="flex items-center space-x-2">
                 <Sliders className="w-5 h-5 text-indigo-400" />
                 <h3 className="text-base font-bold text-white">
@@ -800,9 +800,9 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
       {/* MODAL: CRIAR / EDITAR CRIATURA COMPLETA */}
       {showEditorModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-4">
               <div className="flex items-center space-x-2">
                 <Skull className="w-5 h-5 text-rose-500" />
                 <h3 className="text-base font-bold text-white">
@@ -811,7 +811,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
               </div>
               <button 
                 onClick={() => setShowEditorModal(false)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg"
+                className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1192,16 +1192,16 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
       {/* MODAL: INSTANCIAR CRIATURA NO COMBATE E MAPA */}
       {showSpawnModal && creatureToSpawn && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
               <div className="flex items-center space-x-2">
                 <UserPlus className="w-5 h-5 text-rose-500" />
                 <h3 className="text-base font-bold text-white">Instanciar Criatura</h3>
               </div>
               <button 
                 onClick={() => setShowSpawnModal(false)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg"
+                className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

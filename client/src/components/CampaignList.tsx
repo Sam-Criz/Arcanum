@@ -77,7 +77,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       {/* Header com botões de ação */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-800/80">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Suas Campanhas</h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -88,7 +88,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setShowJoinModal(true)}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl font-medium text-sm transition-all shadow-sm"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 hover:text-white border border-slate-700/80 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
           >
             <Key className="w-4 h-4 text-amber-400" />
             <span>Entrar com Código</span>
@@ -96,7 +96,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-600/30"
+            className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-indigo-600/30"
           >
             <Plus className="w-4 h-4" />
             <span>Criar Nova Campanha</span>
@@ -106,7 +106,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
 
       {/* Grid de Campanhas */}
       {campaigns.length === 0 ? (
-        <div className="text-center py-20 px-6 border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/40">
+        <div className="text-center py-20 px-6 border-2 border-dashed border-slate-800/80 rounded-3xl bg-slate-900/40 backdrop-blur-md">
           <BookOpen className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-slate-200">Nenhuma campanha encontrada</h3>
           <p className="text-sm text-slate-400 max-w-md mx-auto mt-1 mb-6">
@@ -115,7 +115,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
           <div className="flex justify-center gap-3">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-all"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               Criar Primeira Campanha
             </button>
@@ -127,7 +127,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
             <div
               key={camp.id}
               onClick={() => onSelectCampaign(camp)}
-              className="group relative bg-slate-900/90 border border-slate-800 hover:border-indigo-500/60 rounded-2xl p-6 shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer flex flex-col justify-between overflow-hidden"
+              className="group relative bg-slate-900/80 backdrop-blur-md border border-slate-800/80 hover:border-indigo-500/60 rounded-2xl p-6 shadow-xl hover:shadow-indigo-500/10 transition-all duration-200 hover:scale-[1.01] cursor-pointer flex flex-col justify-between overflow-hidden"
             >
               <div className="relative">
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -171,8 +171,8 @@ export const CampaignList: React.FC<CampaignListProps> = ({
 
       {/* Modal Criar Campanha */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-xl bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-md relative">
             <h2 className="text-2xl font-bold text-white mb-2">Criar Nova Campanha</h2>
             <p className="text-sm text-slate-400 mb-6">
               Defina o nome da campanha e escolha o conjunto inicial de regras. Você poderá editar cada fórmula e atributo posteriormente.
@@ -281,8 +281,8 @@ export const CampaignList: React.FC<CampaignListProps> = ({
 
       {/* Modal Entrar com Código */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-md bg-slate-900/90 border border-slate-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-md relative">
             <h2 className="text-2xl font-bold text-white mb-2">Entrar em uma Campanha</h2>
             <p className="text-sm text-slate-400 mb-6">
               Digite o código alfanumérico fornecido pelo mestre da mesa.

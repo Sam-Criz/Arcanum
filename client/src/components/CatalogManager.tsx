@@ -470,7 +470,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
       )}
 
       {/* Header do Catálogo */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
         <div>
           <div className="flex items-center space-x-2 text-xs text-indigo-400 font-semibold mb-1">
             <Sparkles className="w-4 h-4 text-amber-400" />
@@ -485,7 +485,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
         {isMaster && (
           <button
             onClick={openCreateModal}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Item no Catálogo</span>
@@ -495,13 +495,13 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
 
       {/* Seção de Solicitações de Itens (se houver solicitações pendentes ou ativas) */}
       {itemRequests.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl transition-all">
           <div className="flex items-center space-x-2 mb-3">
             <Clock className="w-4 h-4 text-amber-400" />
             <h3 className="font-bold text-sm text-slate-200">
               {isMaster ? 'Solicitações de Itens Pendentes (Aprovação do Mestre)' : 'Minhas Solicitações de Itens'}
             </h3>
-            <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono">
+            <span className="text-xs bg-slate-800/80 text-slate-400 px-2 py-0.5 rounded-full font-mono border border-slate-700/60">
               {itemRequests.filter(r => r.status === 'pending').length} pendente(s)
             </span>
           </div>
@@ -510,7 +510,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
             {itemRequests.map((req) => (
               <div 
                 key={req.id} 
-                className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs"
+                className="p-3 bg-slate-950/80 rounded-xl border border-slate-800/80 flex items-center justify-between gap-3 text-xs"
               >
                 <div>
                   <div className="flex items-center space-x-2">
@@ -553,7 +553,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
       )}
 
       {/* Barra de Filtros e Busca */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center gap-3">
+      <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center gap-3 transition-all">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
           <input
@@ -561,7 +561,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou descrição..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500 transition-all duration-200"
           />
         </div>
 
@@ -571,10 +571,10 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap ${
                 selectedCategory === cat
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  : 'bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800/80'
               }`}
             >
               {cat}
@@ -585,11 +585,11 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
 
       {/* Grid de Itens do Catálogo */}
       {loading ? (
-        <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-2xl text-slate-500 text-sm">
+        <div className="text-center py-16 bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl text-slate-500 text-sm">
           Carregando catálogo de itens...
         </div>
       ) : items.length === 0 ? (
-        <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-2xl text-slate-500 text-sm">
+        <div className="text-center py-16 bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl text-slate-500 text-sm">
           <Package className="w-12 h-12 text-slate-600 mx-auto mb-2 opacity-50" />
           Nenhum item encontrado no catálogo desta campanha com os filtros selecionados.
         </div>
@@ -602,7 +602,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
             return (
               <div
                 key={it.id}
-                className="bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-5 shadow-lg flex flex-col justify-between transition-all group"
+                className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl p-5 shadow-lg flex flex-col justify-between transition-all duration-200 hover:scale-[1.01] group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">

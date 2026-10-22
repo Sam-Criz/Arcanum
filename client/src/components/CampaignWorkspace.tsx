@@ -525,12 +525,12 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
       )}
 
       {/* Top Bar da Campanha */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 mb-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
         <div>
           <div className="flex items-center space-x-3 mb-1">
             <button
               onClick={onBack}
-              className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700"
+              className="text-xs font-semibold px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/80 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               ← Voltar às Campanhas
             </button>
@@ -545,12 +545,12 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
         {/* Ações de Mestre / Convite */}
         <div className="flex items-center space-x-3">
           {inviteCode ? (
-            <div className="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/50">
+            <div className="flex items-center space-x-2 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-indigo-500/50 backdrop-blur-sm">
               <span className="text-xs text-slate-400">Código:</span>
               <span className="font-mono text-sm font-bold text-indigo-300">{inviteCode}</span>
               <button
                 onClick={() => copyToClipboard(inviteCode)}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1 text-slate-400 hover:text-white transition-colors"
                 title="Copiar código"
               >
                 {copiedInvite ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -559,7 +559,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           ) : (
             <button
               onClick={handleGenerateInvite}
-              className="flex items-center space-x-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium transition-all"
+              className="flex items-center space-x-2 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <UserPlus className="w-4 h-4 text-amber-400" />
               <span>Gerar Convite</span>
@@ -568,7 +568,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
           <button
             onClick={() => setShowCreateCharModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all"
+            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Personagem</span>
@@ -697,10 +697,10 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
       {activeTab === 'sheets' && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Coluna da Esquerda: Lista de Personagens */}
-          <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-4 h-fit">
+          <div className="lg:col-span-1 bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 h-fit shadow-xl transition-all">
             <div className="flex items-center justify-between mb-3 px-2">
               <h3 className="font-bold text-sm text-slate-200 uppercase tracking-wider">Personagens</h3>
-              <span className="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">{characters.length}</span>
+              <span className="text-xs bg-slate-800/80 px-2.5 py-0.5 rounded-full text-slate-400 border border-slate-700/60 font-mono">{characters.length}</span>
             </div>
 
             {characters.length === 0 ? (
@@ -721,9 +721,9 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                           localStorage.setItem(storageKey, char.id);
                         }
                       }}
-                      className={`flex items-center space-x-3 p-2.5 rounded-xl cursor-pointer transition-all ${
+                      className={`flex items-center space-x-3 p-2.5 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${
                         selectedCharacter?.id === char.id
-                          ? 'bg-indigo-600/20 border border-indigo-500/50 text-white'
+                          ? 'bg-indigo-600/20 border border-indigo-500/60 text-white shadow-sm'
                           : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
                       }`}
                     >
@@ -754,7 +754,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           {/* Coluna Central/Direita: Ficha Detalhada (Estilo C.R.I.S.) */}
           <div className="lg:col-span-3">
             {selectedCharacter ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+              <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all">
                 {/* Banner de Leitura para Ficha de Terceiros */}
                 {selectedCharacter.user_id !== user.id && !isMaster && (
                   <div className="mb-4 p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl flex items-center space-x-2 text-xs text-amber-300">
