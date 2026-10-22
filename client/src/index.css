@@ -4,22 +4,22 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-600 selection:text-white font-sans;
+    @apply bg-[#131211] text-[#ece3d0] min-h-screen selection:bg-[#c9a04e] selection:text-[#131211] font-sans;
   }
 }
 
-/* Custom scrollbar for dark RPG theme */
+/* Custom scrollbar for Arcanum Dark Leather theme */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #131211;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+  background: #2c2825;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #574e45;
 }

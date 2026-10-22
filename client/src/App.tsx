@@ -88,17 +88,17 @@ export const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-indigo-400">
+      <div className="min-h-screen flex items-center justify-center bg-[#131211] text-[#c9a04e]">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-          <p className="text-sm font-semibold tracking-wider uppercase text-slate-400">Iniciando Arcanum VTT...</p>
+          <div className="w-10 h-10 border-4 border-[#2c2825] border-t-[#c9a04e] rounded-full animate-spin" />
+          <p className="text-sm font-semibold tracking-wider uppercase text-[#aaa292]">Iniciando Arcanum VTT...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#131211] text-[#ece3d0] flex flex-col font-sans selection:bg-[#c9a04e] selection:text-[#131211]">
       <Navbar
         user={user}
         onLogout={handleLogout}

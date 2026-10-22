@@ -48,6 +48,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
   // Painéis e Modais
   const [showCombatDock, setShowCombatDock] = useState(false);
+  const [quickActionTab, setQuickActionTab] = useState<'attack' | 'ability' | 'consumable' | 'defense'>('attack');
+  const [quickSelectedTargetId, setQuickSelectedTargetId] = useState<string>('');
   const [showSceneModal, setShowSceneModal] = useState(false);
   const [showAddTokenModal, setShowAddTokenModal] = useState(false);
   const [showEditTokenModal, setShowEditTokenModal] = useState(false);
@@ -817,14 +819,21 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const mapHeight = activeScene?.height || 2000;
 
   return (
-    <div className="relative w-full h-[760px] bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col select-none">
+    <div className="relative w-full h-[780px] bg-[#131211] border border-[#2c2825] rounded-lg overflow-hidden shadow-2xl flex flex-col select-none">
       {/* BARRA SUPERIOR DE FERRAMENTAS DO VTT */}
-      <div className="h-14 bg-slate-900/70 border-b border-slate-800/80 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+      <div className="h-12 bg-[#1a1816] border-b border-[#2c2825] px-4 flex items-center justify-between z-20">
         {/* Seletor de Cenas */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Layers className="w-5 h-5 text-indigo-400" />
-            {isMaster ? (
+            <span className="font-serif text-sm font-bold text-[#ece3d0]">
+              {activeScene ? activeScene.name : 'Mesa Principal'}
+            </span>
+            {activeScene?.is_active && (
+              <span className="text-[10px] text-[#aaa292] font-mono bg-[#131211] px-1.5 py-0.5 rounded border border-[#2c2825]">
+                Cena ativa
+              </span>
+            )}
+            {isMaster && (
               <select
                 value={activeScene?.id || ''}
                 onChange={(e) => {
@@ -834,7 +843,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     localStorage.setItem(`arcanum_active_scene_${campaign.id}`, match.id);
                   }
                 }}
-                className="bg-slate-950/90 border border-slate-700/80 rounded-xl px-2.5 py-1 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
+                className="bg-[#131211] border border-[#2c2825] rounded px-2 py-0.5 text-xs font-mono text-[#ece3d0] focus:outline-none focus:border-[#c9a04e]"
               >
                 {scenes.map(s => (
                   <option key={s.id} value={s.id}>
@@ -842,20 +851,16 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   </option>
                 ))}
               </select>
-            ) : (
-              <span className="text-xs font-bold text-white bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700/80">
-                {activeScene ? activeScene.name : 'Nenhuma Cena Ativa'}
-              </span>
             )}
           </div>
 
           {/* Botões administrativos do Mestre */}
           {isMaster && (
-            <div className="flex items-center space-x-1 pl-2 border-l border-slate-800/80">
+            <div className="flex items-center space-x-1 pl-2 border-l border-[#2c2825]">
               <button
                 onClick={handleOpenCreateScene}
                 title="Nova Cena"
-                className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -865,7 +870,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   <button
                     onClick={() => handleOpenEditScene(activeScene)}
                     title="Configurar Cena"
-                    className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                    className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                   >
                     <Settings className="w-4 h-4" />
                   </button>
@@ -874,7 +879,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     <button
                       onClick={() => handleActivateScene(activeScene.id)}
                       title="Ativar para Jogadores"
-                      className="px-2.5 py-1 bg-amber-600/90 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                      className="px-2.5 py-1 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Ativar Mesa
                     </button>
@@ -884,7 +889,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     <button
                       onClick={() => handleDeleteScene(activeScene.id)}
                       title="Excluir Cena"
-                      className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                      className="p-1.5 bg-[#8a2c38]/30 hover:bg-[#8a2c38] text-[#ece3d0] border border-[#8a2c38] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -899,11 +904,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         <div className="flex items-center space-x-2">
           {/* Toggle de Fog of War (Mestre) */}
           {isMaster && activeScene && (
-            <div className="flex items-center bg-slate-950/80 rounded-xl border border-slate-800/80 p-0.5 space-x-0.5 backdrop-blur-sm">
+            <div className="flex items-center bg-[#131211] rounded-xl border border-[#2c2825] p-0.5 space-x-0.5 backdrop-blur-sm">
               <button
                 onClick={() => setFogMode('view')}
                 className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
-                  fogMode === 'view' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                  fogMode === 'view' ? 'bg-slate-800 text-white shadow-sm' : 'text-[#aaa292] hover:text-[#ece3d0]'
                 }`}
                 title="Modo Navegação e Mover"
               >
@@ -912,7 +917,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               <button
                 onClick={() => setFogMode('hide')}
                 className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
-                  fogMode === 'hide' ? 'bg-rose-600 text-white font-bold shadow-sm' : 'text-slate-400 hover:text-rose-300'
+                  fogMode === 'hide' ? 'bg-rose-600 text-white font-bold shadow-sm' : 'text-[#aaa292] hover:text-rose-300'
                 }`}
                 title="Arrastar no mapa para ocultar área com névoa"
               >
@@ -921,7 +926,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               <button
                 onClick={() => setFogMode('reveal')}
                 className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
-                  fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'text-slate-400 hover:text-emerald-300'
+                  fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'text-[#aaa292] hover:text-emerald-300'
                 }`}
                 title="Arrastar no mapa para revelar área (abrir buraco na névoa)"
               >
@@ -929,14 +934,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </button>
               <button
                 onClick={handleFogHideAll}
-                className="px-1.5 py-1 text-[11px] text-slate-400 hover:text-rose-400 hover:bg-slate-900 rounded-lg transition-all duration-150"
+                className="px-1.5 py-1 text-[11px] text-[#aaa292] hover:text-[#b24a52] hover:bg-slate-900 rounded-lg transition-all duration-150"
                 title="Ocultar todo o mapa de uma vez"
               >
                 Ocultar Tudo
               </button>
               <button
                 onClick={handleFogRevealAll}
-                className="px-1.5 py-1 text-[11px] text-slate-400 hover:text-emerald-400 hover:bg-slate-900 rounded-lg transition-all duration-150"
+                className="px-1.5 py-1 text-[11px] text-[#aaa292] hover:text-emerald-400 hover:bg-slate-900 rounded-lg transition-all duration-150"
                 title="Revelar todo o mapa para os jogadores"
               >
                 Revelar Tudo
@@ -944,7 +949,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               {activeScene.fog_data && activeScene.fog_data.length > 0 && (
                 <button
                   onClick={handleFogUndo}
-                  className="p-1 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded"
+                  className="p-1 text-[#aaa292] hover:text-[#c9a04e] hover:bg-slate-900 rounded"
                   title="Desfazer última alteração de névoa"
                 >
                   <Undo className="w-3 h-3" />
@@ -964,7 +969,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 }
                 setShowAddTokenModal(true);
               }}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-indigo-600/30"
+              className="px-3 py-1.5 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Token</span>
@@ -977,8 +982,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             title="Alternar Grade"
             className={`p-1.5 rounded-xl border transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] ${
               showGrid 
-                ? 'bg-indigo-950/60 text-indigo-400 border-indigo-600/50' 
-                : 'bg-slate-800/80 text-slate-400 border-slate-700/80 hover:text-white'
+                ? 'bg-[#2c2825] text-[#c9a04e] border-[#c9a04e]' 
+                : 'bg-slate-800/80 text-[#aaa292] border-[#574e45] hover:text-white'
             }`}
           >
             <Grid className="w-4 h-4" />
@@ -988,35 +993,35 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           <button
             onClick={fitToScreen}
             title="Enquadrar Mapa (Centralizar e Ajustar Visão)"
-            className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center space-x-1 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="px-2.5 py-1.5 bg-[#2c2825] hover:bg-[#574e45] border border-[#574e45] text-[#ece3d0] rounded text-xs font-medium flex items-center space-x-1 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Maximize2 className="w-3.5 h-3.5 text-indigo-400" />
+            <Maximize2 className="w-3.5 h-3.5 text-[#c9a04e]" />
             <span className="hidden sm:inline">Enquadrar</span>
           </button>
 
           {/* Controles de Zoom */}
-          <div className="flex items-center space-x-1 bg-slate-950/80 border border-slate-800/80 rounded-xl p-0.5 backdrop-blur-sm">
+          <div className="flex items-center space-x-1 bg-[#131211] border border-[#2c2825] rounded-xl p-0.5 backdrop-blur-sm">
             <button
               onClick={() => handleZoom(-0.1)}
               title="Diminuir Zoom"
-              className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
+              className="p-1 text-[#aaa292] hover:text-white rounded-lg transition-colors"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="text-[11px] font-mono text-slate-300 w-10 text-center">
+            <span className="text-[11px] font-mono text-[#ece3d0] w-10 text-center">
               {Math.round(zoom * 100)}%
             </span>
             <button
               onClick={() => handleZoom(0.1)}
               title="Aumentar Zoom"
-              className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
+              className="p-1 text-[#aaa292] hover:text-white rounded-lg transition-colors"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={resetView}
               title="Redefinir Visão (100%)"
-              className="p-1 text-slate-400 hover:text-white rounded-lg border-l border-slate-800/80 transition-colors"
+              className="p-1 text-[#aaa292] hover:text-white rounded-lg border-l border-[#2c2825] transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -1027,11 +1032,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             onClick={() => setShowCombatDock(!showCombatDock)}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border ${
               showCombatDock
-                ? 'bg-gradient-to-r from-rose-600 to-indigo-600 text-white border-transparent shadow-md'
-                : 'bg-slate-800/80 text-slate-300 border-slate-700/80 hover:text-white'
+                ? 'bg-[#c9a04e] text-[#131211] font-bold border-transparent shadow-sm'
+                : 'bg-[#2c2825] text-[#ece3d0] border-[#574e45] hover:border-[#c9a04e]'
             }`}
           >
-            <Swords className="w-4 h-4 text-amber-400" />
+            <Swords className="w-4 h-4 text-[#c9a04e]" />
             <span>Combate</span>
             {combatEncounter && combatEncounter.status === 'active' && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1" />
@@ -1039,6 +1044,77 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           </button>
         </div>
       </div>
+
+      {/* FITA DE INICIATIVA HORIZONTAL (Design Arcanum V2 - Imagem 5) */}
+      {combatEncounter && combatEncounter.status === 'active' && (
+        <div className="bg-[#1a1816] border-b border-[#2c2825] px-4 py-2 flex items-center justify-between z-20 overflow-x-auto shadow-md">
+          <div className="flex items-center space-x-3 min-w-0">
+            <div className="flex items-center space-x-1.5 shrink-0 pr-2 border-r border-[#2c2825]">
+              <span className="font-serif font-bold text-xs text-[#c9a04e]">Rodada {combatEncounter.round}</span>
+            </div>
+
+            {/* Cartões Horizontais dos Combatentes */}
+            <div className="flex items-center space-x-2 overflow-x-auto py-0.5">
+              {combatEncounter.combatants?.map((c, idx) => {
+                const isActive = idx === combatEncounter.turn_index;
+                const hpPercent = c.hp_percent ?? (c.max_hp ? Math.round(((c.current_hp || 0) / c.max_hp) * 100) : 100);
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => {
+                      setShowCombatDock(true);
+                    }}
+                    className={`flex items-center space-x-2 px-2.5 py-1 rounded border transition-all cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? 'bg-[#2c2825] border-[#c9a04e] ring-1 ring-[#c9a04e] text-[#ece3d0] shadow-sm'
+                        : 'bg-[#131211] border-[#2c2825] text-[#aaa292] hover:text-[#ece3d0] hover:border-[#574e45]'
+                    }`}
+                  >
+                    <span className={`font-mono text-xs font-bold px-1.5 py-0.2 rounded ${
+                      isActive ? 'bg-[#c9a04e] text-[#131211]' : 'bg-[#1a1816] text-[#c9a04e] border border-[#2c2825]'
+                    }`}>
+                      {c.initiative}
+                    </span>
+                    <span className="font-serif text-xs font-semibold">{c.name}</span>
+                    <div className="w-8 h-1 bg-[#131211] rounded-full overflow-hidden border border-[#2c2825] shrink-0">
+                      <div
+                        className="h-full bg-[#b24a52] transition-all"
+                        style={{ width: `${Math.max(0, Math.min(100, hpPercent))}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Botão de Passar Turno */}
+          <div className="flex items-center space-x-2 shrink-0 pl-3">
+            {(() => {
+              const activeCombatant = combatEncounter.combatants?.[combatEncounter.turn_index];
+              const canEndTurn = isMaster || (activeCombatant && activeCombatant.owner_user_id === user.id);
+              if (canEndTurn) {
+                return (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const updated = await api.nextCombatTurn(campaign.id, combatEncounter.id);
+                        setCombatEncounter(updated);
+                      } catch (e) {
+                        console.error('Erro ao passar turno:', e);
+                      }
+                    }}
+                    className="px-3 py-1 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded text-xs font-serif font-bold transition-all shadow-sm flex items-center space-x-1"
+                  >
+                    <span>Encerrar turno</span>
+                  </button>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* ÁREA CENTRAL: MAPA / VIEWPORT INTERATIVO */}
       <div 
@@ -1051,7 +1127,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           const delta = e.deltaY > 0 ? -0.1 : 0.1;
           handleZoom(delta);
         }}
-        className={`flex-1 relative overflow-hidden bg-slate-950 ${
+        className={`flex-1 relative overflow-hidden bg-[#131211] ${
           fogMode !== 'view' ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
         }`}
       >
@@ -1096,12 +1172,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             ) : imageError ? (
               <div className="w-full h-full bg-slate-900 border-2 border-dashed border-rose-800/60 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
                 <Layers className="w-12 h-12 text-rose-500/60 mb-2" />
-                <p className="text-slate-300 font-bold text-sm">Não foi possível carregar a imagem de fundo.</p>
-                <p className="text-slate-500 text-xs mt-1">Verifique a URL ou substitua a imagem nas configurações da cena.</p>
+                <p className="text-[#ece3d0] font-bold text-sm">Não foi possível carregar a imagem de fundo.</p>
+                <p className="text-[#777064] text-xs mt-1">Verifique a URL ou substitua a imagem nas configurações da cena.</p>
               </div>
             ) : (
-              <div className="w-full h-full bg-slate-900 border-2 border-slate-800 flex items-center justify-center pointer-events-none">
-                <span className="text-slate-600 text-sm font-bold tracking-wider uppercase">
+              <div className="w-full h-full bg-slate-900 border-2 border-[#2c2825] flex items-center justify-center pointer-events-none">
+                <span className="text-[#574e45] text-sm font-bold tracking-wider uppercase">
                   Área do Mapa ({mapWidth}x{mapHeight}px)
                 </span>
               </div>
@@ -1180,12 +1256,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
                     {/* Status icons: Bloqueado / Oculto */}
                     {token.is_locked && (
-                      <div className="absolute top-1 right-1 bg-black/80 p-0.5 rounded-full text-amber-400 shadow">
+                      <div className="absolute top-1 right-1 bg-black/80 p-0.5 rounded-full text-[#c9a04e] shadow">
                         <Lock className="w-2.5 h-2.5" />
                       </div>
                     )}
                     {!token.is_visible && (
-                      <div className="absolute bottom-1 right-1 bg-black/80 p-0.5 rounded-full text-rose-400 shadow">
+                      <div className="absolute bottom-1 right-1 bg-black/80 p-0.5 rounded-full text-[#b24a52] shadow">
                         <EyeOff className="w-2.5 h-2.5" />
                       </div>
                     )}
@@ -1194,7 +1270,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   {/* Barra de Vida Flutuante sobre o Token */}
                   {((token.current_hp !== null && token.max_hp && token.max_hp > 0) || (token.hp_percent !== undefined && token.hp_percent !== null)) && (
                     <div className="absolute -top-3 w-full px-1 pointer-events-none">
-                      <div className="w-full h-1.5 bg-slate-950/90 rounded-full overflow-hidden border border-slate-700 shadow">
+                      <div className="w-full h-1.5 bg-[#131211] rounded-full overflow-hidden border border-[#574e45] shadow">
                         {(() => {
                           const pct = token.hp_percent ?? Math.round(((token.current_hp || 0) / (token.max_hp || 1)) * 100);
                           const barColor = pct <= 25 ? 'bg-rose-500' : pct <= 50 ? 'bg-amber-500' : 'bg-emerald-500';
@@ -1210,7 +1286,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   )}
 
                   {/* Nome do Token abaixo com contraste e legibilidade */}
-                  <div className="absolute -bottom-4 bg-slate-950/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-800 whitespace-nowrap pointer-events-none shadow-md max-w-[120px] truncate">
+                  <div className="absolute -bottom-4 bg-[#131211] text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#2c2825] whitespace-nowrap pointer-events-none shadow-md max-w-[120px] truncate">
                     {token.name}
                   </div>
                 </div>
@@ -1295,13 +1371,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 text-sm">
+          <div className="flex flex-col items-center justify-center h-full text-[#777064] text-sm">
             <Layers className="w-12 h-12 text-slate-700 mb-3" />
-            <p className="font-semibold text-slate-400">Nenhuma cena criada nesta campanha.</p>
+            <p className="font-semibold text-[#aaa292]">Nenhuma cena criada nesta campanha.</p>
             {isMaster && (
               <button
                 onClick={handleOpenCreateScene}
-                className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg"
+                className="mt-3 px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-lg"
               >
                 + Criar Primeira Cena
               </button>
@@ -1311,8 +1387,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
         {/* POPOVER DE TOKEN SELECIONADO COM CONTROLES DE TAMANHO */}
         {selectedToken && (
-          <div className="absolute bottom-4 left-4 z-40 bg-slate-900/80 border border-slate-800/80 rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
-            <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 border border-slate-700/80 shrink-0 flex items-center justify-center">
+          <div className="absolute bottom-4 left-4 z-40 bg-slate-900/80 border border-[#2c2825] rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
+            <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 border border-[#574e45] shrink-0 flex items-center justify-center">
               {selectedToken.avatar_url ? (
                 <img src={selectedToken.avatar_url} alt={selectedToken.name} className="w-full h-full object-cover" />
               ) : (
@@ -1324,7 +1400,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
             <div className="min-w-0 flex-1">
               <h4 className="text-xs font-bold text-white truncate">{selectedToken.name}</h4>
-              <p className="text-[10px] text-slate-400 truncate">
+              <p className="text-[10px] text-[#aaa292] truncate">
                 Pos: ({Math.round(selectedToken.x)}, {Math.round(selectedToken.y)})
                 {selectedToken.current_hp !== null 
                   ? ` • PV: ${selectedToken.current_hp}${selectedToken.max_hp ? `/${selectedToken.max_hp}` : ''}`
@@ -1342,24 +1418,24 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               {/* Controle de Tamanho do Token (Mestre) */}
               {isMaster && (
                 <div className="flex items-center space-x-1.5 mt-1">
-                  <span className="text-[10px] text-slate-400 font-semibold">Tamanho:</span>
-                  <div className="flex items-center bg-slate-950/80 border border-slate-700/80 rounded-lg overflow-hidden">
+                  <span className="text-[10px] text-[#aaa292] font-semibold">Tamanho:</span>
+                  <div className="flex items-center bg-[#131211] border border-[#574e45] rounded-lg overflow-hidden">
                     <button
                       onClick={() => handleResizeToken(selectedToken, -0.5)}
                       disabled={selectedToken.size <= 0.5}
                       title="Diminuir tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
+                      className="px-1.5 py-0.5 text-xs text-[#ece3d0] hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
                     >
                       -
                     </button>
-                    <span className="px-1.5 text-[11px] font-mono font-bold text-indigo-400">
+                    <span className="px-1.5 text-[11px] font-mono font-bold text-[#c9a04e]">
                       {selectedToken.size}x
                     </span>
                     <button
                       onClick={() => handleResizeToken(selectedToken, 0.5)}
                       disabled={selectedToken.size >= 4}
                       title="Aumentar tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
+                      className="px-1.5 py-0.5 text-xs text-[#ece3d0] hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
                     >
                       +
                     </button>
@@ -1374,28 +1450,28 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <button
                   onClick={() => openEditTokenModal(selectedToken)}
                   title="Configurar Atributos e Estatísticas do Token / NPC"
-                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handleToggleTokenVisibility(selectedToken)}
                   title={selectedToken.is_visible ? "Ocultar dos Jogadores" : "Revelar aos Jogadores"}
-                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
-                  {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-rose-400" />}
+                  {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-[#b24a52]" />}
                 </button>
                 <button
                   onClick={() => handleToggleTokenLock(selectedToken)}
                   title={selectedToken.is_locked ? "Destravar Movimentação" : "Travar Movimentação"}
-                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
-                  {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-amber-400" /> : <Unlock className="w-3.5 h-3.5 text-slate-400" />}
+                  {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-[#c9a04e]" /> : <Unlock className="w-3.5 h-3.5 text-[#aaa292]" />}
                 </button>
                 <button
                   onClick={() => handleDeleteToken(selectedToken.id)}
                   title="Remover do Mapa"
-                  className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#8a2c38]/30 hover:bg-[#8a2c38] text-[#ece3d0] border border-[#8a2c38] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -1403,12 +1479,120 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             )}
             <button
               onClick={() => setSelectedToken(null)}
-              className="text-slate-500 hover:text-white transition-colors"
+              className="text-[#777064] hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
+
+        {/* BARRA INFERIOR DE AÇÕES TÁTICAS (Design Arcanum V2 - Imagem 5) */}
+        {combatEncounter && combatEncounter.status === 'active' && (() => {
+          const activeCombatant = combatEncounter.combatants?.[combatEncounter.turn_index];
+          const isMyTurn = isMaster || (activeCombatant && activeCombatant.owner_user_id === user.id);
+          if (!isMyTurn || !activeCombatant) return null;
+
+          return (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 w-full max-w-xl px-4 pointer-events-auto">
+              <div className="bg-[#1a1816]/95 border border-[#2c2825] rounded-xl p-3 shadow-2xl backdrop-blur-md">
+                {/* Abas de Tipos de Ação */}
+                <div className="flex items-center justify-between border-b border-[#2c2825] pb-2 mb-2">
+                  <div className="flex items-center space-x-1">
+                    <button
+                      type="button"
+                      onClick={() => setQuickActionTab('attack')}
+                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                        quickActionTab === 'attack'
+                          ? 'bg-[#2c2825] text-[#c9a04e] border border-[#c9a04e]'
+                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                      }`}
+                    >
+                      Ataque
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickActionTab('ability')}
+                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                        quickActionTab === 'ability'
+                          ? 'bg-[#2c2825] text-[#6f93ad] border border-[#6f93ad]'
+                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                      }`}
+                    >
+                      Habilidades
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickActionTab('consumable')}
+                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                        quickActionTab === 'consumable'
+                          ? 'bg-[#2c2825] text-[#5e9b76] border border-[#5e9b76]'
+                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                      }`}
+                    >
+                      Consumíveis
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickActionTab('defense')}
+                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                        quickActionTab === 'defense'
+                          ? 'bg-[#2c2825] text-[#9a83c6] border border-[#9a83c6]'
+                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                      }`}
+                    >
+                      Defesa e esquiva
+                    </button>
+                  </div>
+
+                  <span className="text-[10px] text-[#aaa292] font-mono">
+                    Vez de: <strong className="text-[#ece3d0]">{activeCombatant.name}</strong>
+                  </span>
+                </div>
+
+                {/* Resolução de Ataque / Ação */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-serif font-bold text-sm text-[#ece3d0] truncate">
+                      {quickActionTab === 'attack' ? 'Atacar com Arma Principal' : quickActionTab === 'ability' ? 'Usar Habilidade Ativa' : quickActionTab === 'consumable' ? 'Usar Consumível' : 'Postura Defensiva'}
+                    </h4>
+                    <p className="text-xs text-[#aaa292] font-mono truncate">
+                      {quickActionTab === 'attack' ? 'Dano 1d8 + 3 Cortante • Alcance 1.5m' : quickActionTab === 'ability' ? 'Custo de Ação Principal • Recarga 1 turno' : quickActionTab === 'consumable' ? 'Recuperação ou Imbuição de Dano' : 'Aumenta Defesa até o próximo turno'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-2 shrink-0">
+                    {quickActionTab !== 'defense' && (
+                      <select
+                        value={quickSelectedTargetId}
+                        onChange={(e) => setQuickSelectedTargetId(e.target.value)}
+                        className="bg-[#131211] border border-[#2c2825] text-[#ece3d0] rounded px-2 py-1 text-xs font-mono focus:border-[#c9a04e] focus:outline-none max-w-[140px] truncate"
+                      >
+                        <option value="">Escolher Alvo...</option>
+                        {combatEncounter.combatants
+                          ?.filter(c => c.id !== activeCombatant.id)
+                          .map(c => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                      </select>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setShowCombatDock(true);
+                      }}
+                      className="px-3.5 py-1.5 bg-[#8a2c38] hover:bg-[#8a2c38]/90 text-[#ece3d0] rounded text-xs font-serif font-bold transition-all shadow-md flex items-center space-x-1.5"
+                    >
+                      <Swords className="w-3.5 h-3.5 text-[#ece3d0]" />
+                      <span>Confirmar ataque</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* DOCK LATERAL DO TRACKER DE COMBATE */}
         {showCombatDock && (
@@ -1430,30 +1614,30 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Criar / Editar Cena */}
       {showSceneModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white">
                 {isEditingScene ? 'Configurações da Cena' : 'Nova Cena do Mapa'}
               </h3>
-              <button onClick={() => setShowSceneModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowSceneModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveScene} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">Nome da Cena</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome da Cena</label>
                 <input
                   type="text"
                   required
                   value={sceneForm.name}
                   onChange={(e) => setSceneForm({ ...sceneForm, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">URL da Imagem de Fundo</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">URL da Imagem de Fundo</label>
                 <div className="flex space-x-2">
                   <input
                     type="url"
@@ -1463,12 +1647,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setSceneForm({ ...sceneForm, image_url: e.target.value });
                       detectImageDimensions(e.target.value);
                     }}
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="flex-1 bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                   <button
                     type="button"
                     onClick={() => detectImageDimensions(sceneForm.image_url)}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap"
+                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-[#ece3d0] hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap"
                     title="Detectar resolução nativa da imagem"
                   >
                     Detectar
@@ -1478,78 +1662,78 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Tamanho da Grade (px)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho da Grade (px)</label>
                   <input
                     type="number"
                     min="20"
                     max="200"
                     value={sceneForm.grid_size}
                     onChange={(e) => setSceneForm({ ...sceneForm, grid_size: parseInt(e.target.value, 10) || 50 })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Escala da Grade (m / ft)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Escala da Grade (m / ft)</label>
                   <input
                     type="number"
                     step="0.5"
                     value={sceneForm.grid_scale}
                     onChange={(e) => setSceneForm({ ...sceneForm, grid_scale: parseFloat(e.target.value) || 1.5 })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Largura do Mapa (px)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Largura do Mapa (px)</label>
                   <input
                     type="number"
                     min="500"
                     max="10000"
                     value={sceneForm.width}
                     onChange={(e) => setSceneForm({ ...sceneForm, width: parseInt(e.target.value, 10) || 2000 })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Altura do Mapa (px)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Altura do Mapa (px)</label>
                   <input
                     type="number"
                     min="500"
                     max="10000"
                     value={sceneForm.height}
                     onChange={(e) => setSceneForm({ ...sceneForm, height: parseInt(e.target.value, 10) || 2000 })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
               </div>
 
               <div className="flex items-center space-x-6 pt-1">
-                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={sceneForm.fog_enabled}
                     onChange={(e) => setSceneForm({ ...sceneForm, fog_enabled: e.target.checked })}
-                    className="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0"
+                    className="rounded bg-[#131211] border-[#574e45] text-indigo-600 focus:ring-0"
                   />
                   <span>Ativar Camada de Fog of War (Áreas Ocultas)</span>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowSceneModal(false)}
-                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isEditingScene ? 'Salvar Alterações' : 'Criar Cena'}
                 </button>
@@ -1562,17 +1746,17 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Adicionar Token no Mapa */}
       {showAddTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white">Posicionar Token no Mapa</h3>
-              <button onClick={() => setShowAddTokenModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowAddTokenModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddToken} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                   Vincular a Personagem da Campanha
                 </label>
                 <select
@@ -1585,7 +1769,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setTokenFormAvatar(match.avatar_url || '');
                     }
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 >
                   <option value="">Token Avulso (Monstro / NPC)</option>
                   {characters
@@ -1599,35 +1783,35 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">Nome do Token</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Token</label>
                 <input
                   type="text"
                   required
                   value={tokenFormName}
                   onChange={(e) => setTokenFormName(e.target.value)}
                   placeholder="Nome do Token"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">URL do Avatar / Token (Opcional)</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">URL do Avatar / Token (Opcional)</label>
                 <input
                   type="url"
                   value={tokenFormAvatar}
                   onChange={(e) => setTokenFormAvatar(e.target.value)}
                   placeholder="https://exemplo.com/avatar.png"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Tamanho (Quadrados)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho (Quadrados)</label>
                   <select
                     value={tokenFormSize}
                     onChange={(e) => setTokenFormSize(parseFloat(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   >
                     <option value="0.5">0.5x0.5 (Miúdo / 0.5x)</option>
                     <option value="1">1x1 (Médio / Padrão - 1x)</option>
@@ -1639,120 +1823,120 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Cor do Anel</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Cor do Anel</label>
                   <input
                     type="color"
                     value={tokenFormColor}
                     onChange={(e) => setTokenFormColor(e.target.value)}
-                    className="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl px-2 py-1 cursor-pointer"
+                    className="w-full h-10 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1 cursor-pointer"
                   />
                 </div>
               </div>
 
               {/* Atributos Mecânicos e Defensivos do Token / NPC */}
-              <div className="pt-2 border-t border-slate-800 space-y-3">
-                <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#2c2825] space-y-3">
+                <h4 className="text-xs font-bold text-[#c9a04e] uppercase tracking-wider">
                   Estatísticas de Combate e Defesas
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Defesa (CA)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       value={tokenNpcDefense}
                       onChange={(e) => setTokenNpcDefense(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Redução de Dano (RD)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       value={tokenNpcDR}
                       onChange={(e) => setTokenNpcDR(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">PV Atual</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Atual</label>
                     <input
                       type="number"
                       value={tokenNpcHp}
                       onChange={(e) => setTokenNpcHp(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">PV Máximo</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Máximo</label>
                     <input
                       type="number"
                       value={tokenNpcMaxHp}
                       onChange={(e) => setTokenNpcMaxHp(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={tokenNpcInitiativeFormula}
                     onChange={(e) => setTokenNpcInitiativeFormula(e.target.value)}
                     placeholder="ex: 1d20+2"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Resistências (50%)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Resistências (50%)</label>
                     <input
                       type="text"
                       value={tokenNpcResistances}
                       onChange={(e) => setTokenNpcResistances(e.target.value)}
                       placeholder="fogo, corte"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Vulnerabilidades (2x)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Vulnerabilidades (2x)</label>
                     <input
                       type="text"
                       value={tokenNpcVulnerabilities}
                       onChange={(e) => setTokenNpcVulnerabilities(e.target.value)}
                       placeholder="frio"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Imunidades (0)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Imunidades (0)</label>
                     <input
                       type="text"
                       value={tokenNpcImmunities}
                       onChange={(e) => setTokenNpcImmunities(e.target.value)}
                       placeholder="veneno"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowAddTokenModal(false)}
-                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Posicionar no Mapa
                 </button>
@@ -1765,33 +1949,33 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Configurar / Editar Token & Defesas do NPC */}
       {showEditTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white">Configurar Token / Estatísticas do NPC</h3>
-              <button onClick={() => setShowEditTokenModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowEditTokenModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveEditToken} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">Nome do Token</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Token</label>
                 <input
                   type="text"
                   required
                   value={editTokenForm.name}
                   onChange={(e) => setEditTokenForm({ ...editTokenForm, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Tamanho (Quadrados)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho (Quadrados)</label>
                   <select
                     value={editTokenForm.size}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, size: parseFloat(e.target.value) })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   >
                     <option value="0.5">0.5x0.5 (Miúdo / 0.5x)</option>
                     <option value="1">1x1 (Médio / Padrão - 1x)</option>
@@ -1803,119 +1987,119 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Cor do Anel</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Cor do Anel</label>
                   <input
                     type="color"
                     value={editTokenForm.color}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, color: e.target.value })}
-                    className="w-full h-10 bg-slate-950 border border-slate-800 rounded-xl px-2 py-1 cursor-pointer"
+                    className="w-full h-10 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1 cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800 space-y-3">
-                <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#2c2825] space-y-3">
+                <h4 className="text-xs font-bold text-[#c9a04e] uppercase tracking-wider">
                   Estatísticas de Combate e Defesas
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Defesa (CA)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       value={editTokenForm.defense}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, defense: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Redução de Dano (RD)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       value={editTokenForm.damage_reduction}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, damage_reduction: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">PV Atual</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Atual</label>
                     <input
                       type="number"
                       value={editTokenForm.current_hp}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, current_hp: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">PV Máximo</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Máximo</label>
                     <input
                       type="number"
                       value={editTokenForm.max_hp}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, max_hp: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={editTokenForm.initiative_formula}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, initiative_formula: e.target.value })}
                     placeholder="ex: 1d20+2"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Resistências (50%)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Resistências (50%)</label>
                     <input
                       type="text"
                       value={editTokenForm.resistances}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, resistances: e.target.value })}
                       placeholder="fogo, corte"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Vulnerabilidades (2x)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Vulnerabilidades (2x)</label>
                     <input
                       type="text"
                       value={editTokenForm.vulnerabilities}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, vulnerabilities: e.target.value })}
                       placeholder="frio"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Imunidades (0)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Imunidades (0)</label>
                     <input
                       type="text"
                       value={editTokenForm.immunities}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, immunities: e.target.value })}
                       placeholder="veneno"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowEditTokenModal(false)}
-                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Salvar Alterações
                 </button>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { api, User } from '../services/api';
-import { Lock, Mail, User as UserIcon, Sparkles } from 'lucide-react';
 
 interface AuthModalProps {
   onSuccess: (user: User) => void;
@@ -35,107 +34,125 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all">
-        {/* Subtle decorative glow */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-[88vh] flex items-stretch">
+      {/* Coluna Esquerda: Preview da Mesa e Logotipo */}
+      <div className="hidden lg:flex flex-1 flex-col justify-between p-12 bg-[#131211] border-r border-[#2c2825] relative overflow-hidden">
+        {/* Grid de fundo sutil */}
+        <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
+          backgroundImage: 'linear-gradient(to right, #2c2825 1px, transparent 1px), linear-gradient(to bottom, #2c2825 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }} />
 
-        <div className="relative text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-indigo-400 shadow-md">
-            <Sparkles className="w-7 h-7" />
+        {/* Mock visual tático do mapa similar à imagem 3 */}
+        <div className="relative my-auto mx-auto w-full max-w-lg aspect-[4/3] bg-[#1a1816] border border-[#2c2825] rounded-lg p-6 shadow-2xl flex items-center justify-center">
+          <div className="w-full h-full border border-[#574e45]/40 rounded relative flex items-center justify-center">
+            {/* Tokens táticos estilizados */}
+            <div className="absolute top-1/3 left-1/4 w-12 h-12 rounded-full border-2 border-[#c9a04e] bg-[#1a1816] flex items-center justify-center shadow-lg font-serif text-lg font-bold text-[#c9a04e]">
+              A
+            </div>
+            <div className="absolute top-1/4 right-1/3 w-12 h-12 rounded-full border-2 border-[#8a2c38] bg-[#1a1816] flex items-center justify-center shadow-lg font-serif text-lg font-bold text-[#b24a52]">
+              G
+            </div>
+            <div className="absolute bottom-0 left-0 right-1/2 h-1/3 bg-[#131211]/80 border-t border-dashed border-[#574e45]/60" />
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            {isRegister ? 'Criar Nova Conta' : 'Acessar Plataforma'}
-          </h2>
-          <p className="text-sm text-slate-400 mt-1">
-            {isRegister
-              ? 'Cadastre-se para criar campanhas e mestrar suas histórias'
-              : 'Entre com suas credenciais para gerenciar suas campanhas'}
-          </p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-rose-950/60 border border-rose-800 text-rose-300 text-sm rounded-xl">
-            {error}
-          </div>
-        )}
+        {/* Assinatura inferior */}
+        <div className="relative z-10">
+          <h1 className="font-serif italic text-4xl text-[#c9a04e] font-bold tracking-tight">Arcanum</h1>
+          <p className="text-sm text-[#aaa292] mt-1 font-sans">
+            Mesa virtual de RPG. Cada campanha com as suas próprias regras, fichas e mapas.
+          </p>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegister ? (
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Nome de Usuário
-              </label>
-              <div className="relative">
-                <UserIcon className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
+      {/* Coluna Direita: Formulário de Autenticação */}
+      <div className="w-full lg:w-[480px] shrink-0 flex items-center justify-center p-8 sm:p-12 bg-[#131211]">
+        <div className="w-full max-w-sm space-y-6">
+          <div>
+            <h2 className="text-3xl font-serif text-[#ece3d0] font-bold tracking-tight">
+              {isRegister ? 'Criar conta' : 'Entrar'}
+            </h2>
+            <p className="text-xs text-[#aaa292] mt-1">
+              {isRegister
+                ? 'Cadastre-se para criar ou participar de campanhas.'
+                : 'Use seu email ou nome de usuário para voltar às suas campanhas.'}
+            </p>
+          </div>
+
+          {error && (
+            <div className="p-3 bg-[#8a2c38]/20 border border-[#8a2c38] text-[#ece3d0] text-xs rounded">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {isRegister && (
+              <div>
+                <label className="block text-xs font-mono text-[#aaa292] mb-1">
+                  Nome de usuário
+                </label>
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Ex: MestreDosDados"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm transition-all duration-200"
+                  className="w-full px-3.5 py-2.5 bg-[#1a1816] border border-[#2c2825] focus:border-[#c9a04e] rounded text-sm text-[#ece3d0] placeholder-[#574e45] focus:outline-none transition-colors"
                 />
               </div>
-            </div>
-          ) : null}
+            )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              {isRegister ? 'Email' : 'Email ou Usuário'}
-            </label>
-            <div className="relative">
-              <Mail className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
+            <div>
+              <label className="block text-xs font-mono text-[#aaa292] mb-1">
+                {isRegister ? 'Email' : 'Email ou usuário'}
+              </label>
               <input
                 type={isRegister ? 'email' : 'text'}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={isRegister ? 'seu@email.com' : 'seu@email.com ou MestreDosDados'}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm transition-all duration-200"
+                className="w-full px-3.5 py-2.5 bg-[#1a1816] border border-[#2c2825] focus:border-[#c9a04e] rounded text-sm text-[#ece3d0] placeholder-[#574e45] focus:outline-none transition-colors"
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              Senha
-            </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
+            <div>
+              <label className="block text-xs font-mono text-[#aaa292] mb-1">
+                Senha
+              </label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm transition-all duration-200"
+                className="w-full px-3.5 py-2.5 bg-[#1a1816] border border-[#2c2825] focus:border-[#c9a04e] rounded text-sm text-[#ece3d0] placeholder-[#574e45] focus:outline-none transition-colors"
               />
             </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 px-4 rounded font-bold text-xs bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] transition-all disabled:opacity-50"
+            >
+              {loading ? 'Processando...' : isRegister ? 'Cadastrar e entrar' : 'Entrar na plataforma'}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-[#2c2825] text-xs text-[#aaa292] flex items-center justify-between">
+            <span>{isRegister ? 'Já tem uma conta?' : 'Ainda não tem conta?'}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegister(!isRegister);
+                setError(null);
+              }}
+              className="font-medium text-[#c9a04e] hover:underline"
+            >
+              {isRegister ? 'Entrar' : 'Criar conta'}
+            </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-          >
-            {loading ? 'Processando...' : isRegister ? 'Finalizar Cadastro' : 'Entrar na Plataforma'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-slate-400">
-          {isRegister ? 'Já possui uma conta?' : 'Ainda não possui conta?'}
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError(null);
-            }}
-            className="ml-2 font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-4 transition-colors"
-          >
-            {isRegister ? 'Fazer login' : 'Cadastre-se'}
-          </button>
         </div>
       </div>
     </div>

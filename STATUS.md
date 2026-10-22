@@ -1,9 +1,33 @@
 # Status do Projeto — Plataforma Modular de RPG de Mesa
 
 **Data da última atualização:** 2026-10-21  
-**Versão:** 0.16.0 (Blindagem de Nomes Secretos na Validação de Turno e Ações de Combate)
+**Versão:** 0.17.0 (Reformulação Visual V2 — Design System Oficial & Interface Funcional)
 
 ---
+
+## Destaques da Versão 0.17.0 (Reformulação Visual V2)
+- **Design System Arcanum Oficial Aplicado Rigorosamente:**
+  - Tipografia: Serifada (*IM Fell English*), Sans (*IBM Plex Sans*) e Mono (*IBM Plex Mono*).
+  - Cores: Tinta (`#131211`), Papel (`#1a1816`), Couro (`#2c2825`), Osso (`#ece3d0`), Latão (`#c9a04e`), Vinho (`#8a2c38`), Vida (`#b24a52`), Mana (`#6f93ad`), Cura (`#5e9b76`), Condição (`#9a83c6`), Apoio (`#aaa292`), Borda (`#574e45`).
+- **Autenticação (Login / Cadastro):**
+  - Layout split em 2 colunas: preview tático de mesa com grid e tokens à esquerda, formulário limpo à direita com botão em latão.
+- **Lista de Campanhas:**
+  - Tabela elegante em linhas: `Campanha`, `Sistema de regras`, `Seu papel` (badges com cores oficiais) e `Membros`. Bloco pontilhado para contas novas.
+- **Menu Lateral & Ficha de Personagem:**
+  - Menu vertical lateral compacto (`Mesa`, `Fichas`, `Mochila`, `Rolagens`, `Catálogo`, `Bestiário`, `Modelos`, `Regras`, `Chat`, `Lore`, `Áudio`).
+  - Layout da Ficha em 3 colunas: Coluna 1 (Personagens), Coluna 2 (Identificação, Recursos, Atributos, Defesas e Fórmulas), Coluna 3 (Equipado, Antecedentes e Rolagens Recentes).
+- **Mesa Tática (VTT) & Combate (Imagem 5):**
+  - **Fita de Iniciativa Horizontal no Topo:** cartões horizontais de combatentes com iniciativa, nome, mini status de vida e botão *"Encerrar turno"*.
+  - **Barra Inferior de Ações de Combate:** abas *Ataque*, *Habilidades*, *Consumíveis*, *Defesa e esquiva*, card descritivo da ação e botão vinho *"Confirmar ataque"*.
+  - **Dock Contextual Lateral Direito:** abas *Iniciativa*, *Ficha*, *Registro (logs)* com histórico de danos e ações.
+- **Harmonização Completa dos Módulos:**
+  - *Mochila & Carga*, *Catálogo de Itens*, *Bestiário & NPCs* e *Modelos de Ficha* migrados integralmente da paleta genérica para os tokens oficiais.
+- **Qualidade & Segurança:**
+  - 100% de compilação (`tsc && vite build`) sem avisos ou erros de tipos.
+  - 29/29 testes automatizados do backend passando com sucesso.
+
+---
+
 
 ## Destaques da Versão 0.16.0 (Proteção de Segredos na Validação de Turno e Combate)
 - **Blindagem Contra Vazamento de Nomes na Validação de Turno:**

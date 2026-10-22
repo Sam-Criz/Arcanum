@@ -4,7 +4,7 @@ import {
   ConditionDefinition, AbilityDefinition, BestiaryCreature
 } from '../services/api';
 import { 
-  Swords, Play, Square, SkipForward, SkipBack, Dices, 
+  Play, Square, SkipForward, SkipBack, Dices, 
   Plus, Trash2, Eye, EyeOff, 
   History, Flame, Droplets, X, User as UserIcon,
   Shield, Zap, Crosshair, Target, CheckCircle2, AlertCircle, Wind, Skull, Wand2, Sparkles,
@@ -52,6 +52,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
   onCharacterUpdated
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [dockViewTab, setDockViewTab] = useState<'initiative' | 'sheet' | 'logs'>('initiative');
   const [showActionModal, setShowActionModal] = useState(false);
   const [showLogsDrawer, setShowLogsDrawer] = useState(false);
   const [logs, setLogs] = useState<CombatLog[]>([]);
@@ -728,27 +729,24 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
   const activeCombatant = encounter && encounter.turn_index >= 0 ? combatants[encounter.turn_index] : null;
 
   return (
-    <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-2xl flex flex-col h-full max-h-[750px] transition-all">
+    <div className="bg-[#1a1816]/95 border border-[#2c2825] rounded-lg p-4 shadow-2xl flex flex-col h-full max-h-[750px] transition-all">
       {/* Cabeçalho do Encontro */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+      <div className="flex items-center justify-between pb-3 border-b border-[#2c2825]">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-xl bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-            <Swords className="w-4 h-4" />
-          </div>
           <div>
-            <h3 className="font-bold text-sm text-white truncate max-w-[160px]">
+            <h3 className="font-serif font-bold text-base text-[#ece3d0] truncate max-w-[160px]">
               {encounter ? encounter.name : 'Iniciativa & Combate'}
             </h3>
             {encounter && (
-              <div className="flex items-center space-x-2 text-[10px]">
-                <span className="text-indigo-400 font-semibold">Rodada {encounter.round}</span>
-                <span className="text-slate-500">•</span>
-                <span className={`px-1.5 py-0.2 rounded-lg font-medium ${
+              <div className="flex items-center space-x-2 text-[10px] font-mono">
+                <span className="text-[#c9a04e] font-semibold">Rodada {encounter.round}</span>
+                <span className="text-[#574e45]">•</span>
+                <span className={`px-1.5 py-0.2 rounded font-medium ${
                   encounter.status === 'active' 
-                    ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800'
+                    ? 'bg-[#2c2825] text-[#5e9b76] border border-[#574e45]'
                     : encounter.status === 'prep'
-                      ? 'bg-amber-950/60 text-amber-300 border border-amber-800'
-                      : 'bg-slate-800 text-slate-400'
+                      ? 'bg-[#2c2825] text-[#c9a04e] border border-[#574e45]'
+                      : 'bg-[#131211] text-[#aaa292]'
                 }`}>
                   {encounter.status === 'active' ? 'Ativo' : encounter.status === 'prep' ? 'Preparação' : 'Encerrado'}
                 </span>
@@ -762,10 +760,10 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={() => setShowLogsDrawer(!showLogsDrawer)}
               title="Histórico de Ações"
-              className={`p-1.5 rounded-xl border transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] ${
+              className={`p-1.5 rounded border transition-colors ${
                 showLogsDrawer 
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30' 
-                  : 'bg-slate-800/80 text-slate-400 border-slate-700/80 hover:text-white'
+                  ? 'bg-[#c9a04e] text-[#131211] border-[#c9a04e]' 
+                  : 'bg-[#131211] text-[#aaa292] border-[#2c2825] hover:text-[#ece3d0]'
               }`}
             >
               <History className="w-4 h-4" />
@@ -775,7 +773,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           {isMaster && !encounter && (
             <button
               onClick={handleStartCombat}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-indigo-600/30"
+              className="px-3 py-1.5 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-sm"
             >
               <Play className="w-3.5 h-3.5" />
               <span>Iniciar</span>
@@ -786,10 +784,10 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={handleActivateCombat}
               title="Iniciar Combate e Validar Ordem de Iniciativa"
-              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-emerald-600/30"
+              className="px-2.5 py-1.5 bg-[#5e9b76] hover:bg-[#5e9b76]/90 text-[#131211] rounded text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-sm"
             >
               <Play className="w-3.5 h-3.5" />
-              <span>Iniciar Combate</span>
+              <span>Iniciar combate</span>
             </button>
           )}
 
@@ -797,7 +795,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={() => setShowAddModal(true)}
               title="Adicionar Participante"
-              className="p-1.5 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-800/50 rounded-xl transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+              className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded transition-colors"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -807,7 +805,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <button
               onClick={handleEndCombat}
               title="Encerrar Combate"
-              className="p-1.5 bg-rose-950/50 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 rounded-xl transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+              className="p-1.5 bg-[#8a2c38]/40 hover:bg-[#8a2c38] text-[#ece3d0] border border-[#8a2c38] rounded transition-colors"
             >
               <Square className="w-3.5 h-3.5" />
             </button>
@@ -815,13 +813,133 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
         </div>
       </div>
 
+      {/* ABAS CONTEXTUAIS DO DOCK (Design Arcanum V2 - Imagem 5) */}
+      <div className="flex border-b border-[#2c2825] my-2 text-xs font-serif">
+        <button
+          type="button"
+          onClick={() => setDockViewTab('initiative')}
+          className={`flex-1 py-1.5 text-center font-bold transition-colors ${
+            dockViewTab === 'initiative' ? 'text-[#c9a04e] border-b-2 border-[#c9a04e]' : 'text-[#aaa292] hover:text-[#ece3d0]'
+          }`}
+        >
+          Iniciativa
+        </button>
+        <button
+          type="button"
+          onClick={() => setDockViewTab('sheet')}
+          className={`flex-1 py-1.5 text-center font-bold transition-colors ${
+            dockViewTab === 'sheet' ? 'text-[#c9a04e] border-b-2 border-[#c9a04e]' : 'text-[#aaa292] hover:text-[#ece3d0]'
+          }`}
+        >
+          Ficha
+        </button>
+        <button
+          type="button"
+          onClick={() => setDockViewTab('logs')}
+          className={`flex-1 py-1.5 text-center font-bold transition-colors ${
+            dockViewTab === 'logs' ? 'text-[#c9a04e] border-b-2 border-[#c9a04e]' : 'text-[#aaa292] hover:text-[#ece3d0]'
+          }`}
+        >
+          Registro (${logs.length})
+        </button>
+      </div>
+
+      {/* CONTEÚDO DA ABA FICHA TÁTICA */}
+      {dockViewTab === 'sheet' && (
+        <div className="flex-1 overflow-y-auto p-2 space-y-3">
+          {activeCombatant ? (
+            <div className="space-y-3">
+              <div className="border-b border-[#2c2825] pb-2">
+                <span className="text-[10px] text-[#c9a04e] font-mono uppercase tracking-wider block">Combatente em Ação</span>
+                <h4 className="font-serif font-bold text-base text-[#ece3d0]">{activeCombatant.name}</h4>
+                <span className="text-xs text-[#aaa292]">{activeCombatant.is_npc ? 'NPC / Monstro' : 'Personagem Jogador'}</span>
+              </div>
+
+              {/* Recursos Vitais */}
+              <div className="space-y-2">
+                <div>
+                  <div className="flex justify-between text-xs font-mono mb-1">
+                    <span className="text-[#b24a52] font-bold">Vida (PV)</span>
+                    <span className="text-[#ece3d0]">
+                      {activeCombatant.current_hp !== null ? activeCombatant.current_hp : getHpStatusLabel(activeCombatant.hp_status)}
+                      {activeCombatant.max_hp ? ` / ${activeCombatant.max_hp}` : ''}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-[#131211] rounded-full overflow-hidden border border-[#2c2825]">
+                    <div
+                      className="h-full bg-[#b24a52] transition-all"
+                      style={{ width: `${Math.max(0, Math.min(100, activeCombatant.hp_percent ?? 100))}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center pt-2">
+                  <div className="bg-[#131211] border border-[#2c2825] p-2 rounded">
+                    <span className="text-[10px] text-[#aaa292] block font-mono">Defesa</span>
+                    <span className="text-sm font-bold text-[#ece3d0] font-mono">{activeCombatant.defense ?? 10}</span>
+                  </div>
+                  <div className="bg-[#131211] border border-[#2c2825] p-2 rounded">
+                    <span className="text-[10px] text-[#aaa292] block font-mono">RD</span>
+                    <span className="text-sm font-bold text-[#ece3d0] font-mono">{activeCombatant.damage_reduction ?? 0}</span>
+                  </div>
+                  <div className="bg-[#131211] border border-[#2c2825] p-2 rounded">
+                    <span className="text-[10px] text-[#aaa292] block font-mono">Iniciativa</span>
+                    <span className="text-sm font-bold text-[#c9a04e] font-mono">{activeCombatant.initiative ?? 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botão de Ação Rápida */}
+              <button
+                type="button"
+                onClick={() => handleOpenActionModal(activeCombatant)}
+                className="w-full py-2 bg-[#8a2c38] hover:bg-[#8a2c38]/90 text-[#ece3d0] rounded font-serif font-bold text-xs transition-colors shadow-sm flex items-center justify-center space-x-1.5"
+              >
+                <Crosshair className="w-3.5 h-3.5" />
+                <span>Realizar Ação / Atacar</span>
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-[#aaa292] text-xs">
+              Nenhum combatente ativo selecionado.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CONTEÚDO DA ABA REGISTRO DE COMBATE */}
+      {dockViewTab === 'logs' && (
+        <div className="flex-1 overflow-y-auto p-1 space-y-2">
+          {logs.length === 0 ? (
+            <div className="text-center py-8 text-[#aaa292] text-xs">
+              Nenhum evento registrado ainda neste encontro.
+            </div>
+          ) : (
+            logs.map(log => (
+              <div key={log.id} className="p-2.5 bg-[#131211] border border-[#2c2825] rounded text-xs space-y-1">
+                <div className="flex items-center justify-between text-[10px] text-[#aaa292] font-mono">
+                  <span className="font-semibold text-[#c9a04e]">{log.actor_name}</span>
+                  <span>{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                </div>
+                <p className="text-[#ece3d0]">{log.details?.message || `${log.action_type}: ${log.amount ?? ''}`}</p>
+                {log.details?.attack_roll && (
+                  <div className="text-[10px] font-mono text-[#aaa292]">
+                    Atq: {log.details.attack_roll.expression ? `${log.details.attack_roll.expression} = ` : ''}{log.details.attack_roll.total}{log.details.target_defense !== undefined ? ` vs Def ${log.details.target_defense}` : ''} ({log.details.hit ? 'ACERTO' : 'FALHA'})
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       {/* Controles de Turno e Ações do Mestre */}
       {isMaster && encounter && encounter.status !== 'ended' && (
         <div className="grid grid-cols-4 gap-1.5 my-3 pt-1">
           <button
             onClick={handlePrevTurn}
             title="Turno Anterior"
-            className="py-1.5 px-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-medium flex items-center justify-center space-x-1 border border-slate-700/80 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="py-1.5 px-2 bg-[#131211] hover:bg-[#2c2825] text-[#ece3d0] rounded text-xs font-medium flex items-center justify-center space-x-1 border border-[#2c2825] transition-colors"
           >
             <SkipBack className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Anterior</span>
@@ -830,7 +948,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           <button
             onClick={handleNextTurn}
             title="Próximo Turno"
-            className="py-1.5 px-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1 shadow-md shadow-emerald-700/20 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] col-span-2"
+            className="py-1.5 px-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded text-xs font-bold flex items-center justify-center space-x-1 shadow-sm transition-colors col-span-2"
           >
             <SkipForward className="w-3.5 h-3.5" />
             <span>Próximo Turno</span>
@@ -839,7 +957,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           <button
             onClick={handleRollAllInitiative}
             title="Rolar Todas as Iniciativas"
-            className="py-1.5 px-2 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-700/50 rounded-xl text-xs font-medium flex items-center justify-center transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+            className="py-1.5 px-2 bg-[#2c2825] hover:bg-[#574e45] text-[#c9a04e] border border-[#574e45] rounded text-xs font-medium flex items-center justify-center transition-colors"
           >
             <Dices className="w-3.5 h-3.5" />
           </button>
@@ -848,16 +966,16 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
       {/* Banner de Turno Oculto (quando a vez pertence a uma criatura oculta para jogadores) */}
       {encounter && encounter.status === 'active' && encounter.turn_index === -1 && !isMaster && (
-        <div className="mb-3 p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl shadow-lg flex items-center justify-between">
+        <div className="mb-3 p-2.5 bg-[#131211] border border-[#2c2825] rounded-xl shadow-lg flex items-center justify-between">
           <div className="flex items-center space-x-2.5 min-w-0">
             <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
             <div>
-              <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">Turno Oculto</span>
-              <p className="text-xs font-medium text-slate-300">Aguardando ação do Mestre...</p>
+              <span className="text-[10px] uppercase font-bold text-[#c9a04e] tracking-wider block">Turno Oculto</span>
+              <p className="text-xs font-medium text-[#ece3d0]">Aguardando ação do Mestre...</p>
             </div>
           </div>
-          <span className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-1 rounded flex items-center space-x-1">
-            <EyeOff className="w-3 h-3 text-amber-400" />
+          <span className="text-[10px] bg-[#1a1816] border border-[#2c2825] text-[#aaa292] px-2 py-1 rounded flex items-center space-x-1">
+            <EyeOff className="w-3 h-3 text-[#c9a04e]" />
             <span>Invisível</span>
           </span>
         </div>
@@ -872,24 +990,24 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
         const mainActionsUsed = activeCombatant.actions_used?.main || 0;
 
         return (
-          <div className="mb-3 p-2.5 bg-gradient-to-r from-indigo-950/80 via-slate-900 to-slate-900 border border-indigo-500/40 rounded-xl shadow-lg space-y-2">
+          <div className="mb-3 p-2.5 bg-[#2c2825] border border-[#c9a04e] rounded-xl shadow-lg space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2.5 min-w-0">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                 <div className="min-w-0">
-                  <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">Turno Ativo</span>
+                  <span className="text-[10px] uppercase font-bold text-[#c9a04e] tracking-wider block">Turno Ativo</span>
                   <p className="text-xs font-bold text-white truncate">{activeCombatant.name}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/50 border border-amber-800/50 px-2 py-0.5 rounded">
+                <span className="text-xs font-mono font-bold text-[#c9a04e] bg-amber-950/50 border border-amber-800/50 px-2 py-0.5 rounded">
                   Init {activeCombatant.initiative}
                 </span>
                 {canEndTurn && (
                   <button
                     onClick={handleEndTurn}
                     title="Finalizar este turno e passar para o próximo combatente"
-                    className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold flex items-center space-x-1 shadow transition-all"
+                    className="px-2.5 py-1 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-lg text-xs font-bold flex items-center space-x-1 shadow transition-all"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Encerrar Turno</span>
@@ -898,7 +1016,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/60 pt-1.5 px-0.5">
+            <div className="flex items-center justify-between text-[11px] text-[#aaa292] border-t border-[#2c2825] pt-1.5 px-0.5">
               <div className="flex items-center space-x-1.5">
                 <span>Ação Principal:</span>
                 <span className={`px-1.5 py-0.2 rounded font-mono font-bold text-[10px] ${
@@ -910,8 +1028,8 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 </span>
               </div>
               {nextCombatant && (
-                <div className="text-[10px] text-slate-400 truncate max-w-[170px]">
-                  Próximo: <span className="text-slate-200 font-medium">{nextCombatant.name}</span>
+                <div className="text-[10px] text-[#aaa292] truncate max-w-[170px]">
+                  Próximo: <span className="text-[#ece3d0] font-medium">{nextCombatant.name}</span>
                 </div>
               )}
             </div>
@@ -920,16 +1038,17 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
       })()}
 
       {/* Lista de Combatentes */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-2 min-h-[220px]">
+      {dockViewTab === 'initiative' && (
+        <div className="flex-1 overflow-y-auto pr-1 space-y-2 min-h-[220px]">
         {combatants.length === 0 ? (
-          <div className="text-center py-10 text-slate-500 text-xs">
+          <div className="text-center py-10 text-[#777064] text-xs">
             {encounter ? (
               <div>
                 <p>Nenhum combatente no encontro.</p>
                 {isMaster && (
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="mt-2 px-3 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg text-xs inline-flex items-center space-x-1"
+                    className="mt-2 px-3 py-1 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-lg text-xs inline-flex items-center space-x-1"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Adicionar Combatentes</span>
@@ -956,19 +1075,19 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 key={c.id}
                 className={`p-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.01] flex items-center justify-between ${
                   isActive
-                    ? 'bg-indigo-950/60 border-indigo-500/80 shadow-md shadow-indigo-900/30 ring-1 ring-indigo-500/50'
+                    ? 'bg-[#2c2825] border-[#c9a04e] ring-1 ring-[#c9a04e] shadow-md'
                     : c.is_hidden
-                      ? 'bg-slate-950/40 border-amber-800/40 opacity-80 hover:opacity-100 hover:border-amber-700/60'
-                      : 'bg-slate-950/70 border-slate-800/80 hover:border-slate-750'
+                      ? 'bg-[#131211]/40 border-amber-800/40 opacity-80 hover:opacity-100 hover:border-amber-700/60'
+                      : 'bg-[#131211]/70 border-[#2c2825] hover:border-[#574e45]'
                 }`}
               >
                 <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                   {/* Avatar / Thumbnail */}
-                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 shrink-0 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-800 border border-[#574e45] shrink-0 flex items-center justify-center">
                     {c.avatar_url ? (
                       <img src={c.avatar_url} alt={c.name} className="w-full h-full object-cover" />
                     ) : (
-                      <UserIcon className="w-4 h-4 text-slate-400" />
+                      <UserIcon className="w-4 h-4 text-[#aaa292]" />
                     )}
                   </div>
 
@@ -981,13 +1100,13 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       )}
                       {c.is_hidden && (
                         <span className="text-[9px] bg-amber-950/70 text-amber-300 border border-amber-800/80 px-1.5 py-0.2 rounded flex items-center space-x-1 shrink-0 font-medium" title="Oculto para jogadores (Invisível na iniciativa e no mapa)">
-                          <EyeOff className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                          <EyeOff className="w-2.5 h-2.5 text-[#c9a04e] shrink-0" />
                           <span>Oculto</span>
                         </span>
                       )}
                       {/* Atributos Defensivos visíveis para o mestre */}
                       {isMaster && (
-                        <span className="text-[9px] text-slate-400 font-mono bg-slate-900 px-1 py-0.2 rounded border border-slate-800">
+                        <span className="text-[9px] text-[#aaa292] font-mono bg-slate-900 px-1 py-0.2 rounded border border-[#2c2825]">
                           Def: {c.defense ?? 10} {c.damage_reduction ? `• RD: ${c.damage_reduction}` : ''}
                         </span>
                       )}
@@ -1006,7 +1125,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       )}
                       {c.is_incapacitated && (
                         <span className="text-[9px] bg-rose-950/80 text-rose-300 border border-rose-800 px-1 py-0.5 rounded flex items-center space-x-1 font-medium">
-                          <Skull className="w-2.5 h-2.5 text-rose-400" />
+                          <Skull className="w-2.5 h-2.5 text-[#b24a52]" />
                           <span>Incapacitado</span>
                         </span>
                       )}
@@ -1038,7 +1157,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                                   e.stopPropagation();
                                   handleRemoveCondition(c.id, isObj ? cond.id : cond);
                                 }}
-                                className="ml-0.5 hover:text-rose-400 opacity-60 hover:opacity-100"
+                                className="ml-0.5 hover:text-[#b24a52] opacity-60 hover:opacity-100"
                                 title="Remover condição"
                               >
                                 <X className="w-2.5 h-2.5" />
@@ -1047,7 +1166,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                           </span>
                         );
                       })}
-                      <span className="text-[9px] font-mono text-slate-400 bg-slate-900 px-1 py-0.2 rounded border border-slate-800">
+                      <span className="text-[9px] font-mono text-[#aaa292] bg-slate-900 px-1 py-0.2 rounded border border-[#2c2825]">
                         Ação: {c.actions_used?.main || 0}/1
                       </span>
                     </div>
@@ -1055,12 +1174,12 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     {/* Barra de Vida */}
                     {(c.current_hp !== null || (c.hp_percent !== null && c.hp_percent !== undefined)) && (
                       <div className="w-full mt-1">
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                        <div className="flex items-center justify-between text-[10px] text-[#aaa292] mb-0.5">
                           <span>{c.current_hp !== null ? 'PV' : 'Estado'}</span>
                           {c.current_hp !== null ? (
                             <span className="font-mono">{c.current_hp} / {c.max_hp ?? '?'}</span>
                           ) : (
-                            <span className="font-medium text-slate-300">{getHpStatusLabel(c.hp_status)}</span>
+                            <span className="font-medium text-[#ece3d0]">{getHpStatusLabel(c.hp_status)}</span>
                           )}
                         </div>
                         <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -1076,7 +1195,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
                 {/* Iniciativa e Botão de Ação / Ataque */}
                 <div className="flex items-center space-x-1.5 pl-2 shrink-0">
-                  <span className="text-xs font-mono font-bold text-slate-200 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                  <span className="text-xs font-mono font-bold text-[#ece3d0] bg-slate-900 px-2 py-1 rounded border border-[#2c2825]">
                     {c.initiative}
                   </span>
 
@@ -1084,7 +1203,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   <button
                     onClick={() => handleOpenActionModal(c)}
                     title="Realizar Ação / Atacar Alvo"
-                    className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 rounded-lg text-xs transition-all flex items-center space-x-1"
+                    className="p-1.5 bg-[#8a2c38]/30 hover:bg-[#8a2c38] text-[#ece3d0] border border-[#8a2c38] rounded-lg text-xs transition-all flex items-center space-x-1"
                   >
                     <Crosshair className="w-3.5 h-3.5" />
                   </button>
@@ -1094,7 +1213,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     <button
                       onClick={() => handleOpenConditionModal(c)}
                       title="[Mestre] Intervenção Manual: Aplicar Condição"
-                      className="p-1.5 bg-amber-950/40 hover:bg-amber-900/60 text-amber-400 border border-amber-800/50 rounded-lg text-xs transition-all flex items-center space-x-1"
+                      className="p-1.5 bg-amber-950/40 hover:bg-amber-900/60 text-[#c9a04e] border border-amber-800/50 rounded-lg text-xs transition-all flex items-center space-x-1"
                     >
                       <Flame className="w-3.5 h-3.5" />
                     </button>
@@ -1108,7 +1227,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       className={`p-1.5 rounded-lg text-xs transition-all flex items-center space-x-1 border ${
                         c.is_hidden
                           ? 'bg-amber-950/60 hover:bg-amber-900/80 text-amber-300 border-amber-700/80'
-                          : 'bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border-slate-700'
+                          : 'bg-slate-800/80 hover:bg-slate-700 text-[#aaa292] hover:text-[#ece3d0] border-[#574e45]'
                       }`}
                     >
                       {c.is_hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -1120,7 +1239,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     <button
                       onClick={() => handleRemoveCombatant(c.id)}
                       title="Remover do Encontro"
-                      className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg text-xs transition-all"
+                      className="p-1.5 text-[#777064] hover:text-[#b24a52] rounded-lg text-xs transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -1130,31 +1249,32 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             );
           })
         )}
-      </div>
+        </div>
+      )}
 
       {/* MODAL: Adicionar Combatente (com Atributos Defensivos de NPCs/Monstros) */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white flex items-center space-x-2">
-                <Plus className="w-4 h-4 text-indigo-400" />
+                <Plus className="w-4 h-4 text-[#c9a04e]" />
                 <span>Adicionar Participante ao Combate</span>
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowAddModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {isMaster && (
-              <div className="flex border-b border-slate-800 mb-4 space-x-2">
+              <div className="flex border-b border-[#2c2825] mb-4 space-x-2">
                 <button
                   type="button"
                   onClick={() => setAddCombatantTab('bestiary')}
                   className={`pb-2 px-3 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition-all ${
                     addCombatantTab === 'bestiary'
-                      ? 'border-indigo-500 text-indigo-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                      ? 'border-indigo-500 text-[#c9a04e]'
+                      : 'border-transparent text-[#aaa292] hover:text-[#ece3d0]'
                   }`}
                 >
                   <BookOpen className="w-3.5 h-3.5" />
@@ -1165,8 +1285,8 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   onClick={() => setAddCombatantTab('custom')}
                   className={`pb-2 px-3 text-xs font-semibold flex items-center space-x-1.5 border-b-2 transition-all ${
                     addCombatantTab === 'custom'
-                      ? 'border-indigo-500 text-indigo-400'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                      ? 'border-indigo-500 text-[#c9a04e]'
+                      : 'border-transparent text-[#aaa292] hover:text-[#ece3d0]'
                   }`}
                 >
                   <UserIcon className="w-3.5 h-3.5" />
@@ -1178,19 +1298,19 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             {addCombatantTab === 'bestiary' && isMaster ? (
               <form onSubmit={handleAddCombatant} className="space-y-4">
                 {bestiaryCreatures.length === 0 ? (
-                  <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl text-center text-xs text-slate-400">
+                  <div className="p-4 bg-[#131211]/60 border border-[#2c2825] rounded-xl text-center text-xs text-[#aaa292]">
                     Nenhuma criatura cadastrada no Bestiário da campanha ainda. Crie criaturas na aba Bestiário ou use a aba Customizado.
                   </div>
                 ) : (
                   <>
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                         Criatura Modelo do Bestiário
                       </label>
                       <select
                         value={selectedCreatureId}
                         onChange={(e) => setSelectedCreatureId(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-medium"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                       >
                         {bestiaryCreatures.map(cr => (
                           <option key={cr.id} value={cr.id}>
@@ -1201,7 +1321,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                         Quantidade de Instâncias (Reforços)
                       </label>
                       <input
@@ -1210,26 +1330,26 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         max="20"
                         value={spawnCount}
                         onChange={(e) => setSpawnCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                       />
-                      <p className="text-[10px] text-slate-400 mt-1">
+                      <p className="text-[10px] text-[#aaa292] mt-1">
                         Cada criatura será instanciada de forma independente com iniciativa imediata e token no mapa.
                       </p>
                     </div>
 
-                    <label className="flex items-center space-x-2.5 cursor-pointer bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+                    <label className="flex items-center space-x-2.5 cursor-pointer bg-[#131211]/60 p-2.5 rounded-xl border border-[#2c2825] hover:border-[#574e45] transition-all">
                       <input
                         type="checkbox"
                         checked={spawnIsHidden}
                         onChange={(e) => setSpawnIsHidden(e.target.checked)}
-                        className="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-0 w-4 h-4 shrink-0"
+                        className="rounded bg-slate-900 border-[#574e45] text-indigo-500 focus:ring-0 w-4 h-4 shrink-0"
                       />
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-semibold text-slate-200 flex items-center space-x-1.5">
-                          <EyeOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span className="text-xs font-semibold text-[#ece3d0] flex items-center space-x-1.5">
+                          <EyeOff className="w-3.5 h-3.5 text-[#c9a04e] shrink-0" />
                           <span>Oculto para os jogadores (Invisível na iniciativa e mapa)</span>
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-[#aaa292]">
                           Apenas o mestre verá os tokens e a iniciativa até você decidir revelá-los narrativamente.
                         </span>
                       </div>
@@ -1240,19 +1360,19 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       const cur = bestiaryCreatures.find(c => c.id === selectedCreatureId);
                       if (!cur) return null;
                       return (
-                        <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 shrink-0 border border-slate-700">
+                        <div className="p-3 bg-[#131211] border border-[#2c2825] rounded-xl flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 shrink-0 border border-[#574e45]">
                             {cur.avatar_url || cur.token_url ? (
                               <img src={cur.avatar_url || cur.token_url || undefined} alt={cur.name} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-500">
+                              <div className="w-full h-full flex items-center justify-center text-[#777064]">
                                 <UserIcon className="w-5 h-5" />
                               </div>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <h4 className="text-xs font-bold text-white truncate">{cur.name}</h4>
-                            <p className="text-[10px] text-slate-400">
+                            <p className="text-[10px] text-[#aaa292]">
                               Defesa: {cur.computed_data?.defense ?? 10} • RD: {cur.computed_data?.damage_reduction ?? 0} • PV: {cur.computed_data?.hp ?? 20}
                             </p>
                           </div>
@@ -1262,11 +1382,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   </>
                 )}
 
-                <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-[#ece3d0] rounded-xl text-xs font-semibold"
                   >
                     Cancelar
                   </button>
@@ -1285,7 +1405,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {/* Opção 1: Vincular a Token existente no mapa */}
               {tokens.length > 0 && (
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                     Selecionar Token da Cena (Mapa)
                   </label>
                   <select
@@ -1309,7 +1429,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         setNewCombatantIsNpc(!tok.character_id);
                       }
                     }}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   >
                     <option value="">-- Escolher Token do Mapa --</option>
                     {tokens.map(t => (
@@ -1323,7 +1443,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
               {/* Opção 2: Vincular a Personagem da Campanha */}
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                   Ou Vincular a Personagem da Campanha
                 </label>
                 <select
@@ -1343,7 +1463,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       setNewCombatantIsNpc(char.is_npc === 1);
                     }
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 >
                   <option value="">Participante Avulso / Monstro Customizado</option>
                   {characters.map(char => (
@@ -1355,139 +1475,139 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">Nome do Participante</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Participante</label>
                 <input
                   type="text"
                   required
                   value={newCombatantName}
                   onChange={(e) => setNewCombatantName(e.target.value)}
                   placeholder="ex: Carniçal, Guarda, Jogador"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Pontos de Vida (PV)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Pontos de Vida (PV)</label>
                   <input
                     type="number"
                     min="1"
                     value={newCombatantHp}
                     onChange={(e) => setNewCombatantHp(parseInt(e.target.value, 10) || 1)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={newCombatantFormula}
                     onChange={(e) => setNewCombatantFormula(e.target.value)}
                     placeholder="1d20 + 2"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
               </div>
 
               {/* Atributos Defensivos de NPCs e Monstros */}
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
-                <span className="text-xs font-bold text-indigo-400 block flex items-center space-x-1.5">
+              <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] space-y-3">
+                <span className="text-xs font-bold text-[#c9a04e] block flex items-center space-x-1.5">
                   <Shield className="w-3.5 h-3.5" />
                   <span>Atributos Defensivos (CA, Armadura & Resistências)</span>
                 </span>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-1">Defesa / CA (Dificuldade de Acerto)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-1">Defesa / CA (Dificuldade de Acerto)</label>
                     <input
                       type="number"
                       min="0"
                       value={newCombatantDefense}
                       onChange={(e) => setNewCombatantDefense(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-slate-900 border border-[#574e45] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-1">Redução de Dano / Armadura (RD)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-1">Redução de Dano / Armadura (RD)</label>
                     <input
                       type="number"
                       min="0"
                       value={newCombatantDR}
                       onChange={(e) => setNewCombatantDR(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-slate-900 border border-[#574e45] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Resistências (Dano pela metade, ex: fogo, fisico)</label>
+                  <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Resistências (Dano pela metade, ex: fogo, fisico)</label>
                   <input
                     type="text"
                     value={newCombatantResistances}
                     onChange={(e) => setNewCombatantResistances(e.target.value)}
                     placeholder="ex: fogo, cortante, fisico"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                    className="w-full bg-slate-900 border border-[#574e45] rounded-lg px-2.5 py-1 text-xs text-white"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Vulnerabilidades (Dano x2)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Vulnerabilidades (Dano x2)</label>
                     <input
                       type="text"
                       value={newCombatantVulnerabilities}
                       onChange={(e) => setNewCombatantVulnerabilities(e.target.value)}
                       placeholder="ex: eletrico"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      className="w-full bg-slate-900 border border-[#574e45] rounded-lg px-2.5 py-1 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-0.5">Imunidades (Dano 0)</label>
+                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Imunidades (Dano 0)</label>
                     <input
                       type="text"
                       value={newCombatantImmunities}
                       onChange={(e) => setNewCombatantImmunities(e.target.value)}
                       placeholder="ex: veneno"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      className="w-full bg-slate-900 border border-[#574e45] rounded-lg px-2.5 py-1 text-xs text-white"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-6 pt-1">
-                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={newCombatantIsNpc}
                     onChange={(e) => setNewCombatantIsNpc(e.target.checked)}
-                    className="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0"
+                    className="rounded bg-[#131211] border-[#574e45] text-indigo-600 focus:ring-0"
                   />
                   <span>É NPC / Monstro</span>
                 </label>
 
-                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={newCombatantIsHidden}
                     onChange={(e) => setNewCombatantIsHidden(e.target.checked)}
-                    className="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0"
+                    className="rounded bg-[#131211] border-[#574e45] text-indigo-600 focus:ring-0"
                   />
                   <span>Ocultar dos Jogadores</span>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Adicionar ao Encontro
                 </button>
@@ -1501,18 +1621,18 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
       {/* MODAL: Central de Ações Unificadas de Combate */}
       {showActionModal && selectedTarget && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-xl p-6 shadow-2xl backdrop-blur-md max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-xl p-6 shadow-2xl backdrop-blur-md max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <div>
                 <h3 className="font-bold text-base text-white flex items-center space-x-2">
-                  <Target className="w-4 h-4 text-rose-400" />
+                  <Target className="w-4 h-4 text-[#b24a52]" />
                   <span>Ação de Combate: {selectedTarget.name}</span>
                 </h3>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-[#aaa292]">
                   Alvo: {selectedTarget.current_hp !== null ? `${selectedTarget.current_hp} PV` : getHpStatusLabel(selectedTarget.hp_status)} {isMaster ? `• Defesa: ${selectedTarget.defense} • RD: ${selectedTarget.damage_reduction}` : ''}
                 </span>
               </div>
-              <button onClick={() => setShowActionModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowActionModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1521,10 +1641,10 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             {actionError && (
               <div className="p-3 rounded-xl mb-4 border bg-rose-950/60 border-rose-800 text-rose-200 text-xs">
                 <div className="flex items-center space-x-2 font-bold mb-1">
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-[#b24a52] shrink-0" />
                   <span>Falha ao Executar Ação</span>
                 </div>
-                <p className="text-[11px] text-slate-300 break-words whitespace-pre-wrap">
+                <p className="text-[11px] text-[#ece3d0] break-words whitespace-pre-wrap">
                   {actionError}
                 </p>
               </div>
@@ -1540,7 +1660,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 <div className="flex items-center space-x-2 font-bold mb-1">
                   {actionFeedback.hit === false ? (
                     <>
-                      <AlertCircle className="w-4 h-4 text-amber-400" />
+                      <AlertCircle className="w-4 h-4 text-[#c9a04e]" />
                       <span>O Ataque Errou o Alvo!</span>
                     </>
                   ) : (
@@ -1550,16 +1670,16 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     </>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-300">
+                <p className="text-[11px] text-[#ece3d0]">
                   {actionFeedback.actionLog?.details?.message || actionFeedback.message}
                 </p>
 
                 {/* Discriminação de Danos Elementais e Multiplicadores */}
                 {Array.isArray(actionFeedback.componentsBreakdown || actionFeedback.actionLog?.details?.componentsBreakdown) && (
-                  <div className="mt-2.5 pt-2 border-t border-slate-700/60 flex flex-wrap gap-1.5">
+                  <div className="mt-2.5 pt-2 border-t border-[#574e45] flex flex-wrap gap-1.5">
                     {(actionFeedback.componentsBreakdown || actionFeedback.actionLog?.details?.componentsBreakdown).map((comp: any, idx: number) => (
-                      <span key={idx} className="text-[10px] bg-slate-900/90 border border-slate-700 px-2 py-0.5 rounded font-mono text-slate-200 flex items-center space-x-1">
-                        <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span key={idx} className="text-[10px] bg-slate-900/90 border border-[#574e45] px-2 py-0.5 rounded font-mono text-[#ece3d0] flex items-center space-x-1">
+                        <Sparkles className="w-3 h-3 text-[#c9a04e]" />
                         <span>
                           <strong className="text-amber-300 capitalize">{comp.name || comp.type}:</strong> {comp.original} {comp.multiplier !== 1 ? `(x${comp.multiplier})` : ''} → <strong className="text-rose-300">{comp.final} PV</strong>
                         </span>
@@ -1574,11 +1694,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {/* Seleção do Atacante e do Alvo */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Combatente Ativo (Origem)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Combatente Ativo (Origem)</label>
                   <select
                     value={selectedActorId}
                     onChange={(e) => setSelectedActorId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-medium"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                   >
                     {combatants
                       .filter(c => isMaster || c.owner_user_id === user.id)
@@ -1591,14 +1711,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-slate-300 block mb-1">Alvo da Ação</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Alvo da Ação</label>
                   <select
                     value={selectedTarget.id}
                     onChange={(e) => {
                       const t = combatants.find(c => c.id === e.target.value);
                       if (t) setSelectedTarget(t);
                     }}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-medium"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                   >
                     {combatants.map(c => {
                       const isSelf = c.id === selectedActorId;
@@ -1622,7 +1742,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 if (!tv.valid && actionMode !== 'manual') {
                   return (
                     <div className="p-2.5 bg-rose-950/60 border border-rose-800/80 rounded-xl flex items-center space-x-2 text-rose-300 text-xs">
-                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-[#b24a52] shrink-0" />
                       <span>{tv.reason}</span>
                     </div>
                   );
@@ -1637,7 +1757,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   const label = ae.costType === 'bonus' ? 'ação bônus' : ae.costType === 'reaction' ? 'reação' : 'ação principal';
                   return (
                     <div className="p-2.5 bg-amber-950/60 border border-amber-800/80 rounded-xl flex items-center space-x-2 text-amber-300 text-xs">
-                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-[#c9a04e] shrink-0" />
                       <span>Atenção: {ae.actorName || 'Este combatente'} já utilizou sua {label} neste turno (1/1).</span>
                     </div>
                   );
@@ -1646,14 +1766,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               })()}
 
               {/* Abas de Ações Unificadas */}
-              <div className="flex border-b border-slate-800 pb-1 gap-1.5 overflow-x-auto">
+              <div className="flex border-b border-[#2c2825] pb-1 gap-1.5 overflow-x-auto">
                 <button
                   type="button"
                   onClick={() => setActionMode('weapon')}
                   className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                     actionMode === 'weapon'
-                      ? 'bg-rose-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white bg-slate-800/60'
+                      ? 'bg-[#8a2c38] text-[#ece3d0] shadow-md'
+                      : 'text-[#aaa292] hover:text-white bg-slate-800/60'
                   }`}
                 >
                   <Crosshair className="w-3.5 h-3.5" />
@@ -1666,7 +1786,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                     actionMode === 'ability'
                       ? 'bg-indigo-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white bg-slate-800/60'
+                      : 'text-[#aaa292] hover:text-white bg-slate-800/60'
                   }`}
                 >
                   <Zap className="w-3.5 h-3.5" />
@@ -1679,7 +1799,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                     actionMode === 'consumable'
                       ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white bg-slate-800/60'
+                      : 'text-[#aaa292] hover:text-white bg-slate-800/60'
                   }`}
                 >
                   <HeartPulse className="w-3.5 h-3.5" />
@@ -1692,7 +1812,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                     actionMode === 'imbue'
                       ? 'bg-amber-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white bg-slate-800/60'
+                      : 'text-[#aaa292] hover:text-white bg-slate-800/60'
                   }`}
                 >
                   <Flame className="w-3.5 h-3.5" />
@@ -1705,7 +1825,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                     actionMode === 'defend'
                       ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white bg-slate-800/60'
+                      : 'text-[#aaa292] hover:text-white bg-slate-800/60'
                   }`}
                 >
                   <Shield className="w-3.5 h-3.5" />
@@ -1718,7 +1838,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                   className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                     actionMode === 'dodge'
                       ? 'bg-purple-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white bg-slate-800/60'
+                      : 'text-[#aaa292] hover:text-white bg-slate-800/60'
                   }`}
                 >
                   <Wind className="w-3.5 h-3.5" />
@@ -1732,7 +1852,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap shrink-0 ${
                       actionMode === 'manual'
                         ? 'bg-amber-700 text-white shadow-md'
-                        : 'text-amber-400 hover:text-white bg-amber-950/40 border border-amber-800/40'
+                        : 'text-[#c9a04e] hover:text-white bg-amber-950/40 border border-amber-800/40'
                     }`}
                   >
                     <Shield className="w-3.5 h-3.5" />
@@ -1745,16 +1865,16 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {actionMode === 'weapon' && (
                 <div className="space-y-3">
                   {isLoadingInventory ? (
-                    <div className="text-center py-4 text-xs text-slate-500">Carregando armas do atacante...</div>
+                    <div className="text-center py-4 text-xs text-[#777064]">Carregando armas do atacante...</div>
                   ) : actorWeapons.length > 0 ? (
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                         Arma Equipada no Inventário
                       </label>
                       <select
                         value={selectedWeaponId}
                         onChange={(e) => setSelectedWeaponId(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-medium"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                       >
                         {actorWeapons.map(w => {
                           const props = w.properties || {};
@@ -1793,14 +1913,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         return (
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {hasComponents && curProps.damage_components.map((comp: any, idx: number) => (
-                              <span key={`wc-${idx}`} className="text-[10px] bg-slate-950 border border-amber-800/60 text-amber-300 px-2 py-0.5 rounded font-mono flex items-center space-x-1">
-                                <Sparkles className="w-3 h-3 text-amber-400" />
+                              <span key={`wc-${idx}`} className="text-[10px] bg-[#131211] border border-amber-800/60 text-amber-300 px-2 py-0.5 rounded font-mono flex items-center space-x-1">
+                                <Sparkles className="w-3 h-3 text-[#c9a04e]" />
                                 <span>+{comp.formula || `${comp.percentage_damage}%`} {comp.damage_type}</span>
                               </span>
                             ))}
                             {hasImbue && curProps.imbued_effects.map((eff: any, idx: number) => (
                               <span key={`wi-${idx}`} className="text-[10px] bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 px-2 py-0.5 rounded font-mono flex items-center space-x-1">
-                                <Wand2 className="w-3 h-3 text-indigo-400" />
+                                <Wand2 className="w-3 h-3 text-[#c9a04e]" />
                                 <span>Imbuído: +{eff.damage_formula || `${eff.percentage_damage}%`} {eff.damage_type} ({eff.remaining_charges ?? '∞'} {eff.duration_type})</span>
                               </span>
                             ))}
@@ -1808,14 +1928,14 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         );
                       })()}
 
-                      <span className="text-[10px] text-slate-500 mt-1 block">
+                      <span className="text-[10px] text-[#777064] mt-1 block">
                         O teste de ataque e o dano serão calculados automaticamente no servidor com os atributos reais do personagem contra a defesa do alvo.
                       </span>
                     </div>
                   ) : (
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400">
+                    <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] text-xs text-[#aaa292]">
                       <p className="font-semibold text-white mb-0.5">Nenhuma arma equipada no inventário deste combatente.</p>
-                      <p className="text-[11px] text-slate-500">Será realizado um ataque desarmado resolvido automaticamente pelas regras da campanha e atributos do combatente.</p>
+                      <p className="text-[11px] text-[#777064]">Será realizado um ataque desarmado resolvido automaticamente pelas regras da campanha e atributos do combatente.</p>
                     </div>
                   )}
                 </div>
@@ -1825,7 +1945,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {actionMode === 'ability' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Selecionar Habilidade</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Selecionar Habilidade</label>
                     <select
                       value={selectedAbilityId}
                       onChange={(e) => {
@@ -1838,7 +1958,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                           if (ab.attack_formula) setAbilityAttackFormula(ab.attack_formula);
                         }
                       }}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-medium"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                     >
                       {rulesetAbilities.map(ab => {
                         const costStr = ab.resource_cost ? `${ab.resource_cost.amount} ${ab.resource_cost.name}` : 'Sem custo';
@@ -1859,12 +1979,12 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     if (!ab) return null;
 
                     return (
-                      <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2 text-xs">
+                      <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] space-y-2 text-xs">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <span className="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-semibold">
                             Custo: {ab.action_cost === 'bonus' ? 'Ação Bônus' : ab.action_cost === 'free' ? 'Ação Livre' : 'Ação Principal'}
                           </span>
-                          <span className="text-[10px] bg-slate-900 text-slate-300 border border-slate-700 px-2 py-0.5 rounded font-semibold">
+                          <span className="text-[10px] bg-slate-900 text-[#ece3d0] border border-[#574e45] px-2 py-0.5 rounded font-semibold">
                             Alvo: {Array.isArray(ab.valid_targets) ? ab.valid_targets.join(', ') : (ab.valid_targets || 'enemies')}
                           </span>
                           {ab.resource_cost && (
@@ -1885,12 +2005,12 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         </div>
 
                         {ab.description && (
-                          <p className="text-[11px] text-slate-400 leading-relaxed">{ab.description}</p>
+                          <p className="text-[11px] text-[#aaa292] leading-relaxed">{ab.description}</p>
                         )}
 
                         {Array.isArray(ab.apply_conditions) && ab.apply_conditions.length > 0 && (
                           <div className="flex flex-wrap gap-1 items-center pt-1">
-                            <span className="text-[10px] text-slate-500">Aplica Condição:</span>
+                            <span className="text-[10px] text-[#777064]">Aplica Condição:</span>
                             {ab.apply_conditions.map((ac: any, i: number) => (
                               <span key={i} className="text-[9px] bg-rose-950/80 text-rose-300 border border-rose-800 px-1.5 py-0.5 rounded">
                                 {typeof ac === 'string' ? ac : ac.name}
@@ -1901,7 +2021,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
                         {Array.isArray(ab.remove_conditions) && ab.remove_conditions.length > 0 && (
                           <div className="flex flex-wrap gap-1 items-center pt-1">
-                            <span className="text-[10px] text-slate-500">Cura / Remove Condição:</span>
+                            <span className="text-[10px] text-[#777064]">Cura / Remove Condição:</span>
                             {ab.remove_conditions.map((rc: string, i: number) => (
                               <span key={i} className="text-[9px] bg-emerald-950/80 text-emerald-300 border border-emerald-800 px-1.5 py-0.5 rounded">
                                 {rc}
@@ -1915,68 +2035,68 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
                   {/* Campos para Habilidade Personalizada */}
                   {selectedAbilityId === 'custom' && (
-                    <div className="space-y-3 pt-2 border-t border-slate-800">
+                    <div className="space-y-3 pt-2 border-t border-[#2c2825]">
                       <div>
-                        <label className="text-xs font-medium text-slate-300 block mb-1">Nome da Habilidade</label>
+                        <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome da Habilidade</label>
                         <input
                           type="text"
                           required
                           value={abilityName}
                           onChange={(e) => setAbilityName(e.target.value)}
                           placeholder="ex: Rajada Mística"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                          className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs font-medium text-slate-300 block mb-1">Fórmula de Efeito</label>
+                          <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Efeito</label>
                           <input
                             type="text"
                             required
                             value={abilityDamageFormula}
                             onChange={(e) => setAbilityDamageFormula(e.target.value)}
                             placeholder="ex: 2d6 + 3"
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[#c9a04e]"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-slate-300 block mb-1">Tipo de Dano</label>
+                          <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tipo de Dano</label>
                           <input
                             type="text"
                             value={abilityDamageType}
                             onChange={(e) => setAbilityDamageType(e.target.value)}
                             placeholder="fogo, magico"
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs font-medium text-slate-300 block mb-1">Teste de Acerto (Opcional)</label>
+                          <label className="text-xs font-medium text-[#ece3d0] block mb-1">Teste de Acerto (Opcional)</label>
                           <input
                             type="text"
                             value={abilityAttackFormula}
                             onChange={(e) => setAbilityAttackFormula(e.target.value)}
                             placeholder="ex: 1d20 + intelecto"
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[#c9a04e]"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-slate-300 block mb-1">Custo de Recurso</label>
+                          <label className="text-xs font-medium text-[#ece3d0] block mb-1">Custo de Recurso</label>
                           <div className="flex space-x-1">
                             <input
                               type="number"
                               min="0"
                               value={resourceCostAmount}
                               onChange={(e) => setResourceCostAmount(parseInt(e.target.value, 10) || 0)}
-                              className="w-16 bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-sm text-white text-center"
+                              className="w-16 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-2 text-sm text-white text-center"
                             />
                             <select
                               value={resourceCostName}
                               onChange={(e) => setResourceCostName(e.target.value)}
-                              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-white"
+                              className="flex-1 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-2 text-xs text-white"
                             >
                               <option value="mana">Mana / PM</option>
                               <option value="sanidade">Sanidade / SAN</option>
@@ -1993,20 +2113,20 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {/* ABA 3: USAR CONSUMÍVEL */}
               {actionMode === 'consumable' && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-[#aaa292]">
                     <span>Custo de Ação: <strong className="text-emerald-400">Ação Bônus</strong></span>
-                    <span>Alvos Válidos: <strong className="text-slate-300">Aliados ou Si Mesmo</strong></span>
+                    <span>Alvos Válidos: <strong className="text-[#ece3d0]">Aliados ou Si Mesmo</strong></span>
                   </div>
 
                   {actorConsumables.length > 0 ? (
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                         Consumível no Inventário
                       </label>
                       <select
                         value={selectedConsumableId}
                         onChange={(e) => setSelectedConsumableId(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-medium"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                       >
                         {actorConsumables.map(c => {
                           const props = c.properties || {};
@@ -2027,12 +2147,12 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         const props = curItem.properties || {};
 
                         return (
-                          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2 mt-2 text-xs">
+                          <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] space-y-2 mt-2 text-xs">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-semibold">
                                 Custo: {props.action_cost === 'free' ? 'Ação Livre' : props.action_cost === 'main' ? 'Ação Principal' : 'Ação Bônus'}
                               </span>
-                              <span className="text-[10px] bg-slate-900 text-slate-300 border border-slate-700 px-2 py-0.5 rounded font-mono">
+                              <span className="text-[10px] bg-slate-900 text-[#ece3d0] border border-[#574e45] px-2 py-0.5 rounded font-mono">
                                 Quantidade: {curItem.quantity}
                               </span>
                               {props.charges !== undefined && (
@@ -2048,10 +2168,10 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                             </div>
 
                             {props.descricao && (
-                              <p className="text-[11px] text-slate-400">{props.descricao}</p>
+                              <p className="text-[11px] text-[#aaa292]">{props.descricao}</p>
                             )}
 
-                            <p className="text-[10px] text-amber-400/90 pt-1">
+                            <p className="text-[10px] text-[#c9a04e]/90 pt-1">
                               * 1 unidade ou carga deste item será consumida automaticamente do inventário ao executar.
                             </p>
                           </div>
@@ -2059,9 +2179,9 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       })()}
                     </div>
                   ) : (
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400">
+                    <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] text-xs text-[#aaa292]">
                       <p className="font-semibold text-white mb-0.5">Nenhum consumível no inventário deste combatente.</p>
-                      <p className="text-[11px] text-slate-500">Adicione poções, antídotos ou bálsamos ao inventário do personagem para utilizá-los no combate.</p>
+                      <p className="text-[11px] text-[#777064]">Adicione poções, antídotos ou bálsamos ao inventário do personagem para utilizá-los no combate.</p>
                     </div>
                   )}
                 </div>
@@ -2070,21 +2190,21 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {/* ABA 4: IMBUIR ARMA */}
               {actionMode === 'imbue' && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>Custo de Ação: <strong className="text-amber-400">Ação Bônus</strong></span>
-                    <span>Alvo Válido: <strong className="text-slate-300">Arma Equipada</strong></span>
+                  <div className="flex items-center justify-between text-xs text-[#aaa292]">
+                    <span>Custo de Ação: <strong className="text-[#c9a04e]">Ação Bônus</strong></span>
+                    <span>Alvo Válido: <strong className="text-[#ece3d0]">Arma Equipada</strong></span>
                   </div>
 
                   {actorImbueItems.length > 0 && actorWeapons.length > 0 ? (
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                        <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                           Consumível / Óleo / Veneno de Imbuição
                         </label>
                         <select
                           value={selectedImbueItemId}
                           onChange={(e) => setSelectedImbueItemId(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-medium"
+                          className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                         >
                           {actorImbueItems.map(item => (
                             <option key={item.id} value={item.id}>
@@ -2095,13 +2215,13 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       </div>
 
                       <div>
-                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                        <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                           Arma que Receberá o Efeito
                         </label>
                         <select
                           value={targetWeaponForImbueId}
                           onChange={(e) => setTargetWeaponForImbueId(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-medium"
+                          className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e] font-medium"
                         >
                           {actorWeapons.map(w => (
                             <option key={w.id} value={w.id}>
@@ -2111,20 +2231,20 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         </select>
                       </div>
 
-                      <div className="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-xs space-y-1 text-slate-300">
+                      <div className="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-xs space-y-1 text-[#ece3d0]">
                         <span className="font-semibold text-amber-300 flex items-center space-x-1">
                           <Flame className="w-3.5 h-3.5" />
                           <span>Efeito Persistente de Imbuição</span>
                         </span>
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-[#aaa292]">
                           O consumível será aplicado à arma escolhida, conferindo dano elemental ou condições especiais nos próximos ataques do combatente. 1 unidade do item será consumida.
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400">
+                    <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] text-xs text-[#aaa292]">
                       <p className="font-semibold text-white mb-0.5">Armas ou consumíveis de imbuição indisponíveis.</p>
-                      <p className="text-[11px] text-slate-500">O combatente precisa ter ao menos uma arma equipada e um óleo/veneno consumível no inventário.</p>
+                      <p className="text-[11px] text-[#777064]">O combatente precisa ter ao menos uma arma equipada e um óleo/veneno consumível no inventário.</p>
                     </div>
                   )}
                 </div>
@@ -2137,11 +2257,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     <Shield className="w-4 h-4 text-blue-400" />
                     <span>Postura de Defesa Ativa</span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-[#ece3d0] leading-relaxed">
                     O combatente assume uma postura defensiva consumindo sua ação principal. Concede bônus de Redução de Dano (RD) ou Defesa contra os próximos ataques recebidos até o início do seu próximo turno.
                   </p>
-                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-800 text-[11px] text-slate-400 flex items-center space-x-2">
-                    <span className="text-slate-500 font-semibold">Efeito da Campanha:</span>
+                  <div className="p-2.5 bg-[#131211] rounded-lg border border-[#2c2825] text-[11px] text-[#aaa292] flex items-center space-x-2">
+                    <span className="text-[#777064] font-semibold">Efeito da Campanha:</span>
                     <strong className="text-blue-300">Bônus de Defesa / RD aplicado automaticamente aos ataques recebidos</strong>
                   </div>
                 </div>
@@ -2154,11 +2274,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     <Wind className="w-4 h-4 text-purple-400" />
                     <span>Preparar Esquiva</span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-[#ece3d0] leading-relaxed">
                     O combatente gasta sua ação principal para se esquivar de ataques. Uma rolagem com seus atributos reais da ficha (ex: Agilidade/Destreza/Reflexo) eleva temporariamente sua Defesa contra ataques até o seu próximo turno.
                   </p>
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                       Fórmula de Esquiva (Opcional - deixe vazio para usar a regra padrão da campanha)
                     </label>
                     <input
@@ -2166,7 +2286,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       value={customDodgeFormula}
                       onChange={(e) => setCustomDodgeFormula(e.target.value)}
                       placeholder="ex: 1d20 + agilidade"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-purple-500"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-purple-500"
                     />
                   </div>
                 </div>
@@ -2177,13 +2297,13 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 <div className="space-y-3 p-3 bg-amber-950/20 border border-amber-800/40 rounded-xl">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">Tipo de Ajuste</label>
-                      <div className="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tipo de Ajuste</label>
+                      <div className="grid grid-cols-2 gap-1 bg-[#131211] p-1 rounded-xl border border-[#2c2825]">
                         <button
                           type="button"
                           onClick={() => setManualActionType('damage')}
                           className={`py-1.5 text-xs rounded-lg font-semibold flex items-center justify-center space-x-1 ${
-                            manualActionType === 'damage' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'
+                            manualActionType === 'damage' ? 'bg-[#8a2c38] text-[#ece3d0]' : 'text-[#aaa292] hover:text-white'
                           }`}
                         >
                           <Flame className="w-3.5 h-3.5" />
@@ -2193,7 +2313,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                           type="button"
                           onClick={() => setManualActionType('heal')}
                           className={`py-1.5 text-xs rounded-lg font-semibold flex items-center justify-center space-x-1 ${
-                            manualActionType === 'heal' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+                            manualActionType === 'heal' ? 'bg-emerald-600 text-white' : 'text-[#aaa292] hover:text-white'
                           }`}
                         >
                           <Droplets className="w-3.5 h-3.5" />
@@ -2203,11 +2323,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">Recurso</label>
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">Recurso</label>
                       <select
                         value={manualResourceName}
                         onChange={(e) => setManualResourceName(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                       >
                         <option value="vida">Vida (PV / HP)</option>
                         <option value="sanidade">Sanidade (SAN)</option>
@@ -2218,23 +2338,23 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">Valor Direto</label>
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">Valor Direto</label>
                       <input
                         type="number"
                         min="0"
                         value={manualAmount}
                         onChange={(e) => setManualAmount(parseInt(e.target.value, 10) || 0)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">Ou Fórmula (Opcional)</label>
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">Ou Fórmula (Opcional)</label>
                       <input
                         type="text"
                         value={manualFormula}
                         onChange={(e) => setManualFormula(e.target.value)}
                         placeholder="ex: 2d6 + 3"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
+                        className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[#c9a04e]"
                       />
                     </div>
                   </div>
@@ -2242,21 +2362,21 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               )}
 
               <div>
-                <label className="text-xs font-medium text-slate-400 block mb-1">Notas / Descrição da Ação (Opcional)</label>
+                <label className="text-xs font-medium text-[#aaa292] block mb-1">Notas / Descrição da Ação (Opcional)</label>
                 <input
                   type="text"
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="ex: Golpe mirando ponto fraco"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800/80">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowActionModal(false)}
-                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
@@ -2317,13 +2437,13 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
       {/* MODAL: Aplicar Condição / Efeito de Status */}
       {showConditionModal && selectedCombatantForCondition && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white flex items-center space-x-2">
-                <Flame className="w-4 h-4 text-amber-400" />
+                <Flame className="w-4 h-4 text-[#c9a04e]" />
                 <span>[Mestre] Intervenção Manual de Condição em {selectedCombatantForCondition.name}</span>
               </h3>
-              <button onClick={() => setShowConditionModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowConditionModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -2331,13 +2451,13 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
             <form onSubmit={handleApplyCondition} className="space-y-4">
               {/* Opção 1: Selecionar de Condições Configuradas no Ruleset */}
               <div>
-                <label className="text-xs font-medium text-slate-300 block mb-1">
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                   Condições do Sistema de Regras
                 </label>
                 <select
                   value={selectedConditionDefId}
                   onChange={(e) => setSelectedConditionDefId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-[#131211] border border-[#574e45] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                 >
                   <option value="">-- Personalizada (digitar abaixo) --</option>
                   {rulesetConditions.map(rc => (
@@ -2352,7 +2472,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
               {!selectedConditionDefId && (
                 <>
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                       Nome da Condição Personalizada
                     </label>
                     <input
@@ -2360,20 +2480,20 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                       value={customConditionName}
                       onChange={(e) => setCustomConditionName(e.target.value)}
                       placeholder="Ex: Atordoado, Congelado, Focado..."
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                      className="w-full bg-[#131211] border border-[#574e45] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                       required={!selectedConditionDefId}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
+                      <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                         Tipo de Duração
                       </label>
                       <select
                         value={customDurationType}
                         onChange={(e) => setCustomDurationType(e.target.value as any)}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                        className="w-full bg-[#131211] border border-[#574e45] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                       >
                         <option value="turns">Turnos</option>
                         <option value="rounds">Rodadas</option>
@@ -2384,7 +2504,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
 
                     {customDurationType !== 'permanent' && (
                       <div>
-                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                        <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                           Quantidade
                         </label>
                         <input
@@ -2392,7 +2512,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                           min="1"
                           value={customDurationValue}
                           onChange={(e) => setCustomDurationValue(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                          className="w-full bg-[#131211] border border-[#574e45] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                         />
                       </div>
                     )}
@@ -2400,11 +2520,11 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 </>
               )}
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800/80">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowConditionModal(false)}
-                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] hover:text-white rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
@@ -2425,42 +2545,42 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
       {/* GAVETA / MODAL: Histórico de Ações do Combate */}
       {showLogsDrawer && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-end p-4">
-          <div className="bg-slate-900/90 border border-slate-800/80 rounded-2xl w-full max-w-md h-[90vh] flex flex-col p-6 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md h-[90vh] flex flex-col p-6 shadow-2xl backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white flex items-center space-x-2">
-                <History className="w-5 h-5 text-indigo-400" />
+                <History className="w-5 h-5 text-[#c9a04e]" />
                 <span>Histórico de Combate</span>
               </h3>
-              <button onClick={() => setShowLogsDrawer(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowLogsDrawer(false)} className="text-[#aaa292] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto pr-1 space-y-2">
               {logs.length === 0 ? (
-                <div className="text-center py-16 text-slate-500 text-xs">
+                <div className="text-center py-16 text-[#777064] text-xs">
                   Nenhuma ação registrada neste combate ainda.
                 </div>
               ) : (
                 logs.map(log => (
-                  <div key={log.id} className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                    <div className="flex items-center justify-between text-slate-400 mb-1 text-[10px]">
-                      <span className="font-semibold text-indigo-400">{log.actor_name}</span>
+                  <div key={log.id} className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] text-xs">
+                    <div className="flex items-center justify-between text-[#aaa292] mb-1 text-[10px]">
+                      <span className="font-semibold text-[#c9a04e]">{log.actor_name}</span>
                       <span>{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                     </div>
                     <p className="text-white font-medium">
                       {log.details?.message || `${log.action_type}: ${log.amount ?? ''}`}
                     </p>
                     {log.details?.attack_roll && (
-                      <div className="text-[10px] text-slate-400 mt-1 font-mono bg-slate-900 p-1.5 rounded border border-slate-800">
+                      <div className="text-[10px] text-[#aaa292] mt-1 font-mono bg-slate-900 p-1.5 rounded border border-[#2c2825]">
                         Atq: {log.details.attack_roll.expression ? `${log.details.attack_roll.expression} = ` : ''}{log.details.attack_roll.total}{log.details.target_defense !== undefined ? ` vs Def ${log.details.target_defense}` : ''} ({log.details.hit ? 'ACERTO' : 'FALHA'})
                       </div>
                     )}
                     {Array.isArray(log.details?.componentsBreakdown) && log.details.componentsBreakdown.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {log.details.componentsBreakdown.map((cb: any, cidx: number) => (
-                          <span key={cidx} className="text-[9px] bg-slate-900 border border-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">
-                            <strong className="text-amber-400 capitalize">{cb.name || cb.type}:</strong> {cb.original} {cb.multiplier !== 1 ? `(x${cb.multiplier})` : ''} → {cb.final} PV
+                          <span key={cidx} className="text-[9px] bg-[#1a1816] border border-[#2c2825] text-[#ece3d0] px-1.5 py-0.5 rounded font-mono">
+                            <strong className="text-[#c9a04e] capitalize">{cb.name || cb.type}:</strong> {cb.original} {cb.multiplier !== 1 ? `(x${cb.multiplier})` : ''} → {cb.final} PV
                           </span>
                         ))}
                       </div>

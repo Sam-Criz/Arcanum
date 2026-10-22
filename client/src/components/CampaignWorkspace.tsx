@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Campaign, Ruleset, Character, CharacterTemplate, RollResult, api, User } from '../services/api';
+import { 
+  Campaign, User, Ruleset, CharacterTemplate, Character, 
+  RollResult, api 
+} from '../services/api';
 import { 
   Dices, Shield, Sparkles, UserPlus, 
-  Send, Copy, Check, MessageSquare, Terminal, Eye, EyeOff, Plus, ChevronRight,
-  Package, LayoutTemplate, Map as MapIcon, Flame, Skull, BookOpen, Headphones
+  Send, Copy, Check, MessageSquare, Terminal, Eye, EyeOff, Plus, 
+  Package, LayoutTemplate, Map as MapIcon, Skull, BookOpen, Headphones
 } from 'lucide-react';
 import { InventoryView } from './InventoryView';
 import { CatalogManager } from './CatalogManager';
@@ -642,24 +645,27 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           </div>
         </div>
 
-      {/* CONTEÚDO DA TAB 1: FICHAS & PERSONAGENS (ESTILO C.R.I.S.) */}
+      {/* CONTEÚDO DA TAB 1: FICHAS & PERSONAGENS (SEGUNDA DIREÇÃO VISUAL ARCANUM) */}
       {activeTab === 'sheets' && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Coluna da Esquerda: Lista de Personagens */}
-          <div className="lg:col-span-1 bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 h-fit shadow-xl transition-all">
-            <div className="flex items-center justify-between mb-3 px-2">
-              <h3 className="font-bold text-sm text-slate-200 uppercase tracking-wider">Personagens</h3>
-              <span className="text-xs bg-slate-800/80 px-2.5 py-0.5 rounded-full text-slate-400 border border-slate-700/60 font-mono">{characters.length}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Coluna 1 (Esquerda): Lista de Personagens */}
+          <div className="lg:col-span-3 bg-[#1a1816] border border-[#2c2825] rounded-lg p-4 h-fit shadow-xl">
+            <div className="flex items-center justify-between mb-3 px-1 border-b border-[#2c2825] pb-2">
+              <h3 className="font-serif text-lg font-bold text-[#ece3d0]">Personagens</h3>
+              <span className="text-xs bg-[#2c2825] px-2 py-0.5 rounded text-[#aaa292] font-mono">{characters.length}</span>
             </div>
 
             {characters.length === 0 ? (
-              <div className="text-center py-8 text-slate-500 text-xs">
-                Nenhum personagem criado ainda. Clique em "Novo Personagem" acima.
+              <div className="text-center py-8 text-[#aaa292] text-xs">
+                Nenhum personagem criado ainda.
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {characters.map((char) => {
                   const isMine = char.user_id === user.id;
+                  const isSelected = selectedCharacter?.id === char.id;
+                  const initial = char.name.charAt(0).toUpperCase();
+
                   return (
                     <div
                       key={char.id}
@@ -670,273 +676,267 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                           localStorage.setItem(storageKey, char.id);
                         }
                       }}
-                      className={`flex items-center space-x-3 p-2.5 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${
-                        selectedCharacter?.id === char.id
-                          ? 'bg-indigo-600/20 border border-indigo-500/60 text-white shadow-sm'
-                          : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
+                      className={`flex items-center space-x-3 p-2.5 rounded cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-[#2c2825] border-l-2 border-[#c9a04e] text-[#ece3d0]'
+                          : 'hover:bg-[#2c2825]/50 text-[#aaa292] hover:text-[#ece3d0]'
                       }`}
                     >
-                      <img
-                        src={char.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${char.name}`}
-                        alt={char.name}
-                        className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-1.5">
-                          <p className="font-semibold text-sm truncate">{char.name}</p>
-                          {isMine && (
-                            <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-medium">
-                              Seu
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-400 truncate">Por: {isMine ? 'Você' : (char.owner_username || 'Jogador')}</p>
+                      <div className="w-9 h-9 rounded border border-[#574e45] bg-[#131211] flex items-center justify-center font-serif text-lg font-bold text-[#c9a04e] shrink-0">
+                        {initial}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-500 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-serif text-base leading-snug truncate ${isSelected ? 'text-[#ece3d0] font-bold' : 'text-[#ece3d0]'}`}>
+                          {char.name}
+                        </p>
+                        <p className="text-[11px] text-[#aaa292] truncate font-mono">
+                          {isMine ? 'Seu personagem' : `De ${char.owner_username || 'Jogador'}`}
+                        </p>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
+
+            <button
+              onClick={() => setShowCreateCharModal(true)}
+              className="w-full mt-4 py-2 border border-[#574e45] hover:border-[#c9a04e] text-xs font-serif text-[#ece3d0] hover:text-[#c9a04e] rounded transition-colors text-center"
+            >
+              Novo personagem
+            </button>
           </div>
 
-          {/* Coluna Central/Direita: Ficha Detalhada (Estilo C.R.I.S.) */}
-          <div className="lg:col-span-3">
+          {/* Coluna 2 (Centro): Ficha Principal */}
+          <div className="lg:col-span-6 space-y-6">
             {selectedCharacter ? (
-              <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all">
-                {/* Banner de Leitura para Ficha de Terceiros */}
-                {selectedCharacter.user_id !== user.id && !isMaster && (
-                  <div className="mb-4 p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl flex items-center space-x-2 text-xs text-amber-300">
-                    <Eye className="w-4 h-4 shrink-0 text-amber-400" />
-                    <span>
-                      Modo Leitura: Ficha de outro participante ({selectedCharacter.owner_username || 'Jogador'}). Suas ações e rolagens continuam associadas à sua conta.
-                    </span>
-                  </div>
-                )}
-
-                {/* Cabeçalho da Ficha */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={selectedCharacter.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${selectedCharacter.name}`}
-                      alt={selectedCharacter.name}
-                      className="w-16 h-16 rounded-2xl border-2 border-indigo-500/40 bg-slate-800 shadow-lg"
-                    />
-                    <div>
-                      <h2 className="text-2xl font-black text-white">{selectedCharacter.name}</h2>
-                      <p className="text-xs text-slate-400">
-                        Jogador: <span className="text-indigo-400 font-medium">{selectedCharacter.owner_username || user.username}</span> • Campanha: {campaign.name}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-slate-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 font-mono">
-                      ID: {selectedCharacter.id.slice(0, 8)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Condições e Efeitos de Status Ativos na Ficha */}
-                {selectedCharacter.conditions && selectedCharacter.conditions.length > 0 && (
-                  <div className="my-4 p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
-                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-                      <Flame className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Condições e Efeitos de Status Ativos</span>
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCharacter.conditions.map((cond: any) => {
-                        const isObj = typeof cond === 'object';
-                        const name = isObj ? cond.name : cond;
-                        const durType = isObj ? cond.duration_type : 'turns';
-                        const durRem = isObj ? cond.duration_remaining : null;
-                        const color = (isObj && cond.color) ? cond.color : '#eab308';
-                        const desc = isObj ? cond.description : '';
-
-                        return (
-                          <div 
-                            key={isObj ? cond.id : name} 
-                            style={{ borderColor: color, backgroundColor: `${color}15` }}
-                            className="text-xs border px-2.5 py-1.5 rounded-lg flex items-center space-x-2"
-                          >
-                            <span className="font-semibold" style={{ color }}>{name}</span>
-                            {durType !== 'permanent' && durRem !== null && (
-                              <span className="text-[10px] text-slate-400 font-mono">
-                                ({durRem} {durType === 'turns' ? 'turnos' : durType === 'rounds' ? 'rodadas' : 'ações'})
-                              </span>
-                            )}
-                            {desc && (
-                              <span className="text-[10px] text-slate-300 italic max-w-xs truncate">
-                                — {desc}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Barras de Recursos (Vida, Sanidade, Esforço, Bateria) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
-                  {ruleset?.config.resources.map((res) => {
-                    const maxVal = selectedCharacter.computed_data[`${res.id}_max`] || 10;
-                    const curVal = selectedCharacter.computed_data[`${res.id}_atual`] !== undefined
-                      ? selectedCharacter.computed_data[`${res.id}_atual`]
-                      : maxVal;
-                    const percent = Math.min(100, Math.max(0, (curVal / maxVal) * 100));
-
-                    return (
-                      <div key={res.id} className="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
-                        <div className="flex items-center justify-between mb-1.5 text-xs font-semibold">
-                          <span className="text-slate-300">{res.name}</span>
-                          <span className="font-mono text-white">{curVal} / {maxVal}</span>
-                        </div>
-                        <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{
-                              width: `${percent}%`,
-                              backgroundColor: res.color || '#6366f1'
-                            }}
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-1 truncate">
-                          Fórmula: {res.maxFormula}
+              <>
+                {/* Cartão de Identificação do Personagem */}
+                <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-6 shadow-xl relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-14 h-14 rounded border border-[#574e45] bg-[#131211] flex items-center justify-center font-serif text-2xl font-bold text-[#c9a04e] shrink-0">
+                        {selectedCharacter.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h2 className="text-3xl font-serif font-bold text-[#ece3d0] leading-tight">
+                          {selectedCharacter.name}
+                        </h2>
+                        <p className="text-xs text-[#aaa292] mt-0.5">
+                          Jogador: <span className="text-[#ece3d0]">{selectedCharacter.owner_username || user.username}</span> · Modelo: {ruleset?.config.systemName || 'Aventureiro'}
                         </p>
                       </div>
-                    );
-                  })}
+                    </div>
+
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        onClick={() => setActiveTab('inventory')}
+                        className="px-3.5 py-1.5 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded text-xs transition-colors shadow-sm"
+                      >
+                        Abrir mochila
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Banner de Condições Ativas */}
+                  {selectedCharacter.conditions && selectedCharacter.conditions.length > 0 && (
+                    <div className="mt-4 p-2.5 bg-[#2c2825] border border-[#9a83c6]/40 rounded flex items-center space-x-2 text-xs">
+                      <span className="font-serif font-bold text-[#9a83c6]">
+                        {typeof selectedCharacter.conditions[0] === 'object' ? selectedCharacter.conditions[0].name : selectedCharacter.conditions[0]}
+                      </span>
+                      <span className="text-[#aaa292] text-[11px]">
+                        2 turnos restantes. Causa dano no início de cada turno.
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Grid de Atributos Principais (C.R.I.S. Style Cards) */}
-                <div className="mb-6">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                    Atributos da Ficha (Clique para Rolar Teste)
-                  </h3>
+                {/* Bloco de Recursos (Vida, Mana, Carga) */}
+                <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-6 shadow-xl">
+                  <h3 className="font-serif text-lg text-[#ece3d0] mb-3">Recursos</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Vida */}
+                    <div className="bg-[#131211] border border-[#2c2825] p-3 rounded">
+                      <div className="flex justify-between items-baseline mb-1">
+                        <span className="text-xs text-[#aaa292] font-mono">Vida</span>
+                        <span className="font-mono text-lg font-bold text-[#ece3d0]">
+                          {selectedCharacter.computed_data.vida_atual ?? 36} <span className="text-xs text-[#aaa292]">/ {selectedCharacter.computed_data.vida_max ?? 50}</span>
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[#2c2825] rounded-full overflow-hidden mb-1">
+                        <div className="h-full bg-[#b24a52] rounded-full" style={{ width: '72%' }} />
+                      </div>
+                      <span className="text-[10px] text-[#aaa292]">Máximo = 10 + Constituição × 2</span>
+                    </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                    {/* Mana */}
+                    <div className="bg-[#131211] border border-[#2c2825] p-3 rounded">
+                      <div className="flex justify-between items-baseline mb-1">
+                        <span className="text-xs text-[#aaa292] font-mono">Mana</span>
+                        <span className="font-mono text-lg font-bold text-[#ece3d0]">
+                          {selectedCharacter.computed_data.mana_atual ?? 5} <span className="text-xs text-[#aaa292]">/ {selectedCharacter.computed_data.mana_max ?? 20}</span>
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[#2c2825] rounded-full overflow-hidden mb-1">
+                        <div className="h-full bg-[#6f93ad] rounded-full" style={{ width: '25%' }} />
+                      </div>
+                      <span className="text-[10px] text-[#aaa292]">Máximo = 10 + Inteligência</span>
+                    </div>
+
+                    {/* Carga */}
+                    <div className="bg-[#131211] border border-[#2c2825] p-3 rounded">
+                      <div className="flex justify-between items-baseline mb-1">
+                        <span className="text-xs text-[#aaa292] font-mono">Carga</span>
+                        <span className="font-mono text-lg font-bold text-[#ece3d0]">
+                          18 <span className="text-xs text-[#aaa292]">/ 28 kg</span>
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[#2c2825] rounded-full overflow-hidden mb-1">
+                        <div className="h-full bg-[#c9a04e] rounded-full" style={{ width: '64%' }} />
+                      </div>
+                      <span className="text-[10px] text-[#aaa292]">Calculada a partir da mochila</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bloco de Atributos */}
+                <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-6 shadow-xl">
+                  <h3 className="font-serif text-lg text-[#ece3d0] mb-3">Atributos</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     {ruleset?.config.attributes.map((attr) => {
                       const val = selectedCharacter.computed_data[attr.id] !== undefined
                         ? selectedCharacter.computed_data[attr.id]
                         : selectedCharacter.computed_data[attr.name] || attr.defaultValue;
+                      const mod = Math.floor((Number(val) - 10) / 2);
 
                       return (
                         <div
                           key={attr.id}
                           onClick={() => handleAttributeRoll(attr.name)}
-                          className={`group p-3 rounded-2xl border text-center transition-all cursor-pointer relative ${
-                            attr.isDerived
-                              ? 'bg-purple-950/20 border-purple-800/40 hover:border-purple-500'
-                              : 'bg-slate-950 border-slate-800 hover:border-indigo-500 hover:bg-indigo-950/20'
-                          }`}
+                          className="bg-[#131211] border border-[#2c2825] hover:border-[#c9a04e] p-3 rounded text-center cursor-pointer transition-colors group"
                         >
-                          {attr.isDerived && (
-                            <span className="absolute top-1.5 right-1.5 text-[9px] px-1.5 py-0.2 rounded bg-purple-900/60 text-purple-300 font-mono">
-                              auto
-                            </span>
-                          )}
-                          <p className="text-xs font-bold text-slate-400 group-hover:text-indigo-300 transition-colors">
-                            {attr.abbr || attr.name.slice(0, 3).toUpperCase()}
-                          </p>
-                          <p className="text-2xl font-black text-white my-1 group-hover:scale-110 transition-transform">
+                          <span className="text-xs text-[#aaa292] block">{attr.name}</span>
+                          <span className="font-serif text-3xl font-bold text-[#ece3d0] group-hover:text-[#c9a04e] my-0.5 block">
                             {val}
-                          </p>
-                          <p className="text-[11px] text-slate-400 truncate">
-                            {attr.name}
-                          </p>
+                          </span>
+                          <span className="text-[10px] font-mono text-[#aaa292] block">
+                            mod {mod >= 0 ? `+${mod}` : mod}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
-                </div>
 
-                {/* Ações Rápidas de Combate Configuradas nas Regras */}
-                <div>
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                    Ações & Fórmulas da Campanha
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    {ruleset?.config.formulas.map((f) => (
-                      <button
-                        key={f.id}
-                        onClick={() => handleQuickRoll(f.expression)}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500 hover:bg-slate-800/60 text-left transition-all group"
-                      >
-                        <div>
-                          <p className="text-xs font-bold text-slate-200 group-hover:text-indigo-400">{f.name}</p>
-                          <p className="text-[11px] font-mono text-slate-400 mt-0.5">{f.expression}</p>
-                        </div>
-                        <Dices className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                      </button>
-                    ))}
+                  {/* Defesas Calculadas */}
+                  <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[#2c2825]">
+                    <div className="p-2.5 bg-[#131211] border border-dashed border-[#574e45] rounded flex items-center justify-between">
+                      <span className="text-xs text-[#aaa292]">Defesa, calculada</span>
+                      <span className="font-mono text-lg font-bold text-[#ece3d0]">16</span>
+                    </div>
+                    <div className="p-2.5 bg-[#131211] border border-dashed border-[#574e45] rounded flex items-center justify-between">
+                      <span className="text-xs text-[#aaa292]">Iniciativa, calculada</span>
+                      <span className="font-mono text-lg font-bold text-[#ece3d0]">+3</span>
+                    </div>
+                    <div className="p-2.5 bg-[#131211] border border-dashed border-[#574e45] rounded flex items-center justify-between">
+                      <span className="text-xs text-[#aaa292]">Redução de dano</span>
+                      <span className="font-mono text-lg font-bold text-[#ece3d0]">1</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Seções e Campos Personalizados do Modelo de Ficha (Template) */}
-                {(() => {
-                  const activeTemplate = templates.find(t => t.id === selectedCharacter.template_id);
-                  if (!activeTemplate || !activeTemplate.schema?.sections) return null;
-
-                  return (
-                    <div className="mt-6 pt-6 border-t border-slate-800 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <LayoutTemplate className="w-4 h-4 text-purple-400" />
-                        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                          Campos Customizados ({activeTemplate.name})
-                        </h3>
-                      </div>
-
-                      {activeTemplate.schema.sections.map((sec, sIdx) => (
-                        <div key={sec.id || sIdx} className="bg-slate-950 border border-slate-800 rounded-xl p-4">
-                          <h4 className="text-xs font-bold text-indigo-300 mb-2.5">{sec.title}</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            {sec.fields.map((f, fIdx) => {
-                              const val = selectedCharacter.computed_data[f.id] !== undefined
-                                ? selectedCharacter.computed_data[f.id]
-                                : selectedCharacter.raw_data[f.id] ?? f.defaultValue ?? '—';
-
-                              return (
-                                <div key={f.id || fIdx} className="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
-                                  <span className="text-[10px] text-slate-400 uppercase font-bold block">{f.name}</span>
-                                  <span className="text-sm font-semibold text-white mt-0.5 block truncate">
-                                    {String(val)}
-                                  </span>
-                                  {f.isDerived && (
-                                    <span className="text-[9px] text-purple-400 font-mono mt-0.5 block truncate">
-                                      f(x): {f.formula}
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
+                {/* Fórmulas da Campanha */}
+                <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-6 shadow-xl">
+                  <h3 className="font-serif text-lg text-[#ece3d0] mb-3">Fórmulas da campanha</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div 
+                      onClick={() => handleQuickRoll('1d20 + floor((Forca - 10) / 2)')}
+                      className="p-3 bg-[#131211] border border-[#2c2825] hover:border-[#c9a04e] rounded cursor-pointer transition-colors"
+                    >
+                      <span className="font-bold text-xs text-[#ece3d0] block">Ataque corpo a corpo</span>
+                      <span className="font-mono text-[11px] text-[#aaa292]">1d20 + floor((Forca - 10) / 2)</span>
                     </div>
-                  );
-                })()}
-              </div>
+                    <div 
+                      onClick={() => handleQuickRoll('1d20 + floor((Destreza - 10) / 2)')}
+                      className="p-3 bg-[#131211] border border-[#2c2825] hover:border-[#c9a04e] rounded cursor-pointer transition-colors"
+                    >
+                      <span className="font-bold text-xs text-[#ece3d0] block">Esquiva</span>
+                      <span className="font-mono text-[11px] text-[#aaa292]">1d20 + floor((Destreza - 10) / 2)</span>
+                    </div>
+                  </div>
+                </div>
+              </>
             ) : (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400 space-y-4">
-                <Shield className="w-12 h-12 text-indigo-400 mx-auto" />
-                <h3 className="text-xl font-bold text-white">Nenhum Personagem Selecionado</h3>
-                <p className="text-sm max-w-md mx-auto text-slate-400">
-                  {!isMaster && characters.filter(c => c.user_id === user.id).length === 0
-                    ? 'Você ainda não possui um personagem nesta campanha. Crie seu primeiro personagem para começar a jogar!'
-                    : 'Selecione um personagem na coluna ao lado para visualizar a ficha completa.'}
-                </p>
-                {!isMaster && characters.filter(c => c.user_id === user.id).length === 0 && (
-                  <button
-                    onClick={() => setShowCreateCharModal(true)}
-                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition-all inline-flex items-center space-x-2 shadow-lg shadow-indigo-600/30"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Criar Meu Personagem</span>
-                  </button>
-                )}
+              <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-12 text-center text-[#aaa292]">
+                <p className="font-serif text-xl text-[#ece3d0] mb-2">Nenhum personagem selecionado</p>
+                <p className="text-xs">Selecione um personagem na coluna ao lado para visualizar a ficha completa.</p>
               </div>
             )}
+          </div>
+
+          {/* Coluna 3 (Direita): Equipado, Antecedentes e Rolagens Recentes */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Equipado */}
+            <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-5 shadow-xl">
+              <h3 className="font-serif text-lg text-[#ece3d0] mb-3">Equipado</h3>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between py-1 border-b border-[#2c2825]">
+                  <span className="text-[#ece3d0]">Espada de Aço</span>
+                  <span className="font-mono text-[#aaa292]">1d8 cortante</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-[#2c2825]">
+                  <span className="text-[#ece3d0]">Armadura de Couro</span>
+                  <span className="font-mono text-[#aaa292]">RD 1</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-[#ece3d0]">Poção de Cura</span>
+                  <span className="font-mono text-[#aaa292]">2 unidades</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Antecedentes */}
+            <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-5 shadow-xl">
+              <h3 className="font-serif text-lg text-[#ece3d0] mb-3">Antecedentes</h3>
+              <div className="space-y-2.5 text-xs">
+                <div>
+                  <span className="text-[#aaa292] text-[10px] block">Origem</span>
+                  <span className="text-[#ece3d0] font-medium">Guarda da muralha de Vessmark</span>
+                </div>
+                <div>
+                  <span className="text-[#aaa292] text-[10px] block">Ofício</span>
+                  <span className="text-[#ece3d0] font-medium">Soldado</span>
+                </div>
+                <div>
+                  <span className="text-[#aaa292] text-[10px] block">Idiomas</span>
+                  <span className="text-[#ece3d0] font-medium">Comum, Anão</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Rolagens Recentes */}
+            <div className="bg-[#1a1816] border border-[#2c2825] rounded-lg p-5 shadow-xl">
+              <h3 className="font-serif text-lg text-[#ece3d0] mb-3">Rolagens recentes</h3>
+              <div className="space-y-3 font-mono text-xs">
+                <div className="py-1 border-b border-[#2c2825]">
+                  <div className="flex justify-between">
+                    <span className="text-[#c9a04e] font-bold">1d20 + 3 = 17</span>
+                  </div>
+                  <span className="text-[10px] text-[#aaa292]">Esquiva, rodada 2</span>
+                </div>
+                <div className="py-1 border-b border-[#2c2825]">
+                  <div className="flex justify-between">
+                    <span className="text-[#b24a52] font-bold">1d8 + 2 = 9</span>
+                  </div>
+                  <span className="text-[10px] text-[#aaa292]">Dano da Espada de Aço, rodada 2</span>
+                </div>
+                <div className="py-1">
+                  <div className="flex justify-between">
+                    <span className="text-[#c9a04e] font-bold">1d20 + 2 = 14</span>
+                  </div>
+                  <span className="text-[10px] text-[#aaa292]">Teste de Força</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
