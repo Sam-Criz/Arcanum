@@ -59,6 +59,11 @@ O **Arcanum VTT** é uma plataforma monolítica modular projetada para mestres e
   - **Defesas e Atributos Protegidos:** Estatísticas mecânicas (Defesa, RD, atributos) e fórmulas de iniciativa e dados censuradas nos payloads HTTP, eventos WebSocket e logs de combate, com eliminação de fallbacks fictícios na interface.
   - **Notas Privadas:** Anotações confidenciais do mestre são 100% expurgadas antes de qualquer transmissão.
 - **Revelação Progressiva Granular:** O mestre pode selecionar pontualmente quais campos deseja revelar aos jogadores conforme testes narrativos (Nome, Categoria, Imagem, Descrição, Atributos, PV Exato, Defesas, Tipos de Dano, Equipamentos, Habilidades, Fórmulas ou Notas).
+- **Ocultação & Revelação Dinâmica em Combate:**
+  - Instanciação de criaturas com a opção *"Oculto para os jogadores (Invisível na iniciativa e mapa)"*, garantindo que nem o token nem o combatente apareçam para os jogadores antes da hora narrativa.
+  - Sincronização bidirecional em tempo real entre iniciativa e mapa: alternar a visibilidade no combate sincroniza o token no mapa, e alternar o token no mapa sincroniza a iniciativa.
+  - Controles explícitos no painel do mestre para revelar ou ocultar participantes com preservação integral de PV, iniciativas, condições e ordem de turnos.
+  - Proteção de turno ativo: quando a vez é de uma criatura oculta, os jogadores recebem notificação descritiva de *"Turno Oculto"*, sem apontar indevidamente para outro participante visível.
 
 ### 📐 5. Motor de Regras Configurável (Sem `eval`)
 - Parser matemático léxico e semântico construído do zero, gerando árvore sintática (AST) segura:

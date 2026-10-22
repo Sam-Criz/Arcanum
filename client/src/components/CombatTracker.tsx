@@ -5,7 +5,7 @@ import {
 } from '../services/api';
 import { 
   Swords, Play, Square, SkipForward, SkipBack, Dices, 
-  Plus, Trash2, EyeOff, 
+  Plus, Trash2, Eye, EyeOff, 
   History, Flame, Droplets, X, User as UserIcon,
   Shield, Zap, Crosshair, Target, CheckCircle2, AlertCircle, Wind, Skull, Wand2, Sparkles,
   HeartPulse, BookOpen
@@ -76,6 +76,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
   const [addCombatantTab, setAddCombatantTab] = useState<'bestiary' | 'custom'>('bestiary');
   const [selectedCreatureId, setSelectedCreatureId] = useState('');
   const [spawnCount, setSpawnCount] = useState(1);
+  const [spawnIsHidden, setSpawnIsHidden] = useState(false);
   const [isSpawningCreature, setIsSpawningCreature] = useState(false);
 
   useEffect(() => {
@@ -85,6 +86,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           setBestiaryCreatures(creatures);
           if (creatures.length > 0 && !selectedCreatureId) {
             setSelectedCreatureId(creatures[0].id);
+            setSpawnIsHidden(!creatures[0].is_revealed);
           }
         })
         .catch(console.error);
@@ -442,7 +444,8 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
           encounter.id,
           {
             creature_id: selectedCreatureId,
-            count: Math.max(1, spawnCount)
+            count: Math.max(1, spawnCount),
+            is_hidden: spawnIsHidden
           }
         );
         onEncounterUpdated(res.encounter);
@@ -497,6 +500,20 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
       onEncounterUpdated(updatedEnc);
     } catch (err: any) {
       alert(`Erro ao remover combatente: ${err.message}`);
+    }
+  };
+
+  const handleToggleCombatantVisibility = async (combatant: Combatant) => {
+    if (!encounter) return;
+    try {
+      const res = await api.updateCombatant(campaign.id, encounter.id, combatant.id, {
+        is_hidden: !combatant.is_hidden
+      });
+      if (res.encounter) {
+        onEncounterUpdated(res.encounter);
+      }
+    } catch (err: any) {
+      alert(`Erro ao alterar visibilidade do combatente: ${err.message}`);
     }
   };
 
@@ -708,7 +725,7 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
   };
 
   const combatants = encounter?.combatants || [];
-  const activeCombatant = combatants[encounter?.turn_index ?? 0];
+  const activeCombatant = encounter && encounter.turn_index >= 0 ? combatants[encounter.turn_index] : null;
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl flex flex-col h-full max-h-[750px]">
@@ -829,6 +846,23 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
         </div>
       )}
 
+      {/* Banner de Turno Oculto (quando a vez pertence a uma criatura oculta para jogadores) */}
+      {encounter && encounter.status === 'active' && encounter.turn_index === -1 && !isMaster && (
+        <div className="mb-3 p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl shadow-lg flex items-center justify-between">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+            <div>
+              <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">Turno Oculto</span>
+              <p className="text-xs font-medium text-slate-300">Aguardando ação do Mestre...</p>
+            </div>
+          </div>
+          <span className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-1 rounded flex items-center space-x-1">
+            <EyeOff className="w-3 h-3 text-amber-400" />
+            <span>Invisível</span>
+          </span>
+        </div>
+      )}
+
       {/* Banner de Turno Ativo */}
       {encounter && encounter.status === 'active' && activeCombatant && (() => {
         const nextCombatant = combatants.length > 1
@@ -923,7 +957,9 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                 className={`p-2.5 rounded-xl border transition-all flex items-center justify-between ${
                   isActive
                     ? 'bg-indigo-950/40 border-indigo-500/80 shadow-md shadow-indigo-900/30 ring-1 ring-indigo-500/50'
-                    : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                    : c.is_hidden
+                      ? 'bg-slate-950/40 border-amber-800/40 opacity-80 hover:opacity-100 hover:border-amber-700/60'
+                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
                 }`}
               >
                 <div className="flex items-center space-x-2.5 min-w-0 flex-1">
@@ -944,8 +980,9 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         <span className="text-[9px] bg-rose-950/60 text-rose-300 border border-rose-800 px-1 rounded shrink-0">NPC</span>
                       )}
                       {c.is_hidden && (
-                        <span title="Oculto para jogadores">
-                          <EyeOff className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span className="text-[9px] bg-amber-950/70 text-amber-300 border border-amber-800/80 px-1.5 py-0.2 rounded flex items-center space-x-1 shrink-0 font-medium" title="Oculto para jogadores (Invisível na iniciativa e no mapa)">
+                          <EyeOff className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                          <span>Oculto</span>
                         </span>
                       )}
                       {/* Atributos Defensivos visíveis para o mestre */}
@@ -1063,6 +1100,21 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                     </button>
                   )}
 
+                  {/* Alternar Visibilidade do Combatente (Mestre: Revelar ou Ocultar) */}
+                  {isMaster && (
+                    <button
+                      onClick={() => handleToggleCombatantVisibility(c)}
+                      title={c.is_hidden ? "Revelar aos jogadores (Tornar visível na iniciativa e no mapa)" : "Ocultar dos jogadores (Tornar invisível na iniciativa e no mapa)"}
+                      className={`p-1.5 rounded-lg text-xs transition-all flex items-center space-x-1 border ${
+                        c.is_hidden
+                          ? 'bg-amber-950/60 hover:bg-amber-900/80 text-amber-300 border-amber-700/80'
+                          : 'bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border-slate-700'
+                      }`}
+                    >
+                      {c.is_hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  )}
+
                   {/* Remover Combatente (Mestre) */}
                   {isMaster && (
                     <button
@@ -1164,6 +1216,24 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({
                         Cada criatura será instanciada de forma independente com iniciativa imediata e token no mapa.
                       </p>
                     </div>
+
+                    <label className="flex items-center space-x-2.5 cursor-pointer bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+                      <input
+                        type="checkbox"
+                        checked={spawnIsHidden}
+                        onChange={(e) => setSpawnIsHidden(e.target.checked)}
+                        className="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-0 w-4 h-4 shrink-0"
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-semibold text-slate-200 flex items-center space-x-1.5">
+                          <EyeOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span>Oculto para os jogadores (Invisível na iniciativa e mapa)</span>
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          Apenas o mestre verá os tokens e a iniciativa até você decidir revelá-los narrativamente.
+                        </span>
+                      </div>
+                    </label>
 
                     {/* Preview da Criatura Selecionada */}
                     {(() => {

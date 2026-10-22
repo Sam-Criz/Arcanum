@@ -13,7 +13,7 @@ import { CharacterService } from './modules/characters/character.service';
 import { InventoryService } from './modules/inventory/inventory.service';
 import { RealtimeServer } from './modules/realtime/ws.server';
 import { VttService } from './modules/vtt/vtt.service';
-import { CombatService } from './modules/combat/combat.service';
+import { CombatService, Combatant } from './modules/combat/combat.service';
 import { BestiaryService } from './modules/bestiary/bestiary.service';
 
 export interface AppContext {
@@ -1248,9 +1248,30 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
         rt.broadcastFiltered(req.params.campaignId, (client) => {
           const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
           const clientToken = vttService.getTokenById(req.params.campaignId, token.id, clientIsMaster);
+          if (clientIsMaster) {
+            return clientToken ? { type: 'token:updated', token: clientToken } : null;
+          }
+          if (req.body.is_visible !== undefined) {
+            if (!req.body.is_visible) {
+              return { type: 'token:deleted', tokenId: token.id };
+            } else {
+              return clientToken ? { type: 'token:created', token: clientToken } : null;
+            }
+          }
           if (!clientToken) return null;
           return { type: 'token:updated', token: clientToken };
         });
+
+        if (isMaster && req.body.is_visible !== undefined) {
+          const masterEncounter = combatService.getActiveEncounter(req.params.campaignId, true);
+          const playerEncounter = combatService.getActiveEncounter(req.params.campaignId, false);
+          if (masterEncounter) {
+            rt.broadcastFiltered(req.params.campaignId, (client) => {
+              const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+              return { type: 'combat:encounter_updated', encounter: clientIsMaster ? masterEncounter : playerEncounter };
+            });
+          }
+        }
       }
       res.json({ token });
     } catch (err: any) {
@@ -1426,17 +1447,42 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
   app.patch('/api/campaigns/:campaignId/combat/:encounterId/combatants/:combatantId', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
     try {
       const combatant = combatService.updateCombatant(req.params.campaignId, req.params.combatantId, req.body);
-      const encounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, true);
+      const masterEncounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, true);
+      const playerEncounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, false);
       const rt = getRealtime();
       if (rt) {
+        if (req.body.is_hidden !== undefined && combatant.token_id) {
+          const masterToken = vttService.getTokenById(req.params.campaignId, combatant.token_id, true);
+          const playerToken = vttService.getTokenById(req.params.campaignId, combatant.token_id, false);
+          rt.broadcastFiltered(req.params.campaignId, (client) => {
+            const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+            if (clientIsMaster) {
+              return masterToken ? { type: 'token:updated', token: masterToken } : null;
+            }
+            if (req.body.is_hidden) {
+              return { type: 'token:deleted', tokenId: combatant.token_id };
+            } else {
+              return playerToken ? { type: 'token:created', token: playerToken } : null;
+            }
+          });
+        }
+
         rt.broadcastFiltered(req.params.campaignId, (client) => {
           const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const enc = clientIsMaster ? masterEncounter : playerEncounter;
           const clientCombatant = combatService.getCombatantById(req.params.campaignId, combatant.id, clientIsMaster);
-          if (!clientCombatant) return null;
-          return { type: 'combat:combatant_updated', combatant: clientCombatant, encounter };
+          if (!clientCombatant) {
+            return { type: 'combat:encounter_updated', encounter: enc };
+          }
+          return { type: 'combat:combatant_updated', combatant: clientCombatant, encounter: enc };
+        });
+
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          return { type: 'combat:encounter_updated', encounter: clientIsMaster ? masterEncounter : playerEncounter };
         });
       }
-      res.json({ combatant, encounter });
+      res.json({ combatant, encounter: masterEncounter });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
     }
@@ -1934,29 +1980,45 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
 
       const rt = getRealtime();
       if (rt) {
+        const playerEncounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, false);
         for (const c of combatants) {
           if (c.token_id && (scene_id || encounter?.scene_id)) {
-            const token = vttService.getTokenById(req.params.campaignId, c.token_id);
-            if (token) {
-              rt.broadcast(
-                req.params.campaignId,
-                { type: 'token:created', token },
-                undefined,
-                { masterOnly: !token.is_visible }
-              );
+            const masterToken = vttService.getTokenById(req.params.campaignId, c.token_id, true);
+            const playerToken = vttService.getTokenById(req.params.campaignId, c.token_id, false);
+            if (masterToken) {
+              rt.broadcastFiltered(req.params.campaignId, (client) => {
+                const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+                if (clientIsMaster) return { type: 'token:created', token: masterToken };
+                if (playerToken) return { type: 'token:created', token: playerToken };
+                return null;
+              });
             }
           }
-          rt.broadcast(
-            req.params.campaignId,
-            { type: 'combat:combatant_added', combatant: c, encounter },
-            undefined,
-            { masterOnly: c.is_hidden }
-          );
+          const playerCombatant = combatService.getCombatantById(req.params.campaignId, c.id, false);
+          rt.broadcastFiltered(req.params.campaignId, (client) => {
+            const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+            if (clientIsMaster) return { type: 'combat:combatant_added', combatant: c, encounter };
+            if (playerCombatant) return { type: 'combat:combatant_added', combatant: playerCombatant, encounter: playerEncounter };
+            return null;
+          });
         }
-        rt.broadcast(req.params.campaignId, {
-          type: 'combat:reinforcements_added',
-          combatants,
-          encounter
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          if (clientIsMaster) {
+            return {
+              type: 'combat:reinforcements_added',
+              combatants,
+              encounter
+            };
+          }
+          const visibleCombatants = combatants
+            .map(c => combatService.getCombatantById(req.params.campaignId, c.id, false))
+            .filter((c): c is Combatant => !!c);
+          return {
+            type: 'combat:reinforcements_added',
+            combatants: visibleCombatants,
+            encounter: playerEncounter
+          };
         });
       }
 

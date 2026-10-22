@@ -176,6 +176,9 @@ export class CombatService {
     return rows.map(r => {
       const enc = this.mapEncounter(r, isMaster);
       enc.combatants = this.getCombatants(campaignId, enc.id, isMaster);
+      if (!isMaster) {
+        this.adjustTurnIndexForPlayer(campaignId, enc, r.turn_index ?? 0);
+      }
       return enc;
     });
   }
@@ -199,6 +202,9 @@ export class CombatService {
     if (!row) return null;
     const encounter = this.mapEncounter(row, isMaster);
     encounter.combatants = this.getCombatants(campaignId, encounter.id, isMaster);
+    if (!isMaster) {
+      this.adjustTurnIndexForPlayer(campaignId, encounter, row.turn_index ?? 0);
+    }
     return encounter;
   }
 
@@ -212,7 +218,26 @@ export class CombatService {
     if (!isMaster && row.status === 'prep') return null;
     const encounter = this.mapEncounter(row, isMaster);
     encounter.combatants = this.getCombatants(campaignId, encounter.id, isMaster);
+    if (!isMaster) {
+      this.adjustTurnIndexForPlayer(campaignId, encounter, row.turn_index ?? 0);
+    }
     return encounter;
+  }
+
+  private adjustTurnIndexForPlayer(campaignId: string, encounter: CombatEncounter, dbTurnIndex: number): void {
+    const masterCombatants = this.getCombatants(campaignId, encounter.id, true);
+    if (!masterCombatants.length) {
+      encounter.turn_index = 0;
+      return;
+    }
+    const safeIdx = Math.max(0, Math.min(masterCombatants.length - 1, dbTurnIndex));
+    const activeMasterCombatant = masterCombatants[safeIdx];
+    if (activeMasterCombatant?.is_hidden) {
+      encounter.turn_index = -1;
+    } else if (activeMasterCombatant && encounter.combatants) {
+      const playerIdx = encounter.combatants.findIndex(c => c.id === activeMasterCombatant.id);
+      encounter.turn_index = playerIdx !== -1 ? playerIdx : 0;
+    }
   }
 
   createPreparedEncounter(campaignId: string, data: {
@@ -304,7 +329,7 @@ export class CombatService {
 
     const mergedStats = { ...rawData, ...computedData, ...properties };
     const baseName = options?.name_prefix?.trim() || creatureRow.name;
-    const isHidden = options?.is_hidden ?? false;
+    const isHidden = options?.is_hidden === true;
     const size = Number(creatureRow.size) || 1;
     const targetSceneId = options?.scene_id || encounter.scene_id || null;
 
@@ -1014,6 +1039,14 @@ export class CombatService {
         SET ${updates.join(', ')} 
         WHERE campaign_id = ? AND id = ?
       `).run(...params);
+    }
+
+    if (data.is_hidden !== undefined && existing.token_id) {
+      this.db.prepare(`
+        UPDATE tokens 
+        SET is_visible = ? 
+        WHERE campaign_id = ? AND id = ?
+      `).run(data.is_hidden ? 0 : 1, campaignId, existing.token_id);
     }
 
     return this.getCombatantById(campaignId, combatantId)!;

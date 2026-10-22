@@ -512,6 +512,14 @@ export class VttService {
       WHERE campaign_id = ? AND id = ?
     `).run(...params);
 
+    if (isMaster && data.is_visible !== undefined) {
+      this.db.prepare(`
+        UPDATE combatants 
+        SET is_hidden = ? 
+        WHERE campaign_id = ? AND token_id = ?
+      `).run(data.is_visible ? 0 : 1, campaignId, tokenId);
+    }
+
     return this.getTokenById(campaignId, tokenId)!;
   }
 

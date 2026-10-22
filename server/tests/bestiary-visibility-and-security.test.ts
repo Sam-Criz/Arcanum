@@ -588,6 +588,140 @@ test('Segurança do Bestiário, Visibilidade e Proteção de Segredos (18 Cenár
     assert.strictEqual(playerLuixToken.npc_data.damage_reduction, undefined, 'Cenário 18: RD do token removido');
     assert.strictEqual(playerLuixToken.npc_data.iniciativa_formula, undefined, 'Cenário 18: Formula do token removida');
 
+    // =============================================================
+    // CENÁRIO 19: Ocultação de Monstro no Combate e Revelação Dinâmica
+    // =============================================================
+    console.log('--- CENÁRIO 19 ---');
+    // 1. Mestre instancia uma criatura oculta para o combate e mapa
+    const hiddenCreatureModel = bestiaryService.createCreature(campaign.id, {
+      name: 'Espreitador das Sombras',
+      category: 'monstro',
+      is_revealed: false,
+      raw_data: { vida: 50, defesa: 14, rd: 2 }
+    });
+
+    const c19SpawnHiddenRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/spawn-creatures`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${master.token}` },
+      body: JSON.stringify({
+        creature_id: hiddenCreatureModel.id,
+        count: 1,
+        scene_id: scene.id,
+        is_hidden: true
+      })
+    });
+    assert.strictEqual(c19SpawnHiddenRes.status, 201, 'Spawn com is_hidden: true deve responder 201');
+    const { combatants: spawnedHiddenCombatants } = await c19SpawnHiddenRes.json();
+    assert.strictEqual(spawnedHiddenCombatants.length, 1);
+    const hiddenCombatant = spawnedHiddenCombatants[0];
+    const hiddenTokenId = hiddenCombatant.token_id;
+    assert.ok(hiddenTokenId, 'Token deve ter sido gerado na cena');
+    assert.strictEqual(hiddenCombatant.is_hidden, true, 'Combatente nasce com is_hidden = true');
+
+    // 2. Mestre visualiza na iniciativa e mapa
+    const masterCombatView1 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/active`, {
+      headers: { 'Authorization': `Bearer ${master.token}` }
+    })).json();
+    const masterHiddenCb = masterCombatView1.encounter.combatants.find((c: any) => c.id === hiddenCombatant.id);
+    assert.ok(masterHiddenCb, 'Mestre deve ver o monstro oculto na iniciativa');
+    assert.strictEqual(masterHiddenCb.is_hidden, true, 'Mestre vê indicador de que está oculto');
+
+    const masterTokens1 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/scenes/${scene.id}/tokens`, {
+      headers: { 'Authorization': `Bearer ${master.token}` }
+    })).json();
+    const masterHiddenTk = masterTokens1.tokens.find((t: any) => t.id === hiddenTokenId);
+    assert.ok(masterHiddenTk, 'Mestre deve ver o token na cena');
+    assert.strictEqual(masterHiddenTk.is_visible, false, 'Token nasce com is_visible = false no mapa');
+
+    // 3. Jogador NÃO visualiza o monstro oculto na iniciativa nem no mapa
+    const playerCombatView1 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/active`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    const playerHiddenCb1 = playerCombatView1.encounter.combatants.find((c: any) => c.id === hiddenCombatant.id);
+    assert.strictEqual(playerHiddenCb1, undefined, 'Jogador NUNCA deve ver o monstro oculto na iniciativa');
+
+    const playerTokens1 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/scenes/${scene.id}/tokens`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    const playerHiddenTk1 = playerTokens1.tokens.find((t: any) => t.id === hiddenTokenId);
+    assert.strictEqual(playerHiddenTk1, undefined, 'Jogador NUNCA deve ver o token do monstro oculto no mapa');
+
+    // 4. Teste de Turno: Se o turno ativo pertencer ao monstro oculto, jogador recebe turn_index = -1
+    // Colocamos o turn_index apontando para o monstro oculto
+    const masterEncounterCbList = combatService.getCombatants(campaign.id, encounter.id, true);
+    const hiddenIndexInMaster = masterEncounterCbList.findIndex(c => c.id === hiddenCombatant.id);
+    assert.ok(hiddenIndexInMaster >= 0, 'Monstro oculto deve estar na lista do mestre');
+
+    combatService.updateEncounter(campaign.id, encounter.id, { turn_index: hiddenIndexInMaster, status: 'active' });
+
+    const playerActiveCombatTurn = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/active`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    assert.strictEqual(
+      playerActiveCombatTurn.encounter.turn_index,
+      -1,
+      'Quando for o turno de entidade oculta, o jogador recebe turn_index = -1 (Turno Oculto)'
+    );
+
+    // 5. Mestre revela o combatente aos jogadores via PATCH /combatants/:combatantId
+    const c19RevealRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/combatants/${hiddenCombatant.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${master.token}` },
+      body: JSON.stringify({ is_hidden: false })
+    });
+    assert.strictEqual(c19RevealRes.status, 200, 'Mestre revela combatente com sucesso');
+    const { combatant: revealedCombatant } = await c19RevealRes.json();
+    assert.strictEqual(revealedCombatant.is_hidden, false, 'is_hidden deve ser false');
+
+    // 6. Sincronização automática com o token no mapa e visibilidade para o jogador
+    const playerCombatView2 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/active`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    const playerHiddenCb2 = playerCombatView2.encounter.combatants.find((c: any) => c.id === hiddenCombatant.id);
+    assert.ok(playerHiddenCb2, 'Após revelação, monstro DEVE aparecer na iniciativa do jogador');
+    assert.strictEqual(playerHiddenCb2.name, 'Espreitador das Sombras');
+
+    const playerTokens2 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/scenes/${scene.id}/tokens`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    const playerHiddenTk2 = playerTokens2.tokens.find((t: any) => t.id === hiddenTokenId);
+    assert.ok(playerHiddenTk2, 'Após revelação, token DEVE aparecer no mapa do jogador');
+    assert.strictEqual(playerHiddenTk2.is_visible, true, 'Token foi sincronizado para is_visible = true');
+
+    // 7. Mestre oculta novamente pelo token no mapa (PATCH /tokens/:tokenId)
+    const hideTokenRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/tokens/${hiddenTokenId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${master.token}` },
+      body: JSON.stringify({ is_visible: false })
+    });
+    assert.strictEqual(hideTokenRes.status, 200, 'Mestre oculta token');
+
+    // Token e combatente somem da visão do jogador
+    const playerCombatView3 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/active`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    const playerHiddenCb3 = playerCombatView3.encounter.combatants.find((c: any) => c.id === hiddenCombatant.id);
+    assert.strictEqual(playerHiddenCb3, undefined, 'Monstro voltou a ser ocultado na iniciativa do jogador');
+
+    const playerTokens3 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/scenes/${scene.id}/tokens`, {
+      headers: { 'Authorization': `Bearer ${player.token}` }
+    })).json();
+    const playerHiddenTk3 = playerTokens3.tokens.find((t: any) => t.id === hiddenTokenId);
+    assert.strictEqual(playerHiddenTk3, undefined, 'Token voltou a ser ocultado no mapa do jogador');
+
+    // Mestre continua vendo ambos com integridade total de PV e atributos
+    const masterCombatView3 = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/active`, {
+      headers: { 'Authorization': `Bearer ${master.token}` }
+    })).json();
+    const masterHiddenCb3 = masterCombatView3.encounter.combatants.find((c: any) => c.id === hiddenCombatant.id);
+    assert.ok(masterHiddenCb3, 'Mestre continua vendo monstro oculto');
+    assert.strictEqual(masterHiddenCb3.current_hp, 50, 'PV preservado intacto');
+    assert.strictEqual(masterHiddenCb3.max_hp, 50, 'Max PV preservado');
+    assert.strictEqual(masterHiddenCb3.defense, 14, 'Defesa preservada');
+    assert.strictEqual(masterHiddenCb3.damage_reduction, 2, 'RD preservada');
+
+    console.log('--- CENÁRIO 19 CONCLUÍDO COM SUCESSO ---');
+
   } finally {
     if (masterClient?.ws) masterClient.ws.close();
     if (playerClient?.ws) playerClient.ws.close();

@@ -1,7 +1,25 @@
 # Status do Projeto — Plataforma Modular de RPG de Mesa
 
 **Data da última atualização:** 2026-10-21  
-**Versão:** 0.14.0 (Blindagem de Atributos Secretos de NPCs, Sanitização Centralizada no Backend, Proteção em Profundidade no Frontend e Eliminação de Fallbacks Hardcoded)
+**Versão:** 0.15.0 (Controle Bidirecional de Visibilidade, Sincronização em Tempo Real e Revelação Narrativa de Monstros em Combate e VTT)
+
+---
+
+## Destaques da Versão 0.15.0 (Correção e Otimização do Bestiário no Combate)
+- **Ocultação Efetiva na Inicialização:** Instâncias criadas a partir do Bestiário com a opção *"Oculto para os jogadores (Invisível na iniciativa e mapa)"* agora são filtradas no WebSocket e persistidas no banco, garantindo que o token permaneça invisível na cena e o combatente nunca vaze na iniciativa dos jogadores nem na criação nem após F5.
+- **Sincronização Bidirecional Token <-> Combatente:**
+  - Alterações de visibilidade do combatente no combate (`PATCH /combatants/:combatantId` com `is_hidden`) sincronizam automaticamente a visibilidade do token correspondente no mapa (`tokens.is_visible`).
+  - Alterações de visibilidade do token no VTT (`PATCH /tokens/:tokenId` com `is_visible`) sincronizam automaticamente a visibilidade do combatente correspondente na iniciativa (`combatants.is_hidden`).
+- **Ação Explícita de Revelação / Ocultação no Mestre:**
+  - Botão de toggle de visibilidade (`Eye` / `EyeOff`) implementado em cada card de combatente do `CombatTracker.tsx`.
+  - Badge visual `[Oculto]` e estilo translúcido com destaque âmbar para o mestre identificar claramente combatentes escondidos.
+  - Checkbox persistente no modal de reforços do Bestiário (`spawnIsHidden`) para escolher a visibilidade antes de spawnar criaturas.
+- **Ajuste Matemático de Turno para Jogadores:**
+  - Se a vez narrativo-mecânica pertencer a uma entidade oculta, o backend sanitiza `encounter.turn_index` para `-1` aos jogadores e o frontend exibe o banner "Turno Oculto (Aguardando ação do Mestre...)", impedindo que outro jogador visível pareça ser o ativo da vez.
+- **Preservação Integral de Estado:**
+  - Vida atual e máxima, iniciativa, ordem de turnos, rodada, condições e equipamentos permanecem 100% preservados ao revelar ou ocultar qualquer criatura.
+- **Cobertura Completa de Testes Automatizados:**
+  - Cenário 19 adicionado em `server/tests/bestiary-visibility-and-security.test.ts` cobrindo o ciclo completo de ocultação, revelação, persistência e reversão. 29/29 suítes passando com louvor.
 
 ---
 

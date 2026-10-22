@@ -244,7 +244,16 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       }
     } else if (type === 'token:updated') {
       if (msg.token) {
-        setTokens(prev => prev.map(t => t.id === msg.token.id ? msg.token : t));
+        setTokens(prev => {
+          const exists = prev.some(t => t.id === msg.token.id);
+          if (!exists) {
+            if (!activeSceneRef.current || msg.token.scene_id === activeSceneRef.current.id) {
+              return [...prev, msg.token];
+            }
+            return prev;
+          }
+          return prev.map(t => t.id === msg.token.id ? msg.token : t);
+        });
         setSelectedToken(prev => prev?.id === msg.token.id ? msg.token : prev);
       }
     } else if (type === 'token:deleted') {
@@ -770,6 +779,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       const updated = await api.updateToken(campaign.id, token.id, { is_visible: !token.is_visible });
       setTokens(prev => prev.map(t => t.id === token.id ? updated : t));
       setSelectedToken(updated);
+      if (combatEncounter) {
+        try {
+          const enc = await api.getActiveCombat(campaign.id);
+          setCombatEncounter(enc);
+        } catch {}
+      }
     } catch (err: any) {
       alert(`Erro ao alterar visibilidade: ${err.message}`);
     }
