@@ -1715,16 +1715,29 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
             characterId: result.actorCombatant?.character_id
           });
         }
-        rt.broadcast(req.params.campaignId, {
-          type: 'combat:updated',
-          encounter: updatedEncounter
+        const masterEncounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, true);
+        const playerEncounter = combatService.getEncounterById(req.params.campaignId, req.params.encounterId, false);
+
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          const targetCb = result.targetCombatant ? combatService.getCombatantById(req.params.campaignId, result.targetCombatant.id, clientIsMaster) : null;
+          const actorCb = result.actorCombatant ? combatService.getCombatantById(req.params.campaignId, result.actorCombatant.id, clientIsMaster) : null;
+          const actionLog = combatService.mapLog(result.actionLog, clientIsMaster);
+          return {
+            type: 'combat:action_logged',
+            actionLog,
+            targetCombatant: targetCb,
+            actorCombatant: actorCb,
+            encounter: clientIsMaster ? masterEncounter : playerEncounter
+          };
         });
-        rt.broadcast(req.params.campaignId, {
-          type: 'combat:action_logged',
-          actionLog: result.actionLog,
-          targetCombatant: result.targetCombatant,
-          actorCombatant: result.actorCombatant,
-          encounter: updatedEncounter
+
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          const clientIsMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+          return {
+            type: 'combat:updated',
+            encounter: clientIsMaster ? masterEncounter : playerEncounter
+          };
         });
       }
 

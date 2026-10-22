@@ -7,6 +7,7 @@ import { createApp } from '../src/app';
 import { RealtimeServer } from '../src/modules/realtime/ws.server';
 import { AuthService } from '../src/modules/auth/auth.service';
 import { RbacService } from '../src/modules/permissions/rbac.service';
+import { formatTurnErrorMessage } from '../src/modules/combat/combat.service';
 
 test('Segurança do Bestiário, Visibilidade e Proteção de Segredos (18 Cenários Obrigatórios)', async () => {
   const db = getDatabase(':memory:');
@@ -721,6 +722,140 @@ test('Segurança do Bestiário, Visibilidade e Proteção de Segredos (18 Cenár
     assert.strictEqual(masterHiddenCb3.damage_reduction, 2, 'RD preservada');
 
     console.log('--- CENÁRIO 19 CONCLUÍDO COM SUCESSO ---');
+
+    // =============================================================
+    // CENÁRIO 20: Proteção de Nomes Secretos na Validação de Turno
+    // =============================================================
+    console.log('--- CENÁRIO 20 ---');
+
+    // 1. Criatura Oculta com turno ativo: Jogador tenta agir fora do turno
+    const secretArchmageModel = bestiaryService.createCreature(campaign.id, {
+      name: 'Arquimago Secreto Valerius',
+      category: 'chefe',
+      is_revealed: false,
+      raw_data: { vida: 90, defesa: 16 }
+    });
+
+    const spawnSecretArchmage = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/spawn-creatures`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${master.token}` },
+      body: JSON.stringify({
+        creature_id: secretArchmageModel.id,
+        count: 1,
+        scene_id: scene.id,
+        is_hidden: true
+      })
+    })).json();
+
+    const secretArchmageCb = spawnSecretArchmage.combatants[0];
+
+    // Mestre coloca o turno no Arquimago Oculto
+    const masterCombatantsList1 = combatService.getCombatants(campaign.id, encounter.id, true);
+    const archmageTurnIndex = masterCombatantsList1.findIndex(c => c.id === secretArchmageCb.id);
+    combatService.updateEncounter(campaign.id, encounter.id, { turn_index: archmageTurnIndex, status: 'active' });
+
+    // A. Jogador tenta atacar com arma fora do turno
+    const playerOutOfTurnAttackRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${player.token}` },
+      body: JSON.stringify({
+        action_mode: 'weapon',
+        actor_id: playerLuixCombatant.id,
+        target_id: playerLuixCombatant.id,
+        weapon_id: 'arma_teste_1'
+      })
+    });
+    assert.strictEqual(playerOutOfTurnAttackRes.status, 400, 'Ataque fora do turno deve retornar 400');
+    const attackErrJson = await playerOutOfTurnAttackRes.json();
+    assert.strictEqual(
+      attackErrJson.error,
+      'Não é seu turno de agir.',
+      'Cenário 20: Quando a entidade ativa for oculta, mensagem deve ser genérica ("Não é seu turno de agir.")'
+    );
+    assert.strictEqual(attackErrJson.error.includes('Valerius'), false, 'Nome secreto Valerius NUNCA deve vazar');
+    assert.strictEqual(attackErrJson.error.includes('Arquimago'), false, 'Título secreto NUNCA deve vazar');
+
+    // B. Jogador tenta usar habilidade fora do turno
+    const playerOutOfTurnAbilityRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${player.token}` },
+      body: JSON.stringify({
+        action_mode: 'ability',
+        actor_id: playerLuixCombatant.id,
+        target_id: playerLuixCombatant.id,
+        ability_id: 'hab_qualquer'
+      })
+    });
+    assert.strictEqual(playerOutOfTurnAbilityRes.status, 400);
+    const abilityErrJson = await playerOutOfTurnAbilityRes.json();
+    assert.strictEqual(abilityErrJson.error, 'Não é seu turno de agir.', 'Habilidade fora de turno oculta entidade');
+
+    // C. Jogador tenta usar ação de esquiva/defesa fora do turno
+    const playerOutOfTurnDodgeRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${player.token}` },
+      body: JSON.stringify({
+        action_mode: 'dodge',
+        actor_id: playerLuixCombatant.id
+      })
+    });
+    assert.strictEqual(playerOutOfTurnDodgeRes.status, 400);
+    const dodgeErrJson = await playerOutOfTurnDodgeRes.json();
+    assert.strictEqual(dodgeErrJson.error, 'Não é seu turno de agir.', 'Esquiva fora de turno oculta entidade');
+
+    // 2. Criatura VISÍVEL com NOME MASCARADO: Jogador tenta agir fora do turno
+    const maskedKnightModel = bestiaryService.createCreature(campaign.id, {
+      name: 'Lorde Malakar o Devorador',
+      display_name_players: 'Cavaleiro Negro Enigmático',
+      category: 'chefe',
+      is_revealed: true,
+      revealed_fields: { name: false },
+      raw_data: { vida: 120, defesa: 18 }
+    });
+
+    const spawnMaskedKnight = await (await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/spawn-creatures`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${master.token}` },
+      body: JSON.stringify({
+        creature_id: maskedKnightModel.id,
+        count: 1,
+        scene_id: scene.id,
+        is_hidden: false
+      })
+    })).json();
+
+    const maskedKnightCb = spawnMaskedKnight.combatants[0];
+
+    // Mestre coloca o turno no Cavaleiro Mascarado
+    const masterCombatantsList2 = combatService.getCombatants(campaign.id, encounter.id, true);
+    const maskedTurnIndex = masterCombatantsList2.findIndex(c => c.id === maskedKnightCb.id);
+    combatService.updateEncounter(campaign.id, encounter.id, { turn_index: maskedTurnIndex, status: 'active' });
+
+    // Jogador tenta atacar fora do turno
+    const playerOutOfTurnMaskedRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/combat/${encounter.id}/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${player.token}` },
+      body: JSON.stringify({
+        action_mode: 'weapon',
+        actor_id: playerLuixCombatant.id,
+        target_id: playerLuixCombatant.id,
+        weapon_id: 'arma_teste_1'
+      })
+    });
+    assert.strictEqual(playerOutOfTurnMaskedRes.status, 400);
+    const maskedErrJson = await playerOutOfTurnMaskedRes.json();
+    assert.ok(
+      maskedErrJson.error.includes('Cavaleiro Negro Enigmático'),
+      'Cenário 20: Mensagem de erro deve usar o nome público mascarado ("Cavaleiro Negro Enigmático")'
+    );
+    assert.strictEqual(maskedErrJson.error.includes('Lorde Malakar'), false, 'Nome secreto Lorde Malakar NUNCA deve vazar');
+    assert.strictEqual(maskedErrJson.error.includes('Devorador'), false, 'Sobrenome secreto Devorador NUNCA deve vazar');
+
+    // 3. MESTRE consultando a formatação de erro recebe nomes reais completos
+    const masterFormattedMsg = formatTurnErrorMessage(playerLuixCombatant, maskedKnightCb, true);
+    assert.ok(masterFormattedMsg.includes('Lorde Malakar o Devorador'), 'Mestre vê nome real completo');
+
+    console.log('--- CENÁRIO 20 CONCLUÍDO COM SUCESSO ---');
 
   } finally {
     if (masterClient?.ws) masterClient.ws.close();

@@ -156,6 +156,58 @@ export function areCombatantsEnemies(c1: Combatant, c2: Combatant): boolean {
   return getCombatantFaction(c1) !== getCombatantFaction(c2);
 }
 
+export function getCombatantPublicName(combatant: Combatant): string {
+  if (!combatant.is_npc) {
+    return combatant.name || 'Personagem';
+  }
+
+  const npcData = combatant.npc_data || {};
+  const revealed = npcData.revealed_fields || {};
+
+  // Se o nome verdadeiro foi explicitamente revelado pelo mestre aos jogadores
+  if (revealed.name === true) {
+    return combatant.name || 'Inimigo';
+  }
+
+  // Se houver nome alternativo/mascarado configurado para jogadores
+  if (npcData.display_name_players && String(npcData.display_name_players).trim()) {
+    return String(npcData.display_name_players).trim();
+  }
+
+  // Se o nome não foi revelado e não há display_name_players configurado
+  if (revealed.name === false) {
+    return 'Criatura Desconhecida';
+  }
+
+  return combatant.name || 'Inimigo';
+}
+
+export function formatTurnErrorMessage(
+  actorCombatant: Combatant,
+  activeCombatant: Combatant | null | undefined,
+  isMaster: boolean
+): string {
+  // 1. Mestre tem visibilidade irrestrita de todos os nomes reais e combatentes
+  if (isMaster) {
+    const actorName = actorCombatant.name || 'Combatente';
+    const activeName = activeCombatant?.name || 'outro participante';
+    return `Não é o turno de ${actorName}. O turno atual pertence a ${activeName}.`;
+  }
+
+  // 2. Se a entidade ativa for nula ou estiver OCULTA para os jogadores (is_hidden: 1 / true):
+  // NUNCA revelar nome verdadeiro, apelido secreto, espécie ou qualquer detalhe.
+  // Utilizar mensagem genérica padronizada:
+  if (!activeCombatant || activeCombatant.is_hidden) {
+    return 'Não é seu turno de agir.';
+  }
+
+  // 3. Se a entidade ativa estiver visível para os jogadores, usa o nome público permitido:
+  const actorName = getCombatantPublicName(actorCombatant);
+  const activeName = getCombatantPublicName(activeCombatant);
+
+  return `Não é o turno de ${actorName}. O turno atual pertence a ${activeName}.`;
+}
+
 export class CombatService {
   private actionCache = new Map<string, { result: any; timestamp: number }>();
 
@@ -1931,20 +1983,22 @@ export class CombatService {
       if (encounter.status === 'active' && !data.is_master) {
         const activeCombatant = combatants[encounter.turn_index];
         if (activeCombatant && activeCombatant.id !== actorCombatant.id) {
-          throw new Error(`Não é o turno de ${actorCombatant.name}. O turno atual pertence a ${activeCombatant.name}.`);
+          throw new Error(formatTurnErrorMessage(actorCombatant, activeCombatant, false));
         }
 
         if (imbueCostType === 'main') {
           const maxMain = combatConfig.actions_per_turn?.main ?? 1;
           const usedMain = actorCombatant.actions_used?.main ?? 0;
           if (usedMain >= maxMain) {
-            throw new Error(`Limite de ações atingido: ${actorCombatant.name} já utilizou sua ação principal (${usedMain}/${maxMain}) neste turno.`);
+            const actorDisplayName = data.is_master ? actorCombatant.name : getCombatantPublicName(actorCombatant);
+            throw new Error(`Limite de ações atingido: ${actorDisplayName} já utilizou sua ação principal (${usedMain}/${maxMain}) neste turno.`);
           }
         } else if (imbueCostType === 'bonus') {
           const maxBonus = combatConfig.actions_per_turn?.bonus ?? 1;
           const usedBonus = actorCombatant.actions_used?.bonus ?? 0;
           if (usedBonus >= maxBonus) {
-            throw new Error(`Limite de ações bônus atingido: ${actorCombatant.name} já utilizou sua ação bônus (${usedBonus}/${maxBonus}) neste turno.`);
+            const actorDisplayName = data.is_master ? actorCombatant.name : getCombatantPublicName(actorCombatant);
+            throw new Error(`Limite de ações bônus atingido: ${actorDisplayName} já utilizou sua ação bônus (${usedBonus}/${maxBonus}) neste turno.`);
           }
         }
       }
@@ -2057,7 +2111,8 @@ export class CombatService {
 
       if (!allowed) {
         const actionLabelName = data.ability_name || abilityDefPre?.name || itemPre?.item_name || 'Ação';
-        throw new Error(`Alvo inválido: A ação "${actionLabelName}" não permite o alvo selecionado (${targetCombatant.name}). Alvos válidos: ${earlyValidTargets.join(', ')}.`);
+        const targetDisplayName = data.is_master ? targetCombatant.name : getCombatantPublicName(targetCombatant);
+        throw new Error(`Alvo inválido: A ação "${actionLabelName}" não permite o alvo selecionado (${targetDisplayName}). Alvos válidos: ${earlyValidTargets.join(', ')}.`);
       }
     }
 
@@ -2066,7 +2121,7 @@ export class CombatService {
       if (!data.is_master) {
         const activeCombatant = combatants[encounter.turn_index];
         if (activeCombatant && activeCombatant.id !== actorCombatant.id) {
-          throw new Error(`Não é o turno de ${actorCombatant.name}. O turno atual pertence a ${activeCombatant.name}.`);
+          throw new Error(formatTurnErrorMessage(actorCombatant, activeCombatant, false));
         }
       }
 
@@ -2075,13 +2130,15 @@ export class CombatService {
           const maxMain = combatConfig.actions_per_turn?.main ?? 1;
           const usedMain = actorCombatant.actions_used?.main ?? 0;
           if (usedMain >= maxMain) {
-            throw new Error(`Limite de ações atingido: ${actorCombatant.name} já utilizou sua ação principal (${usedMain}/${maxMain}) neste turno.`);
+            const actorDisplayName = data.is_master ? actorCombatant.name : getCombatantPublicName(actorCombatant);
+            throw new Error(`Limite de ações atingido: ${actorDisplayName} já utilizou sua ação principal (${usedMain}/${maxMain}) neste turno.`);
           }
         } else if (actionCostType === 'bonus') {
           const maxBonus = combatConfig.actions_per_turn?.bonus ?? 1;
           const usedBonus = actorCombatant.actions_used?.bonus ?? 0;
           if (usedBonus >= maxBonus) {
-            throw new Error(`Limite de ações bônus atingido: ${actorCombatant.name} já utilizou sua ação bônus (${usedBonus}/${maxBonus}) neste turno.`);
+            const actorDisplayName = data.is_master ? actorCombatant.name : getCombatantPublicName(actorCombatant);
+            throw new Error(`Limite de ações bônus atingido: ${actorDisplayName} já utilizou sua ação bônus (${usedBonus}/${maxBonus}) neste turno.`);
           }
         }
       }
@@ -3706,7 +3763,7 @@ export class CombatService {
     };
   }
 
-  private mapLog(row: any, isMaster: boolean = true): CombatLog {
+  mapLog(row: any, isMaster: boolean = true): CombatLog {
     let details: any = {};
     try {
       details = JSON.parse(row.details_json || '{}');

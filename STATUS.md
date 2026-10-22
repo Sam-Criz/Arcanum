@@ -1,7 +1,22 @@
 # Status do Projeto — Plataforma Modular de RPG de Mesa
 
 **Data da última atualização:** 2026-10-21  
-**Versão:** 0.15.0 (Controle Bidirecional de Visibilidade, Sincronização em Tempo Real e Revelação Narrativa de Monstros em Combate e VTT)
+**Versão:** 0.16.0 (Blindagem de Nomes Secretos na Validação de Turno e Ações de Combate)
+
+---
+
+## Destaques da Versão 0.16.0 (Proteção de Segredos na Validação de Turno e Combate)
+- **Blindagem Contra Vazamento de Nomes na Validação de Turno:**
+  - Corrigido o vazamento em que o backend informava o nome real de criaturas ocultas ou com identidades protegidas quando um jogador tentava agir fora de seu turno.
+  - Implementada a função centralizada `formatTurnErrorMessage(actorCombatant, activeCombatant, isMaster)`:
+    - Se a criatura da vez estiver oculta para jogadores (`is_hidden = true / 1`), a mensagem retornada é estritamente genérica: `"Não é seu turno de agir."`, sem expor nome real, espécie, apelido ou anotações confidenciais.
+    - Se a criatura estiver visível mas com nome mascarado (`revealed_fields.name = false`), utiliza o nome público autorizado (`display_name_players`, ex: `"Cavaleiro Negro Enigmático"` ou `"luix"`), nunca o nome verdadeiro interno.
+    - Se o usuário for o Mestre (`isMaster = true`), mantém a exibição dos nomes completos e informações irrestritas.
+  - Aplicada a mesma proteção às validações de alvos (`earlyValidTargets`), consumo de ações e imbuições (`imbueWeaponWithConsumable`).
+- **Sanitização de Payloads WebSocket e Broadcast em Ações:**
+  - A rota `POST /combat/:encounterId/action` agora utiliza `rt.broadcastFiltered` para que eventos `combat:action_logged` e `combat:updated` entreguem combatentes sanitizados e logs com nomes mascarados para jogadores, e dados integrais apenas para mestres.
+- **Cobertura de Testes Automatizados:**
+  - Adicionado o **Cenário 20** em `server/tests/bestiary-visibility-and-security.test.ts` validando tentativas de ataque, uso de habilidade, esquiva e ações fora de turno contra criaturas ocultas e mascaradas. 29/29 suítes de testes passando com sucesso.
 
 ---
 

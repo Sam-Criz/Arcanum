@@ -64,6 +64,10 @@ O **Arcanum VTT** é uma plataforma monolítica modular projetada para mestres e
   - Sincronização bidirecional em tempo real entre iniciativa e mapa: alternar a visibilidade no combate sincroniza o token no mapa, e alternar o token no mapa sincroniza a iniciativa.
   - Controles explícitos no painel do mestre para revelar ou ocultar participantes com preservação integral de PV, iniciativas, condições e ordem de turnos.
   - Proteção de turno ativo: quando a vez é de uma criatura oculta, os jogadores recebem notificação descritiva de *"Turno Oculto"*, sem apontar indevidamente para outro participante visível.
+- **Blindagem Contra Vazamento de Nomes em Validações:**
+  - Validações de turno rejeitadas no backend (`applyCombatAction`, `imbueWeaponWithConsumable`) nunca expõem nomes verdadeiros de criaturas ocultas ou protegidas.
+  - Para criaturas ocultas, entrega mensagem genérica: *"Não é seu turno de agir."*
+  - Para criaturas com identidade mascarada, utiliza o nome público autorizado (`display_name_players`), enquanto o mestre continua com acesso integral aos nomes reais.
 
 ### 📐 5. Motor de Regras Configurável (Sem `eval`)
 - Parser matemático léxico e semântico construído do zero, gerando árvore sintática (AST) segura:
