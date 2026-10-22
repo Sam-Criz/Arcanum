@@ -1,9 +1,34 @@
 # Status do Projeto — Plataforma Modular de RPG de Mesa
 
-**Data da última atualização:** 2026-10-21  
-**Versão:** 0.17.0 (Reformulação Visual V2 — Design System Oficial & Interface Funcional)
+**Data da última atualização:** 2026-10-22  
+**Versão:** 0.18.0 (Segurança do Catálogo, Economia e Compras Atômicas + V2 Visual)
 
 ---
+
+## Destaques da Versão 0.18.0 (Segurança do Catálogo & Economia Atômica)
+- **Eliminação de Obtenção Gratuita e Infinita de Itens:**
+  - Jogadores não conseguem mais adicionar itens ao inventário de forma arbitrária ou contornar pagamentos.
+  - O endpoint `POST /characters/:characterId/inventory/purchase` implementa a compra atômica com validação estrita no servidor.
+  - Concessões administrativas gratuitas foram isoladas na rota `POST /characters/:characterId/inventory/grant`, acessível exclusivamente por Mestres.
+- **Novas Propriedades dos Itens do Catálogo (Migração 10):**
+  - `is_hidden` (booleano, padrão 0): Itens ocultos são completamente filtrados pelo backend nas listagens para jogadores. Consultas diretas por ID ou tentativas de compra por jogadores retornam `404 Not Found` para não revelar sua existência.
+  - `is_purchasable` (booleano, padrão 1): Itens com a compra desativada são recusados para jogadores com a mensagem obrigatória: *"Este item requer concessão direta do Mestre."*.
+- **Transações Atômicas e Prevenção de Injeção de Valores:**
+  - A operação de compra utiliza transações SQLite atômicas (`BEGIN TRANSACTION / COMMIT / ROLLBACK`).
+  - O preço unitário é consultado estritamente no banco de dados (`items.cost`), rejeitando qualquer manipulação de preço ou saldo enviada pelo cliente.
+  - O saldo do personagem é debitado atomicamente na mesma transação. Saldo insuficiente cancela a operação sem alterações.
+  - Quantidades inválidas, negativas ou fracionadas são rejeitadas.
+  - Cada compra é registrada na tabela `audit_logs` com os detalhes financeiros da transação.
+- **Interface do Catálogo e Inventário:**
+  - [CatalogManager.tsx]: Controles com um clique para o Mestre (alternar visibilidade com `Eye/EyeOff` e comprabilidade com `Coins/Lock`), badges discretos no card, e modal de compra rápida para o jogador com cálculo em tempo real do total e validação do saldo.
+  - [InventoryView.tsx]: Exibição destacada do Saldo Atual de Moedas nas métricas superiores da mochila e concessão administrativa para Mestres.
+- **Validação Automatizada Completa:**
+  - Criada suíte de testes [catalog-security-and-economy.test.ts] cobrindo todos os 15 cenários de segurança, economia, isolamento e auditoria.
+  - **30/30 testes do backend passando com sucesso.**
+  - **Compilação do frontend (`tsc && vite build`) passando com código 0 e sem avisos.**
+
+---
+
 
 ## Destaques da Versão 0.17.0 (Reformulação Visual V2)
 - **Design System Arcanum Oficial Aplicado Rigorosamente:**

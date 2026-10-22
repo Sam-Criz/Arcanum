@@ -14,6 +14,8 @@ export interface Item {
   cost: number;
   acquisition_mode: ItemAcquisitionMode;
   stock_quantity: number | null;
+  is_hidden: boolean;
+  is_purchasable: boolean;
   properties: Record<string, any>;
   created_at: string;
 }
@@ -26,6 +28,8 @@ export interface CreateItemDTO {
   cost?: number;
   acquisition_mode?: ItemAcquisitionMode;
   stock_quantity?: number | null;
+  is_hidden?: boolean;
+  is_purchasable?: boolean;
   properties?: Record<string, any>;
 }
 
@@ -37,6 +41,8 @@ export interface UpdateItemDTO {
   cost?: number;
   acquisition_mode?: ItemAcquisitionMode;
   stock_quantity?: number | null;
+  is_hidden?: boolean;
+  is_purchasable?: boolean;
   properties?: Record<string, any>;
 }
 
@@ -133,4 +139,25 @@ export interface CreateItemRequestDTO {
 export interface ReviewItemRequestDTO {
   status: 'approved' | 'rejected';
   notes?: string;
+}
+
+export interface PurchaseItemDTO {
+  characterId: string;
+  itemId: string;
+  quantity: number;
+}
+
+export interface PurchaseResult {
+  success: boolean;
+  item: CharacterInventoryItem;
+  inventory: InventorySummary;
+  character: any;
+  transaction: {
+    quantity: number;
+    unitCost: number;
+    totalCost: number;
+    currencyKey: string;
+    previousBalance: number;
+    newBalance: number;
+  };
 }

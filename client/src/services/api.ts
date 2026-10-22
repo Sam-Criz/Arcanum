@@ -241,6 +241,8 @@ export interface CatalogItem {
   cost: number;
   acquisition_mode: 'free' | 'limited' | 'approval';
   stock_quantity: number | null;
+  is_hidden?: boolean;
+  is_purchasable?: boolean;
   properties: Record<string, any>;
   created_at: string;
 }
@@ -725,6 +727,29 @@ class ApiService {
   async deleteCatalogItem(campaignId: string, itemId: string): Promise<void> {
     await this.request(`/campaigns/${campaignId}/items/${itemId}`, {
       method: 'DELETE'
+    });
+  }
+
+  // Compra e Concessão Segura de Itens
+  async purchaseItem(
+    campaignId: string,
+    characterId: string,
+    data: { itemId: string; quantity: number }
+  ): Promise<{ success: boolean; item: InventoryItem; inventory: InventorySummary; character: Character; transaction: any }> {
+    return this.request(`/campaigns/${campaignId}/characters/${characterId}/inventory/purchase`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async grantItemToCharacter(
+    campaignId: string,
+    characterId: string,
+    data: { itemId?: string; itemName?: string; category?: string; quantity?: number; weight?: number; cost?: number; isEquipped?: boolean; properties?: Record<string, any> }
+  ): Promise<{ item: InventoryItem; inventory?: InventorySummary; character?: Character }> {
+    return this.request(`/campaigns/${campaignId}/characters/${characterId}/inventory/grant`, {
+      method: 'POST',
+      body: JSON.stringify(data)
     });
   }
 

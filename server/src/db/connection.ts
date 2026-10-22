@@ -141,6 +141,8 @@ export function initializeSchema(db: DatabaseSync): void {
       cost REAL NOT NULL DEFAULT 0,
       acquisition_mode TEXT NOT NULL DEFAULT 'free' CHECK (acquisition_mode IN ('free', 'limited', 'approval')),
       stock_quantity INTEGER DEFAULT NULL,
+      is_hidden INTEGER NOT NULL DEFAULT 0,
+      is_purchasable INTEGER NOT NULL DEFAULT 1,
       properties_json TEXT NOT NULL DEFAULT '{}',
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
@@ -700,6 +702,18 @@ export function runMigrations(db: DatabaseSync): void {
   const hasPrivateNotes = bestiaryCols.some((c: any) => c.name === 'private_notes');
   if (!hasPrivateNotes) {
     db.exec(`ALTER TABLE bestiary_creatures ADD COLUMN private_notes TEXT DEFAULT '';`);
+  }
+  // -----------------------------------------------------------------------
+  // Migração 10: Segurança do Catálogo - Itens Ocultos e Controle de Comprabilidade
+  // -----------------------------------------------------------------------
+  const itemColsMigration10 = db.prepare(`PRAGMA table_info(items)`).all() as any[];
+  const hasIsHidden = itemColsMigration10.some((c: any) => c.name === 'is_hidden');
+  if (!hasIsHidden) {
+    db.exec(`ALTER TABLE items ADD COLUMN is_hidden INTEGER NOT NULL DEFAULT 0;`);
+  }
+  const hasIsPurchasable = itemColsMigration10.some((c: any) => c.name === 'is_purchasable');
+  if (!hasIsPurchasable) {
+    db.exec(`ALTER TABLE items ADD COLUMN is_purchasable INTEGER NOT NULL DEFAULT 1;`);
   }
 }
 

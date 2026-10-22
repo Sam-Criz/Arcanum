@@ -16,7 +16,9 @@ import {
   InventoryTransferRecord,
   ItemRequest,
   CreateItemRequestDTO,
-  ReviewItemRequestDTO
+  ReviewItemRequestDTO,
+  PurchaseItemDTO,
+  PurchaseResult
 } from './inventory.types';
 import { RulesService } from '../rules-engine/rules.service';
 import { CharacterService } from '../characters/character.service';
@@ -131,12 +133,14 @@ export class InventoryService {
       ? Math.max(0, Math.floor(Number(data.stock_quantity ?? 0)))
       : null;
     const properties = data.properties || {};
+    const is_hidden = Boolean(data.is_hidden) ? 1 : 0;
+    const is_purchasable = data.is_purchasable !== undefined ? (Boolean(data.is_purchasable) ? 1 : 0) : 1;
 
     this.validatePropertiesFormulas(campaignId, properties);
 
     this.db.prepare(`
-      INSERT INTO items (id, campaign_id, name, description, category, weight, cost, acquisition_mode, stock_quantity, properties_json, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO items (id, campaign_id, name, description, category, weight, cost, acquisition_mode, stock_quantity, is_hidden, is_purchasable, properties_json, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       campaignId,
@@ -147,6 +151,8 @@ export class InventoryService {
       cost,
       acquisition_mode,
       stock_quantity,
+      is_hidden,
+      is_purchasable,
       JSON.stringify(properties),
       now
     );
@@ -161,14 +167,21 @@ export class InventoryService {
       cost,
       acquisition_mode,
       stock_quantity,
+      is_hidden: Boolean(is_hidden),
+      is_purchasable: Boolean(is_purchasable),
       properties,
       created_at: now
     };
   }
 
-  getCatalogItems(campaignId: string, category?: string, search?: string): Item[] {
+  getCatalogItems(campaignId: string, category?: string, search?: string, isMaster = true): Item[] {
     let sql = `SELECT * FROM items WHERE campaign_id = ?`;
     const params: any[] = [campaignId];
+
+    // Jogadores não recebem itens ocultos nas listagens
+    if (!isMaster) {
+      sql += ` AND (is_hidden = 0 OR is_hidden IS NULL)`;
+    }
 
     if (category && category !== 'todos') {
       sql += ` AND LOWER(category) = LOWER(?)`;
@@ -195,17 +208,24 @@ export class InventoryService {
       cost: r.cost,
       acquisition_mode: r.acquisition_mode || 'free',
       stock_quantity: r.stock_quantity !== null && r.stock_quantity !== undefined ? Number(r.stock_quantity) : null,
+      is_hidden: Boolean(r.is_hidden),
+      is_purchasable: r.is_purchasable !== undefined && r.is_purchasable !== null ? Boolean(r.is_purchasable) : true,
       properties: JSON.parse(r.properties_json || '{}'),
       created_at: r.created_at
     }));
   }
 
-  getCatalogItemById(campaignId: string, itemId: string): Item | null {
+  getCatalogItemById(campaignId: string, itemId: string, isMaster = true): Item | null {
     const row = this.db.prepare(`
       SELECT * FROM items WHERE campaign_id = ? AND id = ?
     `).get(campaignId, itemId) as any;
 
     if (!row) return null;
+
+    // Se o item estiver oculto e o requisitante não for mestre, não revelar sua existência (404)
+    if (!isMaster && row.is_hidden === 1) {
+      return null;
+    }
 
     return {
       id: row.id,
@@ -217,6 +237,8 @@ export class InventoryService {
       cost: row.cost,
       acquisition_mode: row.acquisition_mode || 'free',
       stock_quantity: row.stock_quantity !== null && row.stock_quantity !== undefined ? Number(row.stock_quantity) : null,
+      is_hidden: Boolean(row.is_hidden),
+      is_purchasable: row.is_purchasable !== undefined && row.is_purchasable !== null ? Boolean(row.is_purchasable) : true,
       properties: JSON.parse(row.properties_json || '{}'),
       created_at: row.created_at
     };
@@ -240,6 +262,8 @@ export class InventoryService {
       ? (data.stock_quantity !== undefined ? Math.max(0, Math.floor(Number(data.stock_quantity ?? 0))) : existing.stock_quantity)
       : null;
     const properties = data.properties !== undefined ? data.properties : existing.properties;
+    const is_hidden = data.is_hidden !== undefined ? (Boolean(data.is_hidden) ? 1 : 0) : (existing.is_hidden ? 1 : 0);
+    const is_purchasable = data.is_purchasable !== undefined ? (Boolean(data.is_purchasable) ? 1 : 0) : (existing.is_purchasable ? 1 : 0);
 
     if (data.properties) {
       this.validatePropertiesFormulas(campaignId, properties);
@@ -247,9 +271,9 @@ export class InventoryService {
 
     this.db.prepare(`
       UPDATE items
-      SET name = ?, description = ?, category = ?, weight = ?, cost = ?, acquisition_mode = ?, stock_quantity = ?, properties_json = ?
+      SET name = ?, description = ?, category = ?, weight = ?, cost = ?, acquisition_mode = ?, stock_quantity = ?, is_hidden = ?, is_purchasable = ?, properties_json = ?
       WHERE id = ? AND campaign_id = ?
-    `).run(name, description, category, weight, cost, acquisition_mode, stock_quantity, JSON.stringify(properties), itemId, campaignId);
+    `).run(name, description, category, weight, cost, acquisition_mode, stock_quantity, is_hidden, is_purchasable, JSON.stringify(properties), itemId, campaignId);
 
     return {
       ...existing,
@@ -260,6 +284,8 @@ export class InventoryService {
       cost,
       acquisition_mode,
       stock_quantity,
+      is_hidden: Boolean(is_hidden),
+      is_purchasable: Boolean(is_purchasable),
       properties
     };
   }
@@ -326,7 +352,7 @@ export class InventoryService {
     campaignId: string,
     characterId: string,
     data: AddInventoryItemDTO,
-    isMaster: boolean = false
+    isMaster: boolean = true
   ): CharacterInventoryItem {
     // Valida pertinência do personagem à campanha
     const char = this.db.prepare(`
@@ -357,17 +383,27 @@ export class InventoryService {
       }
     } else {
       // Obtenção a partir do catálogo oficial da campanha
-      const catalogItem = this.getCatalogItemById(campaignId, itemId);
+      const catalogItem = this.getCatalogItemById(campaignId, itemId, isMaster);
       if (!catalogItem) {
         throw new Error('Item do catálogo não encontrado para esta campanha.');
       }
 
-      // Regra 1: Itens que exigem aprovação não podem ser pegos diretamente por jogadores
+      // Regra: Itens ocultos não podem ser obtidos por jogadores
+      if (catalogItem.is_hidden && !isMaster) {
+        throw new Error('Item do catálogo não encontrado para esta campanha.');
+      }
+
+      // Regra: Itens não compráveis exigem concessão direta do Mestre
+      if (!catalogItem.is_purchasable && !isMaster) {
+        throw new Error('Este item requer concessão direta do Mestre.');
+      }
+
+      // Regra: Itens que exigem aprovação não podem ser pegos diretamente por jogadores
       if (catalogItem.acquisition_mode === 'approval' && !isMaster) {
         throw new Error('Este item exige aprovação do mestre para ser obtido. Envie uma solicitação.');
       }
 
-      // Regra 2: Itens com estoque limitado decrementam atomicamente
+      // Regra: Itens com estoque limitado decrementam atomicamente
       if (catalogItem.acquisition_mode === 'limited') {
         const updateRes = this.db.prepare(`
           UPDATE items
@@ -376,7 +412,7 @@ export class InventoryService {
         `).run(quantity, catalogItem.id, campaignId, quantity);
 
         if (updateRes.changes === 0) {
-          const fresh = this.getCatalogItemById(campaignId, catalogItem.id);
+          const fresh = this.getCatalogItemById(campaignId, catalogItem.id, true);
           throw new Error(`Estoque insuficiente no catálogo da campanha (Disponível: ${fresh?.stock_quantity ?? 0}, Solicitado: ${quantity}).`);
         }
       }
@@ -1316,4 +1352,271 @@ export class InventoryService {
       updated_at: now
     };
   }
+
+  // ==========================================
+  // ECONOMIA E SALDO DE MOEDAS DO PERSONAGEM
+  // ==========================================
+
+  getCharacterBalance(character: any): { balance: number; currencyKey: string } {
+    const raw = character.raw_data || {};
+    const candidates = ['dinheiro', 'moedas', 'ouro', 'gold', 'tibares', 'creditos', 'saldo', 'money', 'tibares_ouro', 'plata'];
+    for (const key of candidates) {
+      if (key in raw && !isNaN(Number(raw[key]))) {
+        return { balance: Number(raw[key]), currencyKey: key };
+      }
+    }
+    const comp = character.computed_data || {};
+    for (const key of candidates) {
+      if (key in comp && !isNaN(Number(comp[key]))) {
+        return { balance: Number(comp[key]), currencyKey: key };
+      }
+    }
+    return { balance: 0, currencyKey: 'dinheiro' };
+  }
+
+  /**
+   * Concessão administrativa de item pelo Mestre (sem cobrança ao jogador)
+   */
+  grantItem(
+    campaignId: string,
+    characterId: string,
+    data: AddInventoryItemDTO
+  ): CharacterInventoryItem {
+    return this.addItemToCharacter(campaignId, characterId, data, true);
+  }
+
+  /**
+   * Compra Segura e Atômica de Item do Catálogo pelo Jogador
+   */
+  purchaseItem(
+    campaignId: string,
+    userId: string,
+    data: PurchaseItemDTO,
+    isMasterUser = false
+  ): PurchaseResult {
+    const charRow = this.db.prepare(`
+      SELECT * FROM characters WHERE id = ? AND campaign_id = ?
+    `).get(data.characterId, campaignId) as any;
+
+    if (!charRow) {
+      throw new Error('Personagem não encontrado nesta campanha.');
+    }
+
+    if (charRow.user_id !== userId && !isMasterUser) {
+      throw new Error('Você só pode comprar itens para seus próprios personagens.');
+    }
+
+    // 1. Validar quantidade inteira positiva
+    const rawQty = Number(data.quantity);
+    const quantity = Math.floor(rawQty);
+    if (isNaN(quantity) || quantity <= 0) {
+      throw new Error('A quantidade deve ser um número inteiro positivo maior que zero.');
+    }
+    if (rawQty !== quantity) {
+      throw new Error('Quantidade fracionada não é permitida.');
+    }
+
+    // 2. Transação Atômica no SQLite
+    this.db.exec('BEGIN TRANSACTION;');
+
+    try {
+      // 3. Buscar item confiável do catálogo
+      const itemRow = this.db.prepare(`
+        SELECT * FROM items WHERE id = ? AND campaign_id = ?
+      `).get(data.itemId, campaignId) as any;
+
+      if (!itemRow) {
+        throw new Error('Item do catálogo não encontrado para esta campanha.');
+      }
+
+      // Se for jogador e item estiver oculto, retornar 404 (não revelar existência)
+      if (!isMasterUser && itemRow.is_hidden === 1) {
+        throw new Error('Item do catálogo não encontrado para esta campanha.');
+      }
+
+      // 4. Validar se o item é comprável
+      const isPurchasable = itemRow.is_purchasable !== undefined && itemRow.is_purchasable !== null 
+        ? Boolean(itemRow.is_purchasable) 
+        : true;
+
+      if (!isPurchasable) {
+        throw new Error('Este item requer concessão direta do Mestre.');
+      }
+
+      // Regra de itens com aprovação obrigatória
+      if (itemRow.acquisition_mode === 'approval' && !isMasterUser) {
+        throw new Error('Este item exige aprovação do mestre para ser obtido. Envie uma solicitação.');
+      }
+
+      // 5. Preço estritamente do servidor
+      const unitCost = Math.max(0, Number(itemRow.cost || 0));
+      if (isNaN(unitCost) || unitCost < 0) {
+        throw new Error('Preço do item inválido no catálogo.');
+      }
+      const totalCost = unitCost * quantity;
+
+      // 6. Validar saldo suficiente
+      const rawData = JSON.parse(charRow.raw_data_json || '{}');
+      const { balance: previousBalance, currencyKey } = this.getCharacterBalance({ raw_data: rawData });
+
+      if (previousBalance < totalCost) {
+        throw new Error(`Saldo insuficiente para realizar a compra. Custo total: ${totalCost}, Saldo disponível: ${previousBalance}.`);
+      }
+
+      // 7. Controle de estoque atômico se limitado
+      if (itemRow.acquisition_mode === 'limited') {
+        const updateRes = this.db.prepare(`
+          UPDATE items
+          SET stock_quantity = stock_quantity - ?
+          WHERE id = ? AND campaign_id = ? AND stock_quantity >= ?
+        `).run(quantity, itemRow.id, campaignId, quantity);
+
+        if (updateRes.changes === 0) {
+          throw new Error('Estoque insuficiente no catálogo da campanha.');
+        }
+      }
+
+      // 8. Debitar saldo
+      const newBalance = previousBalance - totalCost;
+      rawData[currencyKey] = newBalance;
+
+      this.db.prepare(`
+        UPDATE characters
+        SET raw_data_json = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).run(JSON.stringify(rawData), data.characterId);
+
+      // 9. Adicionar item ao inventário
+      const itemProperties = JSON.parse(itemRow.properties_json || '{}');
+      if (itemRow.category === 'arma' && itemProperties.capacidade_municao !== undefined && itemProperties.municao_atual === undefined) {
+        itemProperties.municao_atual = itemProperties.capacidade_municao;
+      }
+      if (itemRow.category === 'tecnologico' && itemProperties.bateria_max !== undefined && itemProperties.bateria_atual === undefined) {
+        itemProperties.bateria_atual = itemProperties.bateria_max;
+      }
+      if (itemRow.category === 'ocultista' && itemProperties.pontos_alma_max !== undefined && itemProperties.pontos_alma_atual === undefined) {
+        itemProperties.pontos_alma_atual = itemProperties.pontos_alma_max;
+      }
+      if (itemRow.category === 'consumivel' && itemProperties.cargas_max !== undefined && itemProperties.cargas_atual === undefined) {
+        itemProperties.cargas_atual = itemProperties.cargas_max;
+      }
+
+      const existingInv = this.db.prepare(`
+        SELECT id, quantity, properties_json FROM character_inventory 
+        WHERE character_id = ? AND item_id = ?
+      `).get(data.characterId, itemRow.id) as any;
+
+      let resultInventoryItem: CharacterInventoryItem;
+
+      if (existingInv) {
+        const newQty = existingInv.quantity + quantity;
+        const mergedProps = { ...itemProperties, ...JSON.parse(existingInv.properties_json || '{}') };
+
+        this.db.prepare(`
+          UPDATE character_inventory SET quantity = ?, properties_json = ? WHERE id = ?
+        `).run(newQty, JSON.stringify(mergedProps), existingInv.id);
+
+        resultInventoryItem = {
+          id: existingInv.id,
+          character_id: data.characterId,
+          item_id: itemRow.id,
+          item_name: itemRow.name,
+          category: itemRow.category,
+          quantity: newQty,
+          weight: itemRow.weight,
+          cost: itemRow.cost,
+          is_equipped: 0,
+          properties: mergedProps
+        };
+      } else {
+        const invId = crypto.randomUUID();
+        this.db.prepare(`
+          INSERT INTO character_inventory (id, character_id, item_id, item_name, category, quantity, weight, cost, is_equipped, properties_json)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+        `).run(
+          invId,
+          data.characterId,
+          itemRow.id,
+          itemRow.name,
+          itemRow.category,
+          quantity,
+          itemRow.weight,
+          itemRow.cost,
+          JSON.stringify(itemProperties)
+        );
+
+        resultInventoryItem = {
+          id: invId,
+          character_id: data.characterId,
+          item_id: itemRow.id,
+          item_name: itemRow.name,
+          category: itemRow.category,
+          quantity,
+          weight: itemRow.weight,
+          cost: itemRow.cost,
+          is_equipped: 0,
+          properties: itemProperties
+        };
+      }
+
+      // 10. Registro de auditoria
+      const auditId = crypto.randomUUID();
+      this.db.prepare(`
+        INSERT INTO audit_logs (id, campaign_id, user_id, action, entity_type, entity_id, details_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        auditId,
+        campaignId,
+        userId,
+        'inventory:purchase',
+        'item',
+        itemRow.id,
+        JSON.stringify({
+          characterId: data.characterId,
+          characterName: charRow.name,
+          itemId: itemRow.id,
+          itemName: itemRow.name,
+          quantity,
+          unitCost,
+          totalCost,
+          currencyKey,
+          previousBalance,
+          newBalance
+        })
+      );
+
+      // Finaliza transação
+      this.db.exec('COMMIT;');
+
+      // Recomputa personagem
+      this.characterService?.recomputeCharacter(campaignId, data.characterId);
+
+      const summary = this.getCharacterInventory(campaignId, data.characterId);
+      const updatedChar = this.characterService?.getCharacterById(campaignId, data.characterId);
+
+      return {
+        success: true,
+        item: resultInventoryItem,
+        inventory: summary,
+        character: updatedChar || { ...charRow, raw_data: rawData },
+        transaction: {
+          quantity,
+          unitCost,
+          totalCost,
+          currencyKey,
+          previousBalance,
+          newBalance
+        }
+      };
+
+    } catch (err) {
+      try {
+        this.db.exec('ROLLBACK;');
+      } catch (rbErr) {
+        // ignora se já tiver revertido
+      }
+      throw err;
+    }
+  }
+
 }

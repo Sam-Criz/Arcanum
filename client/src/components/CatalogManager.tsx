@@ -3,7 +3,7 @@ import { Campaign, CatalogItem, Character, ItemRequest, api, User, DamageTypeDef
 import { 
   Package, Plus, Trash2, Edit3, Search, Gift, Sparkles, Filter, 
   Check, X, Clock, Swords, Shield, Zap, Flame, HeartPulse, Send,
-  Wand2
+  Wand2, Eye, EyeOff, Lock, Coins, ShoppingBag, AlertCircle
 } from 'lucide-react';
 
 interface CatalogManagerProps {
@@ -48,6 +48,14 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
   const [cost, setCost] = useState('0');
   const [acquisitionMode, setAcquisitionMode] = useState<'free' | 'limited' | 'approval'>('free');
   const [stockQuantity, setStockQuantity] = useState('10');
+  const [isHidden, setIsHidden] = useState(false);
+  const [isPurchasable, setIsPurchasable] = useState(true);
+
+  // Modal de Compra do Jogador
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [itemToPurchase, setItemToPurchase] = useState<CatalogItem | null>(null);
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   // Propriedades Específicas por Categoria
   const [weaponDano, setWeaponDano] = useState('1d8');
@@ -128,6 +136,25 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
 
   const isMaster = campaign.role === 'owner' || campaign.role === 'master' || campaign.role === 'assistant';
 
+  const getCharacterBalance = (char: Character | null | undefined): { balance: number; currencyKey: string } => {
+    if (!char) return { balance: 0, currencyKey: 'dinheiro' };
+    const raw = char.raw_data || {};
+    const candidates = ['dinheiro', 'moedas', 'ouro', 'gold', 'tibares', 'creditos', 'saldo', 'money', 'tibares_ouro', 'plata'];
+    for (const key of candidates) {
+      if (key in raw && !isNaN(Number(raw[key]))) {
+        return { balance: Number(raw[key]), currencyKey: key };
+      }
+    }
+    const comp = char.computed_data || {};
+    for (const key of candidates) {
+      if (key in comp && !isNaN(Number(comp[key]))) {
+        return { balance: Number(comp[key]), currencyKey: key };
+      }
+    }
+    return { balance: 0, currencyKey: 'dinheiro' };
+  };
+
+
   useEffect(() => {
     loadCatalog();
     loadItemRequests();
@@ -175,6 +202,8 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
     setCost('0');
     setAcquisitionMode('free');
     setStockQuantity('10');
+    setIsHidden(false);
+    setIsPurchasable(true);
     setWeaponDano('1d8');
     setWeaponTipoDano(damageTypes.length > 0 ? damageTypes[0].id : 'fisico');
     setWeaponAtaque('');
@@ -328,6 +357,8 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
         cost: parseFloat(cost) || 0,
         acquisition_mode: acquisitionMode,
         stock_quantity: acquisitionMode === 'limited' ? (parseInt(stockQuantity, 10) || 0) : null,
+        is_hidden: isHidden,
+        is_purchasable: isPurchasable,
         properties
       };
 
@@ -344,6 +375,66 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar item');
+    }
+  };
+
+  const handleToggleHidden = async (item: CatalogItem) => {
+    try {
+      const nextVal = !item.is_hidden;
+      await api.updateCatalogItem(campaign.id, item.id, { is_hidden: nextVal });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_hidden: nextVal } : i));
+      setSuccess(nextVal ? `"${item.name}" agora está oculto para os jogadores.` : `"${item.name}" agora está visível no catálogo.`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao alterar visibilidade');
+    }
+  };
+
+  const handleTogglePurchasable = async (item: CatalogItem) => {
+    try {
+      const nextVal = item.is_purchasable !== undefined ? !item.is_purchasable : false;
+      await api.updateCatalogItem(campaign.id, item.id, { is_purchasable: nextVal });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_purchasable: nextVal } : i));
+      setSuccess(nextVal ? `"${item.name}" agora pode ser comprado pelos jogadores.` : `"${item.name}" agora requer concessão direta do Mestre.`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao alterar comprabilidade');
+    }
+  };
+
+  const openPurchaseModal = (item: CatalogItem) => {
+    const userChars = isMaster ? characters : characters.filter(c => c.user_id === user?.id);
+    if (userChars.length === 0) {
+      alert('Você precisa ter um personagem nesta campanha para comprar itens.');
+      return;
+    }
+    setItemToPurchase(item);
+    setPurchaseQuantity(1);
+    setShowPurchaseModal(true);
+  };
+
+  const handleExecutePurchase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!itemToPurchase || !selectedCharacter) return;
+    setIsPurchasing(true);
+    setError(null);
+
+    try {
+      const res = await api.purchaseItem(campaign.id, selectedCharacter.id, {
+        itemId: itemToPurchase.id,
+        quantity: purchaseQuantity
+      });
+
+      setShowPurchaseModal(false);
+      setItemToPurchase(null);
+      setSuccess(`Compra realizada com sucesso! ${res.transaction.quantity}x ${itemToPurchase.name} adicionado(s) à sua mochila por ${res.transaction.totalCost}.`);
+      loadCatalog();
+      onRefreshCampaign?.();
+      setTimeout(() => setSuccess(null), 4000);
+    } catch (err: any) {
+      setError(err.message || 'Falha ao realizar compra.');
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
@@ -381,7 +472,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
     if (!itemToGrant || !grantCharId) return;
 
     try {
-      await api.addItemToCharacter(campaign.id, grantCharId, {
+      await api.grantItemToCharacter(campaign.id, grantCharId, {
         itemId: itemToGrant.id,
         quantity: grantQuantity
       });
@@ -610,11 +701,25 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
                       {it.name}
                     </h3>
                     <div className="flex flex-col items-end gap-1">
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800/40">
-                        {it.category}
-                      </span>
+                      <div className="flex items-center space-x-1">
+                        {it.is_hidden && (
+                          <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-[#8a2c38]/40 text-[#ece3d0] border border-[#8a2c38] flex items-center space-x-1" title="Oculto para os jogadores">
+                            <EyeOff className="w-2.5 h-2.5 text-[#b24a52]" />
+                            <span>Oculto</span>
+                          </span>
+                        )}
+                        {it.is_purchasable === false && (
+                          <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-[#2c2825] text-[#aaa292] border border-[#574e45] flex items-center space-x-1" title="Requer concessão direta do Mestre">
+                            <Lock className="w-2.5 h-2.5 text-[#c9a04e]" />
+                            <span>Concessão</span>
+                          </span>
+                        )}
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#2c2825] text-[#ece3d0] border border-[#574e45]">
+                          {it.category}
+                        </span>
+                      </div>
                       {it.acquisition_mode === 'approval' && (
-                        <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-amber-950/60 text-amber-300 border border-amber-800/60">
+                        <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-amber-950/60 text-[#c9a04e] border border-amber-800/60">
                           Requer Aprovação
                         </span>
                       )}
@@ -622,14 +727,9 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
                         <span className={`text-[9px] uppercase font-bold px-1.5 py-0.2 rounded ${
                           isStockDepleted
                             ? 'bg-rose-950/60 text-rose-300 border border-rose-800'
-                            : 'bg-cyan-950/60 text-cyan-300 border border-cyan-800'
+                            : 'bg-[#2c2825] text-[#6f93ad] border border-[#574e45]'
                         }`}>
                           {isStockDepleted ? 'Esgotado' : `Estoque: ${it.stock_quantity} un.`}
-                        </span>
-                      )}
-                      {it.acquisition_mode === 'free' && (
-                        <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
-                          Obtenção Livre
                         </span>
                       )}
                     </div>
@@ -692,19 +792,55 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
                     <span>Preço: <strong className="text-[#c9a04e] font-mono">${it.cost}</strong></span>
                   </div>
 
+                  {/* Mensagem se o item não for comprável para jogadores */}
+                  {!isMaster && it.is_purchasable === false && (
+                    <div className="p-2 mb-2 bg-[#131211] border border-[#2c2825] rounded text-[11px] text-[#aaa292] flex items-center space-x-1.5">
+                      <Lock className="w-3.5 h-3.5 text-[#c9a04e] shrink-0" />
+                      <span>Este item requer concessão direta do Mestre.</span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between pt-1 gap-2">
                     {isMaster ? (
                       <div className="flex items-center space-x-1">
+                        {/* Toggle Visibilidade (Mestre) */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleHidden(it)}
+                          className={`p-1.5 rounded border transition-colors ${
+                            it.is_hidden
+                              ? 'bg-[#8a2c38]/30 border-[#8a2c38] text-[#ece3d0]'
+                              : 'bg-[#131211] border-[#2c2825] text-[#aaa292] hover:text-[#ece3d0]'
+                          }`}
+                          title={it.is_hidden ? "Item oculto. Clique para revelar aos jogadores" : "Item visível. Clique para ocultar dos jogadores"}
+                        >
+                          {it.is_hidden ? <EyeOff className="w-3.5 h-3.5 text-[#b24a52]" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+
+                        {/* Toggle Comprabilidade (Mestre) */}
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePurchasable(it)}
+                          className={`p-1.5 rounded border transition-colors ${
+                            it.is_purchasable === false
+                              ? 'bg-[#2c2825] border-[#574e45] text-[#aaa292]'
+                              : 'bg-[#131211] border-[#2c2825] text-[#c9a04e]'
+                          }`}
+                          title={it.is_purchasable === false ? "Apenas concessão. Clique para liberar compra" : "Comprável. Clique para restringir a concessão do Mestre"}
+                        >
+                          {it.is_purchasable === false ? <Lock className="w-3.5 h-3.5" /> : <Coins className="w-3.5 h-3.5" />}
+                        </button>
+
                         <button
                           onClick={() => openEditModal(it)}
-                          className="p-1.5 text-[#aaa292] hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                          className="p-1.5 text-[#aaa292] hover:text-white hover:bg-[#2c2825] rounded transition-colors"
                           title="Editar item"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteItem(it.id)}
-                          className="p-1.5 text-[#aaa292] hover:text-[#b24a52] hover:bg-rose-950/30 rounded-lg transition-colors"
+                          className="p-1.5 text-[#aaa292] hover:text-[#b24a52] hover:bg-[#8a2c38]/30 rounded transition-colors"
                           title="Excluir item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -713,24 +849,32 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
                     ) : <div />}
 
                     <div className="flex items-center space-x-2">
-                      {/* Botão de Conceder Direto para Mestres */}
+                      {/* Botão de Conceder Administrativo (Mestre) */}
                       {isMaster && characters.length > 0 && (
                         <button
                           onClick={() => openGrantModal(it)}
                           disabled={Boolean(isStockDepleted)}
-                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold transition-all shadow-sm"
+                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#2c2825] hover:bg-[#574e45] border border-[#574e45] disabled:opacity-50 text-[#ece3d0] text-xs font-medium transition-all shadow-sm"
                         >
-                          <Gift className="w-3.5 h-3.5" />
+                          <Gift className="w-3.5 h-3.5 text-[#c9a04e]" />
                           <span>Conceder</span>
                         </button>
                       )}
 
-                      {/* Botão de Solicitar ou Pegar para Jogadores */}
+                      {/* Botões do Jogador */}
                       {!isMaster && characters.length > 0 && (
-                        it.acquisition_mode === 'approval' ? (
+                        it.is_purchasable === false ? (
+                          <button
+                            disabled
+                            className="px-3 py-1.5 rounded bg-[#131211] border border-[#2c2825] text-[#777064] text-xs font-serif cursor-not-allowed flex items-center space-x-1"
+                          >
+                            <Lock className="w-3 h-3" />
+                            <span>Reservado</span>
+                          </button>
+                        ) : it.acquisition_mode === 'approval' ? (
                           <button
                             onClick={() => openRequestModal(it)}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-600/80 hover:bg-amber-600 text-white text-xs font-semibold transition-all shadow-sm"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#2c2825] hover:bg-[#574e45] border border-[#c9a04e] text-[#c9a04e] text-xs font-bold transition-all shadow-sm"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>Solicitar</span>
@@ -738,17 +882,17 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
                         ) : isStockDepleted ? (
                           <button
                             disabled
-                            className="px-3 py-1.5 rounded-xl bg-slate-800 text-[#777064] text-xs font-semibold cursor-not-allowed"
+                            className="px-3 py-1.5 rounded bg-[#131211] border border-[#2c2825] text-[#777064] text-xs font-semibold cursor-not-allowed"
                           >
                             Esgotado
                           </button>
                         ) : (
                           <button
-                            onClick={() => openGrantModal(it)}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold text-xs font-semibold transition-all shadow-sm"
+                            onClick={() => openPurchaseModal(it)}
+                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold text-xs transition-all shadow-sm font-serif"
                           >
-                            <Package className="w-3.5 h-3.5" />
-                            <span>Pegar Item</span>
+                            <ShoppingBag className="w-3.5 h-3.5" />
+                            <span>Comprar (${it.cost})</span>
                           </button>
                         )
                       )}
@@ -1452,6 +1596,102 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({
           </div>
         </div>
       )}
+
+      {/* MODAL COMPRAR ITEM (JOGADOR COM DÉBITO ATÔMICO) */}
+      {showPurchaseModal && itemToPurchase && selectedCharacter && (() => {
+        const charBalance = getCharacterBalance(selectedCharacter);
+        const unitCost = itemToPurchase.cost || 0;
+        const totalCost = unitCost * purchaseQuantity;
+        const hasEnoughMoney = charBalance.balance >= totalCost;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-[#1a1816] border border-[#2c2825] rounded-xl p-6 shadow-2xl relative">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
+                <h3 className="text-lg font-serif font-bold text-[#ece3d0] flex items-center space-x-2">
+                  <ShoppingBag className="w-5 h-5 text-[#c9a04e]" />
+                  <span>Comprar Item do Catálogo</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowPurchaseModal(false)}
+                  className="text-[#aaa292] hover:text-[#ece3d0] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleExecutePurchase} className="space-y-4">
+                <div className="p-3 bg-[#131211] border border-[#2c2825] rounded">
+                  <span className="text-xs text-[#aaa292] block">Item Selecionado</span>
+                  <span className="font-serif font-bold text-[#ece3d0] text-base">{itemToPurchase.name}</span>
+                  <span className="text-xs text-[#aaa292] block mt-0.5">
+                    {itemToPurchase.category} • {itemToPurchase.weight}kg • Preço Unitário: <strong className="text-[#c9a04e] font-mono">${unitCost}</strong>
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono text-[#aaa292] mb-1">
+                      Quantidade
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={itemToPurchase.acquisition_mode === 'limited' ? (itemToPurchase.stock_quantity ?? 1) : 99}
+                      required
+                      value={purchaseQuantity}
+                      onChange={(e) => setPurchaseQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                      className="w-full px-3 py-1.5 bg-[#131211] border border-[#2c2825] focus:border-[#c9a04e] rounded text-[#ece3d0] font-mono text-xs focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-mono text-[#aaa292] mb-1">
+                      Total a Pagar
+                    </label>
+                    <div className="px-3 py-1.5 bg-[#131211] border border-[#2c2825] rounded text-[#c9a04e] font-mono font-bold text-xs">
+                      ${totalCost}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[#2c2825]/50 border border-[#2c2825] rounded flex items-center justify-between text-xs font-mono">
+                  <span className="text-[#aaa292]">Saldo de {selectedCharacter.name}:</span>
+                  <span className={`font-bold ${hasEnoughMoney ? 'text-[#5e9b76]' : 'text-[#b24a52]'}`}>
+                    ${charBalance.balance} (${charBalance.currencyKey})
+                  </span>
+                </div>
+
+                {!hasEnoughMoney && (
+                  <div className="p-2.5 bg-[#8a2c38]/30 border border-[#8a2c38] rounded text-xs text-[#ece3d0] flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 text-[#b24a52] shrink-0" />
+                    <span>Saldo insuficiente para realizar esta compra.</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#2c2825]">
+                  <button
+                    type="button"
+                    onClick={() => setShowPurchaseModal(false)}
+                    className="px-3 py-1.5 rounded border border-[#574e45] text-[#ece3d0] hover:bg-[#2c2825] text-xs font-serif transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!hasEnoughMoney || isPurchasing}
+                    className="px-4 py-1.5 rounded bg-[#c9a04e] hover:bg-[#c9a04e]/90 disabled:opacity-50 text-[#131211] font-bold text-xs font-serif transition-all shadow-sm flex items-center space-x-1.5"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>{isPurchasing ? 'Processando...' : 'Confirmar Compra'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* MODAL CONCEDER ITEM A PERSONAGEM (MESTRE OU OBTENÇÃO LIVRE) */}
       {showGrantModal && itemToGrant && (

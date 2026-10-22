@@ -58,6 +58,25 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [transferQuantity, setTransferQuantity] = useState(1);
 
   const isMaster = campaign.role === 'owner' || campaign.role === 'master' || campaign.role === 'assistant';
+
+  const getCharacterBalance = (char: Character | null | undefined): { balance: number; currencyKey: string } => {
+    if (!char) return { balance: 0, currencyKey: 'dinheiro' };
+    const raw = char.raw_data || {};
+    const candidates = ['dinheiro', 'moedas', 'ouro', 'gold', 'tibares', 'creditos', 'saldo', 'money', 'tibares_ouro', 'plata'];
+    for (const key of candidates) {
+      if (key in raw && !isNaN(Number(raw[key]))) {
+        return { balance: Number(raw[key]), currencyKey: key };
+      }
+    }
+    const comp = char.computed_data || {};
+    for (const key of candidates) {
+      if (key in comp && !isNaN(Number(comp[key]))) {
+        return { balance: Number(comp[key]), currencyKey: key };
+      }
+    }
+    return { balance: 0, currencyKey: 'dinheiro' };
+  };
+
   const isOwnerOfChar = selectedCharacter && selectedCharacter.user_id === user.id;
   const canEdit = isMaster || isOwnerOfChar;
 
@@ -156,20 +175,39 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
     try {
       let res: { item: InventoryItem; inventory?: InventorySummary; character?: Character };
+      const qty = parseInt(customQuantity, 10) || 1;
+
       if (addMode === 'catalog') {
         if (!selectedCatalogItemId) return;
-        res = await api.addItemToCharacter(campaign.id, selectedCharacter.id, {
-          itemId: selectedCatalogItemId,
-          quantity: parseInt(customQuantity, 10) || 1
-        });
+        if (isMaster) {
+          res = await api.grantItemToCharacter(campaign.id, selectedCharacter.id, {
+            itemId: selectedCatalogItemId,
+            quantity: qty
+          });
+        } else {
+          // Jogador realiza compra atômica
+          const purchaseRes = await api.purchaseItem(campaign.id, selectedCharacter.id, {
+            itemId: selectedCatalogItemId,
+            quantity: qty
+          });
+          res = {
+            item: purchaseRes.item,
+            inventory: purchaseRes.inventory,
+            character: purchaseRes.character
+          };
+          setSuccessMsg(`Compra efetuada com sucesso por ${purchaseRes.transaction.totalCost}!`);
+        }
       } else {
+        if (!isMaster) {
+          throw new Error('Apenas o Mestre pode conceder itens customizados sem cadastro no catálogo.');
+        }
         if (!customName.trim()) return;
-        res = await api.addItemToCharacter(campaign.id, selectedCharacter.id, {
+        res = await api.grantItemToCharacter(campaign.id, selectedCharacter.id, {
           itemName: customName.trim(),
           category: customCategory,
           weight: parseFloat(customWeight) || 0,
           cost: parseFloat(customCost) || 0,
-          quantity: parseInt(customQuantity, 10) || 1
+          quantity: qty
         });
       }
 
@@ -347,7 +385,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       )}
 
       {/* Resumo do Inventário / Métricas de Carga */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
         <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl p-4 shadow-xl flex items-center space-x-3 transition-all">
           <div className="w-10 h-10 rounded-xl bg-[#2c2825] border border-[#574e45] flex items-center justify-center text-[#c9a04e]">
             <Package className="w-5 h-5" />
@@ -378,13 +416,23 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl p-4 shadow-xl flex items-center space-x-3 transition-all">
-          <div className="w-10 h-10 rounded-xl bg-[#2c2825] border border-[#574e45] flex items-center justify-center text-[#c9a04e]">
-            <Coins className="w-5 h-5" />
+        <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl p-3.5 shadow-sm flex items-center space-x-3 transition-all">
+          <div className="w-9 h-9 rounded-lg bg-[#2c2825] border border-[#574e45] flex items-center justify-center text-[#5e9b76]">
+            <Coins className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] text-[#777064] uppercase tracking-wider block font-semibold">Valor em Bens</span>
-            <span className="text-lg font-bold text-[#c9a04e] font-mono">${inventory?.totalCost || 0}</span>
+            <span className="text-[10px] text-[#aaa292] uppercase font-mono tracking-wider block">Saldo Atual</span>
+            <span className="text-base font-bold text-[#5e9b76] font-mono">${getCharacterBalance(selectedCharacter).balance}</span>
+          </div>
+        </div>
+
+        <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl p-3.5 shadow-sm flex items-center space-x-3 transition-all">
+          <div className="w-9 h-9 rounded-lg bg-[#2c2825] border border-[#574e45] flex items-center justify-center text-[#c9a04e]">
+            <Package className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] text-[#aaa292] uppercase font-mono tracking-wider block">Valor em Bens</span>
+            <span className="text-base font-bold text-[#c9a04e] font-mono">${inventory?.totalCost || 0}</span>
           </div>
         </div>
       </div>

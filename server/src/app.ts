@@ -725,10 +725,25 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
   // --- ROTAS DO CATÁLOGO DE ITENS DA CAMPANHA ---
   app.get('/api/campaigns/:campaignId/items', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
     try {
+      const isMaster = req.membership?.role === 'owner' || req.membership?.role === 'master' || req.membership?.role === 'assistant';
       const category = req.query.category as string | undefined;
       const search = req.query.search as string | undefined;
-      const items = inventoryService.getCatalogItems(req.params.campaignId, category, search);
+      const items = inventoryService.getCatalogItems(req.params.campaignId, category, search, isMaster);
       res.json({ items });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/campaigns/:campaignId/items/:itemId', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership?.role === 'owner' || req.membership?.role === 'master' || req.membership?.role === 'assistant';
+      const item = inventoryService.getCatalogItemById(req.params.campaignId, req.params.itemId, isMaster);
+      if (!item) {
+        res.status(404).json({ error: 'Item do catálogo não encontrado para esta campanha.' });
+        return;
+      }
+      res.json({ item });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -771,20 +786,85 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
     }
   });
 
-  app.post('/api/campaigns/:campaignId/characters/:characterId/inventory', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+  // Rota de Compra Segura e Atômica pelo Jogador
+  app.post('/api/campaigns/:campaignId/characters/:characterId/inventory/purchase', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
     try {
-      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master';
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const result = inventoryService.purchaseItem(
+        req.params.campaignId,
+        req.user!.userId,
+        {
+          characterId: req.params.characterId,
+          itemId: req.body.itemId,
+          quantity: req.body.quantity !== undefined ? req.body.quantity : 1
+        },
+        isMaster
+      );
+
+      // Notificação em tempo real
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, {
+          type: 'inventory:updated',
+          characterId: req.params.characterId,
+          inventory: result.inventory,
+          character: result.character
+        });
+      }
+
+      res.status(200).json(result);
+    } catch (err: any) {
+      const status = err.message?.includes('não encontrado') ? 404 : 400;
+      res.status(status).json({ error: err.message });
+    }
+  });
+
+  // Rota de Concessão Administrativa de Item pelo Mestre
+  app.post('/api/campaigns/:campaignId/characters/:characterId/inventory/grant', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
       const char = characterService.getCharacterById(req.params.campaignId, req.params.characterId);
       if (!char) {
         res.status(404).json({ error: 'Personagem não encontrado.' });
         return;
       }
-      if (char.user_id !== req.user!.userId && !isMaster) {
-        res.status(403).json({ error: 'Você só pode adicionar itens aos seus próprios personagens.' });
+
+      const item = inventoryService.grantItem(req.params.campaignId, req.params.characterId, req.body);
+      const inventory = inventoryService.getCharacterInventory(req.params.campaignId, req.params.characterId);
+      const character = characterService.getCharacterById(req.params.campaignId, req.params.characterId);
+
+      // Notificação em tempo real
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, {
+          type: 'inventory:updated',
+          characterId: req.params.characterId,
+          inventory,
+          character
+        });
+      }
+
+      res.status(201).json({ item, inventory, character });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/characters/:characterId/inventory', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const char = characterService.getCharacterById(req.params.campaignId, req.params.characterId);
+      if (!char) {
+        res.status(404).json({ error: 'Personagem não encontrado.' });
         return;
       }
 
-      const item = inventoryService.addItemToCharacter(req.params.campaignId, req.params.characterId, req.body, isMaster);
+      // Se for jogador comum, redireciona/exige compra ou solicitação
+      if (!isMaster) {
+        res.status(403).json({ error: 'Operação não autorizada: Jogadores devem adquirir itens através da operação de compra (/purchase) ou mediante solicitação ao Mestre.' });
+        return;
+      }
+
+      const item = inventoryService.addItemToCharacter(req.params.campaignId, req.params.characterId, req.body, true);
       const inventory = inventoryService.getCharacterInventory(req.params.campaignId, req.params.characterId);
       const character = characterService.getCharacterById(req.params.campaignId, req.params.characterId);
 
