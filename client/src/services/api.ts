@@ -1569,6 +1569,147 @@ class ApiService {
     });
     return res.success;
   }
+
+  // ==========================================
+  // 1. Áudio e Ambientação da Sessão (YouTube)
+  // ==========================================
+  async getAudioTracks(campaignId: string): Promise<{ tracks: AudioTrack[]; currentTrack: AudioTrack | null }> {
+    return this.request<{ tracks: AudioTrack[]; currentTrack: AudioTrack | null }>(`/campaigns/${campaignId}/audio`);
+  }
+
+  async addAudioTrack(campaignId: string, data: { title: string; youtube_url: string; volume?: number }): Promise<{ track: AudioTrack }> {
+    return this.request<{ track: AudioTrack }>(`/campaigns/${campaignId}/audio`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async playAudioTrack(campaignId: string, trackId: string): Promise<{ track: AudioTrack }> {
+    return this.request<{ track: AudioTrack }>(`/campaigns/${campaignId}/audio/${trackId}/play`, {
+      method: 'POST'
+    });
+  }
+
+  async pauseAudioTrack(campaignId: string): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/campaigns/${campaignId}/audio/pause`, {
+      method: 'POST'
+    });
+  }
+
+  async deleteAudioTrack(campaignId: string, trackId: string): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/campaigns/${campaignId}/audio/${trackId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==========================================
+  // 2. Aba de Lore com Privacidade Granular
+  // ==========================================
+  async getCharacterLore(campaignId: string, characterId: string): Promise<{ entries: CharacterLoreEntry[] }> {
+    return this.request<{ entries: CharacterLoreEntry[] }>(`/campaigns/${campaignId}/characters/${characterId}/lore`);
+  }
+
+  async getCharacterLoreById(campaignId: string, characterId: string, loreId: string): Promise<{ entry: CharacterLoreEntry }> {
+    return this.request<{ entry: CharacterLoreEntry }>(`/campaigns/${campaignId}/characters/${characterId}/lore/${loreId}`);
+  }
+
+  async createCharacterLore(
+    campaignId: string,
+    characterId: string,
+    data: { title: string; content: string; visibility?: 'private_gm' | 'public' }
+  ): Promise<{ entry: CharacterLoreEntry }> {
+    return this.request<{ entry: CharacterLoreEntry }>(`/campaigns/${campaignId}/characters/${characterId}/lore`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async updateCharacterLore(
+    campaignId: string,
+    characterId: string,
+    loreId: string,
+    data: { title?: string; content?: string; visibility?: 'private_gm' | 'public' }
+  ): Promise<{ entry: CharacterLoreEntry }> {
+    return this.request<{ entry: CharacterLoreEntry }>(`/campaigns/${campaignId}/characters/${characterId}/lore/${loreId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deleteCharacterLore(campaignId: string, characterId: string, loreId: string): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/campaigns/${campaignId}/characters/${characterId}/lore/${loreId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==========================================
+  // 3. Sussurros Privados 1-on-1 com o Mestre
+  // ==========================================
+  async getWhispers(campaignId: string, withUser?: string): Promise<{ whispers: CampaignWhisper[]; contacts: WhisperContact[] }> {
+    const query = withUser ? `?withUser=${encodeURIComponent(withUser)}` : '';
+    return this.request<{ whispers: CampaignWhisper[]; contacts: WhisperContact[] }>(`/campaigns/${campaignId}/whispers${query}`);
+  }
+
+  async sendWhisper(campaignId: string, data: { recipient_id?: string; content: string }): Promise<{ whisper: CampaignWhisper }> {
+    return this.request<{ whisper: CampaignWhisper }>(`/campaigns/${campaignId}/whispers`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async markWhispersAsRead(campaignId: string, otherUserId: string): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/campaigns/${campaignId}/whispers/read`, {
+      method: 'PATCH',
+      body: JSON.stringify({ other_user_id: otherUserId })
+    });
+  }
+}
+
+export interface AudioTrack {
+  id: string;
+  campaign_id: string;
+  title: string;
+  youtube_url: string;
+  youtube_video_id: string;
+  added_by: string;
+  added_by_username?: string;
+  is_playing: number;
+  volume: number;
+  created_at: string;
+}
+
+export interface CharacterLoreEntry {
+  id: string;
+  campaign_id: string;
+  character_id: string;
+  author_user_id: string;
+  author_username?: string;
+  title: string;
+  content: string;
+  visibility: 'private_gm' | 'public';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CampaignWhisper {
+  id: string;
+  campaign_id: string;
+  sender_id: string;
+  sender_username: string;
+  recipient_id: string;
+  recipient_username: string;
+  content: string;
+  is_read: number;
+  created_at: string;
+}
+
+export interface WhisperContact {
+  user_id: string;
+  username: string;
+  role: string;
+  unread_count: number;
+  last_message?: string | null;
+  last_activity?: string | null;
 }
 
 export interface EnvironmentalCondition {

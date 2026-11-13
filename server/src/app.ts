@@ -17,6 +17,9 @@ import { VttService } from './modules/vtt/vtt.service';
 import { CombatService, Combatant } from './modules/combat/combat.service';
 import { BestiaryService } from './modules/bestiary/bestiary.service';
 import { MasterToolsService } from './modules/master-tools/master-tools.service';
+import { AudioService } from './modules/audio/audio.service';
+import { LoreService } from './modules/lore/lore.service';
+import { WhisperService } from './modules/whispers/whisper.service';
 
 export interface AppContext {
   app: Express;
@@ -31,6 +34,9 @@ export interface AppContext {
   combatService: CombatService;
   bestiaryService: BestiaryService;
   masterToolsService: MasterToolsService;
+  audioService: AudioService;
+  loreService: LoreService;
+  whisperService: WhisperService;
   realtimeServer?: RealtimeServer;
   setRealtimeServer: (rt: RealtimeServer) => void;
 }
@@ -63,6 +69,9 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
   const combatService = new CombatService(db, rulesService, characterService, inventoryService);
   const bestiaryService = new BestiaryService(db, rulesService, characterService);
   const masterToolsService = new MasterToolsService(db);
+  const audioService = new AudioService(db);
+  const loreService = new LoreService(db);
+  const whisperService = new WhisperService(db);
 
   if (activeRealtimeServer) {
     activeRealtimeServer.setVttService(vttService);
@@ -2788,6 +2797,221 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
     }
   });
 
+  // ==========================================
+  // 1. ÁUDIO E AMBIENTAÇÃO DA SESSÃO (YOUTUBE)
+  // ==========================================
+  app.get('/api/campaigns/:campaignId/audio', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const data = audioService.listTracks(req.params.campaignId);
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/audio', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const track = audioService.addTrack(req.params.campaignId, userId, req.body);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'audio:track_added', track });
+      }
+      res.status(201).json({ track });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/audio/:trackId/play', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const track = audioService.playTrack(req.params.campaignId, req.params.trackId);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'audio:play', track });
+      }
+      res.json({ track });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/audio/pause', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      audioService.pauseTrack(req.params.campaignId);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'audio:pause' });
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/campaigns/:campaignId/audio/:trackId', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      audioService.deleteTrack(req.params.campaignId, req.params.trackId);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'audio:track_deleted', trackId: req.params.trackId });
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  // ==========================================
+  // 2. ABA DE LORE DOS PERSONAGENS COM PRIVACIDADE
+  // ==========================================
+  app.get('/api/campaigns/:campaignId/characters/:characterId/lore', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const entries = loreService.listLore(req.params.campaignId, req.params.characterId, userId, isMaster);
+      res.json({ entries });
+    } catch (err: any) {
+      res.status(err.status || 500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/campaigns/:campaignId/characters/:characterId/lore/:loreId', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const entry = loreService.getLoreById(req.params.campaignId, req.params.characterId, req.params.loreId, userId, isMaster);
+      res.json({ entry });
+    } catch (err: any) {
+      res.status(err.status || 500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/characters/:characterId/lore', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const entry = loreService.createLore(req.params.campaignId, req.params.characterId, userId, isMaster, req.body);
+      res.status(201).json({ entry });
+    } catch (err: any) {
+      res.status(err.status || 400).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/campaigns/:campaignId/characters/:characterId/lore/:loreId', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const entry = loreService.updateLore(req.params.campaignId, req.params.characterId, req.params.loreId, userId, isMaster, req.body);
+      res.json({ entry });
+    } catch (err: any) {
+      res.status(err.status || 400).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/campaigns/:campaignId/characters/:characterId/lore/:loreId', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      loreService.deleteLore(req.params.campaignId, req.params.characterId, req.params.loreId, userId, isMaster);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(err.status || 400).json({ error: err.message });
+    }
+  });
+
+  // ==========================================
+  // 3. SUSSURRO PRIVADO COM O MESTRE (1-ON-1)
+  // ==========================================
+  app.get('/api/campaigns/:campaignId/whispers', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const withUser = req.query.withUser as string | undefined;
+      const data = whisperService.listWhispers(req.params.campaignId, userId, isMaster, withUser);
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/whispers', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const membership = rbacService.getMembership(req.params.campaignId, userId);
+      if (!membership) {
+        return res.status(403).json({ error: 'Você não é membro desta campanha.' });
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const whisper = whisperService.sendWhisper(
+        req.params.campaignId,
+        userId,
+        isMaster,
+        req.body.recipient_id,
+        req.body.content
+      );
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcastFiltered(req.params.campaignId, (client) => {
+          if (client.userId === whisper.sender_id || client.userId === whisper.recipient_id) {
+            return { type: 'whisper:new', whisper };
+          }
+          return null;
+        });
+      }
+      res.status(201).json({ whisper });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/campaigns/:campaignId/whispers/read', requireAuth, (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.userId || (req as any).user?.id;
+      const { other_user_id } = req.body;
+      if (!other_user_id) {
+        return res.status(400).json({ error: 'other_user_id é obrigatório.' });
+      }
+      whisperService.markAsRead(req.params.campaignId, userId, other_user_id);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
   // Servir SPA estática do frontend se compilada
   const clientDist = path.join(__dirname, '../../client/dist');
   if (fs.existsSync(clientDist)) {
@@ -2811,6 +3035,9 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
     combatService,
     bestiaryService,
     masterToolsService,
+    audioService,
+    loreService,
+    whisperService,
     realtimeServer: activeRealtimeServer,
     setRealtimeServer
   };

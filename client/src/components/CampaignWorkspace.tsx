@@ -9,7 +9,7 @@ import {
   Send, Copy, Check, Terminal, Plus, 
   Package, LayoutTemplate, Skull,
   Users, Trash2, Crown, ChevronLeft, ChevronDown,
-  Heart, Zap, Weight, LogOut
+  Heart, Zap, Weight, LogOut, Music, BookOpen
 } from 'lucide-react';
 import { InventoryView } from './InventoryView';
 import { CatalogManager } from './CatalogManager';
@@ -17,6 +17,9 @@ import { TemplateEditor } from './TemplateEditor';
 import { VirtualTabletop } from './VirtualTabletop';
 import { BestiaryManager } from './BestiaryManager';
 import { MasterToolsManager } from './MasterToolsManager';
+import { AudioManager } from './AudioManager';
+import { CharacterLoreView } from './CharacterLoreView';
+import { WhisperDock } from './WhisperDock';
 
 interface CampaignWorkspaceProps {
   campaign: Campaign;
@@ -72,7 +75,10 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
   const toast = useNotification();
   const [equippedItems, setEquippedItems] = useState<any[]>([]);
   const [characterInventory, setCharacterInventory] = useState<any[]>([]);
-  const [sheetInnerTab, setSheetInnerTab] = useState<'abilities' | 'equipment' | 'background'>('abilities');
+  const [sheetInnerTab, setSheetInnerTab] = useState<'abilities' | 'equipment' | 'lore' | 'background'>('abilities');
+  const [showAudioDrawer, setShowAudioDrawer] = useState(false);
+  const [latestAudioEvent, setLatestAudioEvent] = useState<any>(null);
+  const [latestWhisperEvent, setLatestWhisperEvent] = useState<any>(null);
 
   // Menu Dropdown do Compêndio
   const [showCompendiumMenu, setShowCompendiumMenu] = useState(false);
@@ -471,6 +477,10 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
             setCharacters(prev => prev.map(c => c.id === msg.character.id ? msg.character : c));
             setSelectedCharacter(prev => prev?.id === msg.character.id ? msg.character : prev);
           }
+        } else if (msg.type?.startsWith('audio:')) {
+          setLatestAudioEvent(msg);
+        } else if (msg.type === 'whisper:new') {
+          setLatestWhisperEvent(msg.whisper || msg);
         } else if (msg.type === 'vtt:event' || msg.type?.startsWith('token:') || msg.type?.startsWith('scene:')) {
           setLastVttEvent(msg);
           vttListenersRef.current.forEach(listener => {
@@ -994,8 +1004,17 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           </div>
         </nav>
 
-        {/* Direita: Ações Rápidas (Membros, Convite, Novo Personagem) */}
+        {/* Direita: Ações Rápidas (Membros, Áudio, Convite, Novo Personagem) */}
         <div className="flex items-center space-x-2 shrink-0">
+          <button
+            onClick={() => setShowAudioDrawer(true)}
+            title="Trilha Sonora & Ambientação (YouTube)"
+            className="p-1.5 rounded-lg bg-[#141716] hover:bg-[#252a27] text-[#c86d51] hover:text-[#ebe7de] border border-[#343b37] transition-colors flex items-center gap-1.5"
+          >
+            <Music className="w-4 h-4" />
+            <span className="text-xs font-serif hidden lg:inline">Áudio</span>
+          </button>
+
           <button
             onClick={() => { setShowMembersModal(true); loadMembers(); }}
             title="Membros da Mesa"
@@ -1299,6 +1318,24 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
                       <button
                         type="button"
+                        onClick={() => setSheetInnerTab('lore')}
+                        className={`pb-2.5 px-4 font-bold transition-colors relative ${
+                          sheetInnerTab === 'lore'
+                            ? 'text-[#c86d51]'
+                            : 'text-[#9b9689] hover:text-[#ebe7de]'
+                        }`}
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>Lore & Crônicas</span>
+                        </span>
+                        {sheetInnerTab === 'lore' && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => setSheetInnerTab('background')}
                         className={`pb-2.5 px-4 font-bold transition-colors relative ${
                           sheetInnerTab === 'background'
@@ -1431,6 +1468,16 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                           </div>
                         )}
                       </div>
+                    )}
+
+                    {/* Conteúdo Aba Lore & Crônicas com Privacidade Granular */}
+                    {sheetInnerTab === 'lore' && selectedCharacter && (
+                      <CharacterLoreView
+                        campaignId={campaign.id}
+                        character={selectedCharacter}
+                        currentUser={user}
+                        isMaster={isMaster}
+                      />
                     )}
 
                     {/* Conteúdo Aba Antecedentes */}
@@ -1959,6 +2006,22 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           </div>
         </div>
       )}
+      {/* 1. Player de Áudio e Ambientação da Sessão (YouTube) */}
+      <AudioManager
+        campaignId={campaign.id}
+        isMaster={isMaster}
+        isOpen={showAudioDrawer}
+        onClose={() => setShowAudioDrawer(false)}
+        activeAudioEvent={latestAudioEvent}
+      />
+
+      {/* 2. Botão Flutuante de Sussurro Privado com o Mestre (Canto Inferior Direito) */}
+      <WhisperDock
+        campaignId={campaign.id}
+        currentUser={user}
+        isMaster={isMaster}
+        activeWhisperEvent={latestWhisperEvent}
+      />
     </div>
   );
 };

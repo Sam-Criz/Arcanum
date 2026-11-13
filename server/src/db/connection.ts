@@ -850,6 +850,56 @@ export function runMigrations(db: DatabaseSync): void {
     );
     CREATE INDEX IF NOT EXISTS idx_revelations_camp ON entity_revelations(campaign_id);
     CREATE INDEX IF NOT EXISTS idx_revelations_entity ON entity_revelations(campaign_id, entity_type, entity_id);
+
+    -- 1. Áudio e Ambientação da Sessão (YouTube)
+    CREATE TABLE IF NOT EXISTS campaign_audio_tracks (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      youtube_url TEXT NOT NULL,
+      youtube_video_id TEXT NOT NULL,
+      added_by TEXT NOT NULL,
+      is_playing INTEGER NOT NULL DEFAULT 0,
+      volume INTEGER NOT NULL DEFAULT 80,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_audio_tracks_camp ON campaign_audio_tracks(campaign_id);
+
+    -- 2. Lore dos Personagens com Privacidade Granular
+    CREATE TABLE IF NOT EXISTS character_lore_entries (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      character_id TEXT NOT NULL,
+      author_user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      visibility TEXT NOT NULL CHECK(visibility IN ('private_gm', 'public')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE,
+      FOREIGN KEY (author_user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_lore_char ON character_lore_entries(character_id);
+    CREATE INDEX IF NOT EXISTS idx_lore_camp ON character_lore_entries(campaign_id);
+
+    -- 3. Sussurro Privado com o Mestre (1-on-1)
+    CREATE TABLE IF NOT EXISTS campaign_whispers (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      sender_id TEXT NOT NULL,
+      recipient_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      is_read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_whispers_camp ON campaign_whispers(campaign_id);
+    CREATE INDEX IF NOT EXISTS idx_whispers_participants ON campaign_whispers(campaign_id, sender_id, recipient_id);
   `);
 }
 
