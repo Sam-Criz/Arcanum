@@ -19,18 +19,23 @@ export class CampaignService {
     const membershipId = crypto.randomUUID();
     const now = new Date().toISOString();
     const preset = data.preset || 'investigacao';
+    const requireApproval = data.requireCharacterApproval ? 1 : 0;
+    const rawMaxSkills = data.maxSkillsPerCharacter ?? (data as any).max_skills_per_character;
+    const maxSkills = rawMaxSkills !== undefined ? Math.max(1, Number(rawMaxSkills)) : 6;
 
     this.db.exec('BEGIN TRANSACTION;');
     try {
       this.db.prepare(`
-        INSERT INTO campaigns (id, name, description, cover_image, owner_id, is_archived, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 0, ?, ?)
+        INSERT INTO campaigns (id, name, description, cover_image, owner_id, is_archived, require_character_approval, max_skills_per_character, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?)
       `).run(
         campaignId,
         data.name.trim(),
         data.description?.trim() || '',
         data.coverImage || null,
         ownerId,
+        requireApproval,
+        maxSkills,
         now,
         now
       );
@@ -58,6 +63,8 @@ export class CampaignService {
       cover_image: data.coverImage || null,
       owner_id: ownerId,
       is_archived: 0,
+      require_character_approval: requireApproval,
+      max_skills_per_character: maxSkills,
       created_at: now,
       updated_at: now,
       role: 'owner',
@@ -69,7 +76,7 @@ export class CampaignService {
   getUserCampaigns(userId: string): CampaignWithRole[] {
     const rows = this.db.prepare(`
       SELECT 
-        c.id, c.name, c.description, c.cover_image, c.owner_id, c.is_archived, c.created_at, c.updated_at,
+        c.id, c.name, c.description, c.cover_image, c.owner_id, c.is_archived, c.require_character_approval, c.max_skills_per_character, c.created_at, c.updated_at,
         m.role,
         (SELECT COUNT(*) FROM campaign_memberships WHERE campaign_id = c.id) as member_count,
         (SELECT title FROM ruleset_versions WHERE campaign_id = c.id AND is_active = 1 LIMIT 1) as active_ruleset_name
@@ -86,6 +93,8 @@ export class CampaignService {
       cover_image: r.cover_image,
       owner_id: r.owner_id,
       is_archived: r.is_archived,
+      require_character_approval: r.require_character_approval ? 1 : 0,
+      max_skills_per_character: r.max_skills_per_character ?? 6,
       created_at: r.created_at,
       updated_at: r.updated_at,
       role: r.role as CampaignRole,
@@ -96,7 +105,7 @@ export class CampaignService {
 
   getCampaignById(campaignId: string): Campaign | null {
     const row = this.db.prepare(`
-      SELECT id, name, description, cover_image, owner_id, is_archived, created_at, updated_at
+      SELECT id, name, description, cover_image, owner_id, is_archived, require_character_approval, max_skills_per_character, created_at, updated_at
       FROM campaigns
       WHERE id = ?
     `).get(campaignId) as any;
@@ -110,6 +119,8 @@ export class CampaignService {
       cover_image: row.cover_image,
       owner_id: row.owner_id,
       is_archived: row.is_archived,
+      require_character_approval: row.require_character_approval ? 1 : 0,
+      max_skills_per_character: row.max_skills_per_character !== undefined ? Number(row.max_skills_per_character) : 6,
       created_at: row.created_at,
       updated_at: row.updated_at
     };
@@ -124,19 +135,27 @@ export class CampaignService {
     const name = data.name !== undefined ? data.name.trim() : existing.name;
     const description = data.description !== undefined ? data.description.trim() : existing.description;
     const coverImage = data.coverImage !== undefined ? data.coverImage : (existing.cover_image ?? null);
+    const requireApproval = data.requireCharacterApproval !== undefined 
+      ? (data.requireCharacterApproval ? 1 : 0) 
+      : (existing.require_character_approval ?? 0);
+    const maxSkills = data.maxSkillsPerCharacter !== undefined
+      ? Math.max(1, data.maxSkillsPerCharacter)
+      : (existing.max_skills_per_character ?? 6);
     const now = new Date().toISOString();
 
     this.db.prepare(`
       UPDATE campaigns
-      SET name = ?, description = ?, cover_image = ?, updated_at = ?
+      SET name = ?, description = ?, cover_image = ?, require_character_approval = ?, max_skills_per_character = ?, updated_at = ?
       WHERE id = ?
-    `).run(name, description, coverImage ?? null, now, campaignId);
+    `).run(name, description, coverImage ?? null, requireApproval, maxSkills, now, campaignId);
 
     return {
       ...existing,
       name,
       description,
       cover_image: coverImage,
+      require_character_approval: requireApproval,
+      max_skills_per_character: maxSkills,
       updated_at: now
     };
   }
@@ -239,11 +258,14 @@ export class CampaignService {
 
     return rows.map(r => ({
       userId: r.user_id,
+      user_id: r.user_id,
+      id: r.user_id,
       username: r.username,
       email: r.email,
       avatarUrl: r.avatar_url,
       role: r.role as CampaignRole,
-      joinedAt: r.joined_at
+      joinedAt: r.joined_at,
+      joined_at: r.joined_at
     }));
   }
 
@@ -263,5 +285,107 @@ export class CampaignService {
     this.db.prepare(`
       UPDATE campaign_memberships SET role = ? WHERE campaign_id = ? AND user_id = ?
     `).run(newRole, campaignId, targetUserId);
+  }
+
+  removeMember(campaignId: string, targetUserId: string, requesterUserId: string): void {
+    const requester = this.db.prepare(`
+      SELECT role FROM campaign_memberships WHERE campaign_id = ? AND user_id = ?
+    `).get(campaignId, requesterUserId) as any;
+
+    if (!requester || (requester.role !== 'owner' && requester.role !== 'master' && requester.role !== 'assistant')) {
+      throw new Error('Apenas o Mestre pode remover jogadores da campanha.');
+    }
+
+    let target = this.db.prepare(`
+      SELECT role, user_id FROM campaign_memberships WHERE campaign_id = ? AND user_id = ?
+    `).get(campaignId, targetUserId) as any;
+
+    if (!target) {
+      target = this.db.prepare(`
+        SELECT role, user_id FROM campaign_memberships WHERE campaign_id = ? AND id = ?
+      `).get(campaignId, targetUserId) as any;
+    }
+
+    if (!target) {
+      throw new Error('Jogador não é membro desta campanha.');
+    }
+
+    const actualTargetUserId = target.user_id;
+
+    if (target.role === 'owner') {
+      throw new Error('Não é possível remover o proprietário da campanha.');
+    }
+
+    this.db.exec('BEGIN TRANSACTION;');
+    try {
+      this.db.prepare(`DELETE FROM campaign_memberships WHERE campaign_id = ? AND user_id = ?`).run(campaignId, actualTargetUserId);
+      this.db.prepare(`
+        UPDATE tokens SET character_id = NULL 
+        WHERE campaign_id = ? AND character_id IN (SELECT id FROM characters WHERE user_id = ? AND campaign_id = ?)
+      `).run(campaignId, actualTargetUserId, campaignId);
+      this.db.prepare(`
+        UPDATE combatants SET character_id = NULL 
+        WHERE campaign_id = ? AND character_id IN (SELECT id FROM characters WHERE user_id = ? AND campaign_id = ?)
+      `).run(campaignId, actualTargetUserId, campaignId);
+      this.db.exec('COMMIT;');
+    } catch (err) {
+      this.db.exec('ROLLBACK;');
+      throw err;
+    }
+  }
+
+  getChatMessages(campaignId: string, limit = 100): Array<{
+    id: string;
+    campaign_id: string;
+    sender_id: string;
+    sender_name: string;
+    content: string;
+    type: string;
+    created_at: string;
+  }> {
+    return this.db.prepare(`
+      SELECT id, campaign_id, sender_id, sender_name, content, type, created_at
+      FROM campaign_chat_messages
+      WHERE campaign_id = ?
+      ORDER BY created_at ASC
+      LIMIT ?
+    `).all(campaignId, limit) as any[];
+  }
+
+  addChatMessage(
+    campaignId: string,
+    senderId: string,
+    senderName: string,
+    content: string,
+    type: string = 'text'
+  ): {
+    id: string;
+    campaign_id: string;
+    sender_id: string;
+    sender_name: string;
+    content: string;
+    type: string;
+    created_at: string;
+  } {
+    if (!content || !content.trim()) {
+      throw new Error('Mensagem não pode ser vazia.');
+    }
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+
+    this.db.prepare(`
+      INSERT INTO campaign_chat_messages (id, campaign_id, sender_id, sender_name, content, type, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(id, campaignId, senderId, senderName, content.trim(), type, now);
+
+    return {
+      id,
+      campaign_id: campaignId,
+      sender_id: senderId,
+      sender_name: senderName,
+      content: content.trim(),
+      type,
+      created_at: now
+    };
   }
 }

@@ -6,6 +6,7 @@ import fs from 'fs';
 import { DatabaseSync } from 'node:sqlite';
 import { AuthService } from './modules/auth/auth.service';
 import { createAuthMiddleware } from './modules/auth/auth.middleware';
+import { createRateLimiter } from './modules/auth/rate-limit.middleware';
 import { RbacService } from './modules/permissions/rbac.service';
 import { RulesService } from './modules/rules-engine/rules.service';
 import { CampaignService } from './modules/campaigns/campaign.service';
@@ -15,6 +16,7 @@ import { RealtimeServer } from './modules/realtime/ws.server';
 import { VttService } from './modules/vtt/vtt.service';
 import { CombatService, Combatant } from './modules/combat/combat.service';
 import { BestiaryService } from './modules/bestiary/bestiary.service';
+import { MasterToolsService } from './modules/master-tools/master-tools.service';
 
 export interface AppContext {
   app: Express;
@@ -28,6 +30,7 @@ export interface AppContext {
   vttService: VttService;
   combatService: CombatService;
   bestiaryService: BestiaryService;
+  masterToolsService: MasterToolsService;
   realtimeServer?: RealtimeServer;
   setRealtimeServer: (rt: RealtimeServer) => void;
 }
@@ -39,6 +42,7 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
   const setRealtimeServer = (rt: RealtimeServer) => {
     activeRealtimeServer = rt;
     rt.setVttService(vttService);
+    rt.setCampaignService(campaignService);
     app.set('realtimeServer', rt);
   };
   const getRealtime = (): RealtimeServer | undefined => {
@@ -58,16 +62,23 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
   const vttService = new VttService(db, characterService);
   const combatService = new CombatService(db, rulesService, characterService, inventoryService);
   const bestiaryService = new BestiaryService(db, rulesService, characterService);
+  const masterToolsService = new MasterToolsService(db);
 
   if (activeRealtimeServer) {
     activeRealtimeServer.setVttService(vttService);
+    activeRealtimeServer.setCampaignService(campaignService);
   }
 
   // Middlewares de autenticação e permissão
   const requireAuth = createAuthMiddleware(authService);
+  const authRateLimiter = createRateLimiter({
+    windowMs: 60 * 1000, // 1 minuto
+    maxRequests: 30, // 30 requisições por minuto por IP
+    message: 'Muitas tentativas de autenticação. Aguarde um minuto e tente novamente.'
+  });
 
   // --- ROTAS DE AUTENTICAÇÃO ---
-  app.post('/api/auth/register', (req: Request, res: Response) => {
+  app.post('/api/auth/register', authRateLimiter, (req: Request, res: Response) => {
     try {
       const result = authService.register(req.body);
       res.status(201).json(result);
@@ -76,7 +87,7 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
     }
   });
 
-  app.post('/api/auth/login', (req: Request, res: Response) => {
+  app.post('/api/auth/login', authRateLimiter, (req: Request, res: Response) => {
     try {
       const result = authService.login(req.body);
       res.status(200).json(result);
@@ -179,6 +190,23 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
       const { role } = req.body;
       campaignService.updateMemberRole(req.params.campaignId, req.params.targetUserId, role, req.user!.userId);
       res.json({ success: true });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/campaigns/:campaignId/members/:targetUserId', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      campaignService.removeMember(req.params.campaignId, req.params.targetUserId, req.user!.userId);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, {
+          type: 'campaign:member_removed',
+          userId: req.params.targetUserId
+        });
+        rt.disconnectUserFromCampaign(req.params.campaignId, req.params.targetUserId);
+      }
+      res.json({ success: true, message: 'Jogador removido da campanha com sucesso.' });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
     }
@@ -377,7 +405,23 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
 
       const rollResult = rulesService.evaluateFormula(req.params.campaignId, exprOrId, variables || {});
 
-      // Salva a rolagem no histórico da campanha
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+
+      let characterName: string | undefined = undefined;
+      if (characterId) {
+        const char = characterService.getCharacterById(req.params.campaignId, characterId);
+        if (!char) {
+          res.status(404).json({ error: 'Personagem não encontrado nesta campanha.' });
+          return;
+        }
+        if (char.user_id !== req.user!.userId && !isMaster) {
+          res.status(403).json({ error: 'Você não tem permissão para realizar rolagens com o personagem de outro jogador.' });
+          return;
+        }
+        characterName = char.name;
+      }
+
+      // Salva a rolagem no histórico da campanha estritamente após validação de autorização
       const rollId = crypto.randomUUID();
       db.prepare(`
         INSERT INTO dice_rolls (id, campaign_id, user_id, character_id, expression, breakdown_json, total, context_type, is_secret)
@@ -392,12 +436,6 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
         rollResult.total,
         isSecret ? 1 : 0
       );
-
-      let characterName: string | undefined = undefined;
-      if (characterId) {
-        const char = characterService.getCharacterById(req.params.campaignId, characterId);
-        characterName = char?.name;
-      }
 
       const now = new Date().toISOString();
       const rollPayload = {
@@ -428,8 +466,6 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
           { masterOnly: !!isSecret }
         );
       }
-
-      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
 
       if (isSecret && !isMaster) {
         // Se a rolagem for secreta e disparada por um jogador comum,
@@ -506,18 +542,99 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
 
   app.post('/api/campaigns/:campaignId/characters', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
     try {
-      const character = characterService.createCharacter(req.params.campaignId, req.user!.userId, req.body);
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+
+      // Trava de segurança: se o usuário for jogador comum, bloqueia a criação direta com 403 e emite solicitação de pendência ao mestre
+      if (!isMaster) {
+        const request = characterService.createCharacterRequest(req.params.campaignId, req.user!.userId, req.body);
+
+        const rt = getRealtime();
+        if (rt) {
+          rt.broadcast(req.params.campaignId, {
+            type: 'character_request:created',
+            request
+          }, undefined, { masterOnly: true });
+        }
+
+        res.status(403).json({
+          error: 'A criação direta de personagens é restrita ao Mestre. Sua solicitação foi enviada para aprovação do Mestre da campanha.',
+          status: 'pending_approval',
+          request
+        });
+        return;
+      }
+
+      const targetUserId = (isMaster && req.body.userId) ? req.body.userId : req.user!.userId;
+      const character = characterService.createCharacter(req.params.campaignId, targetUserId, req.body);
       
       // Notifica sala via realtime
       const rt = getRealtime();
       if (rt) {
         rt.broadcast(req.params.campaignId, {
           type: 'character:created',
-          character: { id: character.id, name: character.name, userId: req.user!.userId }
+          character: { id: character.id, name: character.name, userId: targetUserId }
         });
       }
 
       res.status(201).json({ character });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  // Endpoints de solicitação e aprovação de personagens
+  app.get('/api/campaigns/:campaignId/character-requests', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const requests = characterService.getCharacterRequests(req.params.campaignId, req.user!.userId, isMaster);
+      res.json({ requests });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/character-requests/:requestId/approve', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const result = characterService.approveCharacterRequest(req.params.campaignId, req.params.requestId, req.user!.userId);
+
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, {
+          type: 'character_request:approved',
+          requestId: req.params.requestId,
+          character: result.character
+        });
+        rt.broadcast(req.params.campaignId, {
+          type: 'character:created',
+          character: { id: result.character.id, name: result.character.name, userId: result.character.user_id }
+        });
+      }
+
+      res.json({ success: true, message: 'Personagem aprovado com sucesso!', ...result });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/character-requests/:requestId/reject', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const request = characterService.rejectCharacterRequest(
+        req.params.campaignId,
+        req.params.requestId,
+        req.user!.userId,
+        req.body?.reason
+      );
+
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, {
+          type: 'character_request:rejected',
+          requestId: req.params.requestId,
+          reason: request.rejection_reason
+        });
+      }
+
+      res.json({ success: true, message: 'Solicitação de personagem rejeitada.', request });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
     }
@@ -625,6 +742,113 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
       }
 
       res.json({ success, character: updatedChar });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  // --- ROTAS DE HABILIDADES DO PERSONAGEM (CRUD E CONTROLE DE TETO) ---
+  const handleAddSkill = (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership ? (req.membership.role === 'owner' || req.membership.role === 'master' || req.membership.role === 'assistant') : false;
+      const char = db.prepare(`SELECT campaign_id FROM characters WHERE id = ?`).get(req.params.characterId) as any;
+      if (!char) {
+        res.status(404).json({ error: 'Personagem não encontrado.' });
+        return;
+      }
+      const campaignId = req.params.campaignId || char.campaign_id;
+      const result = characterService.addSkillToCharacter(campaignId, req.params.characterId, req.body, req.user!.userId, isMaster);
+
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(campaignId, {
+          type: 'character:updated',
+          character: result.character
+        });
+      }
+
+      res.status(201).json(result);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  };
+
+  const handleRemoveSkill = (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership ? (req.membership.role === 'owner' || req.membership.role === 'master' || req.membership.role === 'assistant') : false;
+      const char = db.prepare(`SELECT campaign_id FROM characters WHERE id = ?`).get(req.params.characterId) as any;
+      if (!char) {
+        res.status(404).json({ error: 'Personagem não encontrado.' });
+        return;
+      }
+      const campaignId = req.params.campaignId || char.campaign_id;
+      const updated = characterService.removeSkillFromCharacter(campaignId, req.params.characterId, req.params.skillId, req.user!.userId, isMaster);
+
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(campaignId, {
+          type: 'character:updated',
+          character: updated
+        });
+      }
+
+      res.json({ success: true, character: updated });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  };
+
+  app.post('/api/campaigns/:campaignId/characters/:characterId/skills', requireAuth, rbacService.requireCampaignRole('player'), handleAddSkill);
+  app.post('/api/characters/:characterId/skills', requireAuth, handleAddSkill);
+
+  app.delete('/api/campaigns/:campaignId/characters/:characterId/skills/:skillId', requireAuth, rbacService.requireCampaignRole('player'), handleRemoveSkill);
+  app.delete('/api/characters/:characterId/skills/:skillId', requireAuth, handleRemoveSkill);
+
+  // --- ROTAS DO CHAT EM TEMPO REAL E PERSISTÊNCIA ---
+  app.get(['/api/campaigns/:campaignId/chat/messages', '/api/campaigns/:campaignId/chat'], requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 100;
+      const messages = campaignService.getChatMessages(req.params.campaignId, limit);
+      res.json({ messages });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post(['/api/campaigns/:campaignId/chat/messages', '/api/campaigns/:campaignId/chat'], requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const content = req.body.content || req.body.text;
+      const type = req.body.type || 'text';
+      if (!content || !content.trim()) {
+        res.status(400).json({ error: 'Conteúdo da mensagem é obrigatório.' });
+        return;
+      }
+      const message = campaignService.addChatMessage(
+        req.params.campaignId,
+        req.user!.userId,
+        req.user!.username,
+        content.trim(),
+        type
+      );
+
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, {
+          type: 'chat:message',
+          id: message.id,
+          sender: message.sender_name,
+          sender_name: message.sender_name,
+          userId: message.sender_id,
+          sender_id: message.sender_id,
+          text: message.content,
+          content: message.content,
+          timestamp: message.created_at,
+          created_at: message.created_at,
+          message
+        });
+      }
+
+      res.status(201).json({ message });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
     }
@@ -1842,26 +2066,51 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
   // --- ROTAS DO BESTIÁRIO (CRIATURAS & NPCs) ---
   // ==========================================
 
-  // Listar criaturas do bestiário (seguro por padrão: jogadores só veem criaturas com is_revealed = 1)
+  // Listar criaturas do bestiário (seguro por padrão: jogadores recebem versão sanitizada de acordo com entity_revelations)
   app.get('/api/campaigns/:campaignId/bestiary', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
     try {
       const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
       const category = req.query.category as string | undefined;
       const search = req.query.search as string | undefined;
       const creatures = bestiaryService.getCreatures(req.params.campaignId, { category, search }, isMaster);
+      if (!isMaster) {
+        const sanitized = creatures.map(c =>
+          masterToolsService.revelations.sanitizeEntityPayload(req.params.campaignId, 'monster', c, req.user!.userId, false)
+        );
+        res.json({ creatures: sanitized });
+        return;
+      }
       res.json({ creatures });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
   });
 
-  // Obter criatura do bestiário por ID (404 para jogadores se is_revealed = 0)
+  // Obter criatura do bestiário por ID (sanitizada no backend para jogadores comuns)
   app.get('/api/campaigns/:campaignId/bestiary/:creatureId', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
     try {
       const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
-      const creature = bestiaryService.getCreatureById(req.params.campaignId, req.params.creatureId, isMaster);
+      const creature = bestiaryService.getCreatureById(req.params.campaignId, req.params.creatureId, true);
       if (!creature) {
         res.status(404).json({ error: 'Criatura não encontrada no bestiário.' });
+        return;
+      }
+      if (!isMaster) {
+        // Verifica se há revelações na tabela entity_revelations para este jogador ou públicas
+        const revRows = db.prepare(`
+          SELECT * FROM entity_revelations
+          WHERE campaign_id = ? AND entity_type = 'monster' AND entity_id = ?
+            AND (revealed_to_user_id IS NULL OR revealed_to_user_id = ?)
+        `).all(req.params.campaignId, creature.id, req.user!.userId) as any[];
+
+        // Se a criatura estiver oculta (is_revealed = 0) e não houver nenhuma revelação para este jogador -> 404
+        if (!creature.is_revealed && revRows.length === 0) {
+          res.status(404).json({ error: 'Criatura não encontrada no bestiário.' });
+          return;
+        }
+
+        const sanitized = masterToolsService.revelations.sanitizeEntityPayload(req.params.campaignId, 'monster', creature, req.user!.userId, false);
+        res.json({ creature: sanitized });
         return;
       }
       res.json({ creature });
@@ -2121,6 +2370,424 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
     }
   });
 
+  // ==========================================
+  // --- FASE 5: FERRAMENTAS AVANÇADAS DO MESTRE ---
+  // ==========================================
+
+  // --- 1. CONDIÇÕES AMBIENTAIS ---
+  const broadcastConditionEvent = (campaignId: string, condition: any, action: 'created' | 'updated' | 'deleted') => {
+    const rt = getRealtime();
+    if (!rt) return;
+
+    if (action === 'deleted') {
+      rt.broadcastFiltered(campaignId, (client) => {
+        return {
+          type: 'scene:condition_updated',
+          action: 'deleted',
+          conditionId: condition.id,
+          sceneId: condition.scene_id,
+          removed: true
+        };
+      });
+      rt.broadcast(campaignId, { type: 'environmental:deleted', conditionId: condition.id });
+      rt.broadcast(campaignId, { type: 'environment:change', conditionId: condition.id, removed: true });
+      return;
+    }
+
+    const isActive = Number(condition.is_active) === 1;
+    const isVisible = Number(condition.is_visible_to_players) === 1;
+
+    // Broadcast 1: scene:condition_updated
+    rt.broadcastFiltered(campaignId, (client) => {
+      const isMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+
+      if (isMaster) {
+        return {
+          type: 'scene:condition_updated',
+          action,
+          condition,
+          removed: false
+        };
+      }
+
+      // Jogador comum:
+      if (isActive && isVisible) {
+        return {
+          type: 'scene:condition_updated',
+          action,
+          condition,
+          removed: false
+        };
+      } else {
+        return {
+          type: 'scene:condition_updated',
+          action: 'removed',
+          conditionId: condition.id,
+          sceneId: condition.scene_id,
+          removed: true
+        };
+      }
+    });
+
+    // Broadcast 2: environmental:created / environmental:updated
+    rt.broadcastFiltered(campaignId, (client) => {
+      const isMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+      if (isMaster || (isActive && isVisible)) {
+        return {
+          type: action === 'created' ? 'environmental:created' : 'environmental:updated',
+          condition,
+          removed: false
+        };
+      } else {
+        return {
+          type: 'environmental:updated',
+          conditionId: condition.id,
+          sceneId: condition.scene_id,
+          removed: true
+        };
+      }
+    });
+
+    // Broadcast 3: environment:change
+    rt.broadcastFiltered(campaignId, (client) => {
+      const isMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+      if (isMaster || (isActive && isVisible)) {
+        return {
+          type: 'environment:change',
+          condition,
+          removed: false
+        };
+      } else {
+        return {
+          type: 'environment:change',
+          conditionId: condition.id,
+          sceneId: condition.scene_id,
+          removed: true
+        };
+      }
+    });
+  };
+
+  app.get('/api/campaigns/:campaignId/scenes/:sceneId/conditions', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const conditions = masterToolsService.environmental.getConditions(req.params.campaignId, req.params.sceneId, isMaster);
+      res.json({ conditions });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get(['/api/campaigns/:campaignId/environmental-conditions', '/api/campaigns/:campaignId/conditions'], requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const sceneId = req.query.sceneId as string | undefined;
+      const conditions = masterToolsService.environmental.getConditions(req.params.campaignId, sceneId, isMaster);
+      res.json({ conditions });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get(['/api/campaigns/:campaignId/environmental-conditions/:conditionId', '/api/campaigns/:campaignId/conditions/:conditionId'], requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const condition = masterToolsService.environmental.getConditionById(req.params.campaignId, req.params.conditionId, isMaster);
+      if (!condition) {
+        res.status(404).json({ error: 'Condição ambiental não encontrada.' });
+        return;
+      }
+      res.json({ condition });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post(['/api/campaigns/:campaignId/environmental-conditions', '/api/campaigns/:campaignId/conditions'], requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const condition = masterToolsService.environmental.createCondition(req.params.campaignId, req.body);
+      broadcastConditionEvent(req.params.campaignId, condition, 'created');
+      res.status(201).json({ condition });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.patch(['/api/campaigns/:campaignId/environmental-conditions/:conditionId', '/api/campaigns/:campaignId/conditions/:conditionId'], requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const condition = masterToolsService.environmental.updateCondition(req.params.campaignId, req.params.conditionId, req.body);
+      broadcastConditionEvent(req.params.campaignId, condition, 'updated');
+      res.json({ condition });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post(['/api/campaigns/:campaignId/environmental-conditions/:conditionId/toggle', '/api/campaigns/:campaignId/conditions/:conditionId/toggle'], requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const condition = masterToolsService.environmental.toggleCondition(req.params.campaignId, req.params.conditionId, req.body?.isActive);
+      broadcastConditionEvent(req.params.campaignId, condition, 'updated');
+      res.json({ condition });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.delete(['/api/campaigns/:campaignId/environmental-conditions/:conditionId', '/api/campaigns/:campaignId/conditions/:conditionId'], requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const existing = masterToolsService.environmental.getConditionById(req.params.campaignId, req.params.conditionId, true);
+      masterToolsService.environmental.deleteCondition(req.params.campaignId, req.params.conditionId);
+      broadcastConditionEvent(req.params.campaignId, existing || { id: req.params.conditionId }, 'deleted');
+      res.json({ success: true, conditionId: req.params.conditionId });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  // --- 2. EVENTOS DE CAMPANHA E CENA ---
+  const broadcastEventNotification = (campaignId: string, event: any, type: string) => {
+    const rt = getRealtime();
+    if (!rt) return;
+
+    const targetUsers: string[] = Array.isArray(event.target_user_ids)
+      ? event.target_user_ids
+      : (event.target_user_id ? [event.target_user_id] : []);
+
+    const isPublic = event.visibility === 'public' || event.visibility === 'all';
+    const isTargeted = event.visibility === 'targeted' || event.visibility === 'target_player';
+
+    rt.broadcastFiltered(campaignId, (client) => {
+      const isMaster = client.role === 'owner' || client.role === 'master' || client.role === 'assistant';
+      if (isMaster) {
+        return { type, event };
+      }
+
+      if (isPublic) {
+        return { type, event };
+      }
+
+      if (isTargeted && targetUsers.includes(client.userId)) {
+        return { type, event };
+      }
+
+      // Se for master_only ou target_player de outro usuário, não recebe nada (bloqueio total de vazamento)
+      return null;
+    });
+  };
+
+  app.get('/api/campaigns/:campaignId/events', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const sceneId = req.query.sceneId as string | undefined;
+      const events = masterToolsService.events.getEvents(req.params.campaignId, req.user!.userId, isMaster, sceneId);
+      res.json({ events });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/campaigns/:campaignId/events/:eventId', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const event = masterToolsService.events.getEventById(req.params.campaignId, req.params.eventId, req.user!.userId, isMaster);
+      if (!event) {
+        res.status(404).json({ error: 'Evento não encontrado.' });
+        return;
+      }
+      res.json({ event });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/events', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const event = masterToolsService.events.createEvent(req.params.campaignId, req.user!.userId, req.body);
+      broadcastEventNotification(req.params.campaignId, event, 'event:created');
+      res.status(201).json({ event });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/campaigns/:campaignId/events/:eventId', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const event = masterToolsService.events.updateEvent(req.params.campaignId, req.params.eventId, req.body);
+      broadcastEventNotification(req.params.campaignId, event, 'event:updated');
+      res.json({ event });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/events/:eventId/trigger', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const result = masterToolsService.events.triggerEvent(req.params.campaignId, req.params.eventId, req.user!.userId, true);
+      broadcastEventNotification(req.params.campaignId, result.event, 'event:triggered');
+      res.json(result);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/campaigns/:campaignId/events/:eventId', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      masterToolsService.events.deleteEvent(req.params.campaignId, req.params.eventId);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'event:deleted', eventId: req.params.eventId });
+      }
+      res.json({ success: true, eventId: req.params.eventId });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  // --- 3. NOTAS SECRETAS DO MESTRE ---
+  app.get('/api/notes/:noteId', requireAuth, (req: Request, res: Response) => {
+    try {
+      const row = db.prepare('SELECT campaign_id FROM master_notes WHERE id = ?').get(req.params.noteId) as any;
+      if (!row) {
+        res.status(404).json({ error: 'Nota não encontrada.' });
+        return;
+      }
+      const membership = rbacService.getMembership(row.campaign_id, req.user!.userId);
+      if (!membership) {
+        res.status(403).json({ error: 'Acesso negado. Você não é membro da campanha desta nota.' });
+        return;
+      }
+      const isMaster = membership.role === 'owner' || membership.role === 'master' || membership.role === 'assistant';
+      const note = masterToolsService.notes.getNoteById(row.campaign_id, req.params.noteId, req.user!.userId, isMaster);
+      if (!note) {
+        res.status(404).json({ error: 'Nota não encontrada.' });
+        return;
+      }
+      res.json({ note });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  app.get('/api/campaigns/:campaignId/notes', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const notes = masterToolsService.notes.getNotes(req.params.campaignId, req.user!.userId, isMaster, req.query as any);
+      res.json({ notes });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/campaigns/:campaignId/notes/:noteId', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const note = masterToolsService.notes.getNoteById(req.params.campaignId, req.params.noteId, req.user!.userId, isMaster);
+      if (!note) {
+        res.status(404).json({ error: 'Nota não encontrada.' });
+        return;
+      }
+      res.json({ note });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/notes', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const note = masterToolsService.notes.createNote(req.params.campaignId, req.user!.userId, req.body);
+      const rt = getRealtime();
+      if (rt && !note.is_private) {
+        rt.broadcast(req.params.campaignId, { type: 'note:created', note });
+      }
+      res.status(201).json({ note });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/campaigns/:campaignId/notes/:noteId', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      const note = masterToolsService.notes.updateNote(req.params.campaignId, req.params.noteId, req.body, req.user!.userId, isMaster);
+      res.json({ note });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/notes/:noteId/share', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const sharedUsers = req.body.sharedWithUserIds || req.body.shared_with_user_ids || [];
+      const note = masterToolsService.notes.shareNote(
+        req.params.campaignId,
+        req.params.noteId,
+        sharedUsers,
+        req.body.isPrivate ?? req.body.is_private
+      );
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'note:shared', noteId: note.id });
+      }
+      res.json({ note });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/campaigns/:campaignId/notes/:noteId', requireAuth, rbacService.requireCampaignRole('player'), (req: Request, res: Response) => {
+    try {
+      const isMaster = req.membership!.role === 'owner' || req.membership!.role === 'master' || req.membership!.role === 'assistant';
+      masterToolsService.notes.deleteNote(req.params.campaignId, req.params.noteId, req.user!.userId, isMaster);
+      res.json({ success: true, noteId: req.params.noteId });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  // --- 4. REVELAÇÕES GRANULARES (DATA ACCESS MATRIX) ---
+  app.get('/api/campaigns/:campaignId/revelations', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const entityType = req.query.entity_type as any;
+      const entityId = req.query.entity_id as string;
+      if (entityType && entityId) {
+        const revelations = masterToolsService.revelations.getRevelationsForEntity(req.params.campaignId, entityType, entityId);
+        res.json({ revelations });
+      } else {
+        const rows = db.prepare(`SELECT * FROM entity_revelations WHERE campaign_id = ?`).all(req.params.campaignId);
+        res.json({ revelations: rows });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/campaigns/:campaignId/revelations', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const revelation = masterToolsService.revelations.revealEntity(req.params.campaignId, req.body);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'entity:revealed', revelation });
+      }
+      res.status(201).json({ revelation });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/campaigns/:campaignId/revelations', requireAuth, rbacService.requireCampaignRole('master'), (req: Request, res: Response) => {
+    try {
+      const { entity_type, entity_id, revealed_to_user_id } = req.body;
+      masterToolsService.revelations.unrevealEntity(req.params.campaignId, entity_type, entity_id, revealed_to_user_id);
+      const rt = getRealtime();
+      if (rt) {
+        rt.broadcast(req.params.campaignId, { type: 'entity:unrevealed', entity_type, entity_id });
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
   // Servir SPA estática do frontend se compilada
   const clientDist = path.join(__dirname, '../../client/dist');
   if (fs.existsSync(clientDist)) {
@@ -2143,6 +2810,7 @@ export function createApp(db: DatabaseSync, realtimeServer?: RealtimeServer): Ap
     vttService,
     combatService,
     bestiaryService,
+    masterToolsService,
     realtimeServer: activeRealtimeServer,
     setRealtimeServer
   };

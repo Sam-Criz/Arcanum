@@ -62,3 +62,28 @@ export interface CreateCharacterDTO {
   isNpc?: boolean;
   rawData?: Record<string, any>;
 }
+
+export interface UpdateCharacterDTO {
+  name?: string;
+  templateId?: string;
+  avatarUrl?: string;
+  rawData?: Record<string, any>;
+}
+
+export interface CharacterCreationRequest {
+  id: string;
+  campaign_id: string;
+  user_id: string;
+  username?: string;
+  user_email?: string;
+  name: string;
+  template_id?: string | null;
+  template_name?: string | null;
+  raw_data: Record<string, any>;
+  avatar_url?: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  rejection_reason?: string | null;
+  reviewed_by_user_id?: string | null;
+  created_at: string;
+  updated_at: string;
+}

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-platform-prompt-management": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/agent-platform-prompt-management/SKILL.md",
+      "computedHash": "7661a7ce5642632a63aa08a96dfa886a2c6ba7f66ef36932113bb17c0274b6bf"
+    },
+    "api-gateway-backend-security-and-rate-limiting": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/api-gateway-backend-security-and-rate-limiting/SKILL.md",
+      "computedHash": "da50d37d7bf749a464cc1567d9d71c6cf2bea006792f17fda70fbe3c27e35951"
+    },
+    "developing-genkit-js": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/developing-genkit-js/SKILL.md",
+      "computedHash": "6848922a47221eb8de4e608e0953bc09c1ff51651eecaa5216c81ac7d0596955"
+    },
+    "firebase-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/firebase-basics/SKILL.md",
+      "computedHash": "12e54a6dde0e9deda65494062a1aa178b37018895df219434ba5686db94008e0"
+    },
+    "retrieving-developer-knowledge": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/developers/retrieving-developer-knowledge/SKILL.md",
+      "computedHash": "39a93ca8021bbb6a4160a82c9dccecd6135ffcc691941fa35e51af05cb7e7b41"
+    }
+  }
+}

@@ -1,11 +1,14 @@
+import { notify } from './NotificationProvider';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Scene, Token, CombatEncounter, Character, Campaign, User, api 
+  Scene, Token, CombatEncounter, Character, Campaign, User, EnvironmentalCondition, api 
 } from '../services/api';
 import { CombatTracker } from './CombatTracker';
+import CharacterDetails from './CharacterDetails';
 import { 
   ZoomIn, ZoomOut, RotateCcw, Grid, Eye, EyeOff, Lock, Unlock, 
-  Plus, Settings, Trash2, Swords, Layers, X, Maximize2, Undo
+  Plus, Settings, Trash2, Swords, Layers, X, Maximize2, Undo, Sparkles, Shield, Zap,
+  CloudRain, Flame, Wind, Sun, Moon, Skull, ChevronLeft, Map as MapIcon
 } from 'lucide-react';
 
 interface VirtualTabletopProps {
@@ -36,6 +39,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const [activeScene, setActiveScene] = useState<Scene | null>(null);
   const [tokens, setTokens] = useState<Token[]>([]);
   const [combatEncounter, setCombatEncounter] = useState<CombatEncounter | null>(null);
+  const [environmentalConditions, setEnvironmentalConditions] = useState<EnvironmentalCondition[]>([]);
   const [imageError, setImageError] = useState(false);
 
   // Controles de Visualização (Pan & Zoom)
@@ -50,16 +54,48 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const [showCombatDock, setShowCombatDock] = useState(false);
   const [quickActionTab, setQuickActionTab] = useState<'attack' | 'ability' | 'consumable' | 'defense'>('attack');
   const [quickSelectedTargetId, setQuickSelectedTargetId] = useState<string>('');
+  const [selectedQuickActionId, setSelectedQuickActionId] = useState<string>('');
+  const [isExecutingQuickAction, setIsExecutingQuickAction] = useState<boolean>(false);
+  const [quickActionFeedback, setQuickActionFeedback] = useState<string | null>(null);
+  const [showTargetModal, setShowTargetModal] = useState<boolean>(false);
+  const [showImbueModal, setShowImbueModal] = useState<boolean>(false);
+  const [selectedWeaponForImbue, setSelectedWeaponForImbue] = useState<any | null>(null);
+  const [selectedOilForImbue, setSelectedOilForImbue] = useState<string>('');
+  const [isExecutingImbue, setIsExecutingImbue] = useState<boolean>(false);
+  const [dockInventory, setDockInventory] = useState<any[]>([]);
+  const [dockInventoryTrigger, setDockInventoryTrigger] = useState<number>(0);
   const [showSceneModal, setShowSceneModal] = useState(false);
   const [showAddTokenModal, setShowAddTokenModal] = useState(false);
   const [showEditTokenModal, setShowEditTokenModal] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [selectedCharacterDetails, setSelectedCharacterDetails] = useState<any | null>(null);
   const [isEditingScene, setIsEditingScene] = useState(false);
+  const [isSceneIslandCollapsed, setIsSceneIslandCollapsed] = useState(false);
+  const [isToolsIslandCollapsed, setIsToolsIslandCollapsed] = useState(false);
 
   // Fog of war mode (GM only)
   const [fogMode, setFogMode] = useState<'view' | 'hide' | 'reveal'>('view');
   const [fogDragStart, setFogDragStart] = useState<{ x: number; y: number } | null>(null);
   const [currentFogRect, setCurrentFogRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+
+  // Vínculo Reativo do Dock Tático ao Personagem/Token Ativo
+  const activeTurnCombatant = combatEncounter?.combatants?.[combatEncounter.turn_index];
+  const selectedTokenCombatant = selectedToken ? combatEncounter?.combatants?.find(c => c.token_id === selectedToken.id || (selectedToken.character_id && c.character_id === selectedToken.character_id)) : null;
+  const dockCombatant = (isMaster && selectedTokenCombatant) ? selectedTokenCombatant : (activeTurnCombatant || selectedTokenCombatant);
+  const dockCharId = dockCombatant?.character_id || selectedToken?.character_id || selectedCharacter?.id || (characters.find(c => c.user_id === user.id)?.id);
+
+  useEffect(() => {
+    if (dockCharId && campaign?.id) {
+      api.getCharacterInventory(campaign.id, dockCharId)
+        .then((res: any) => {
+          const items = Array.isArray(res) ? res : (res?.items || []);
+          setDockInventory(items);
+        })
+        .catch(() => setDockInventory([]));
+    } else {
+      setDockInventory([]);
+    }
+  }, [dockCharId, campaign?.id, dockInventoryTrigger]);
 
   // Arraste de Tokens
   const [draggingTokenId, setDraggingTokenId] = useState<string | null>(null);
@@ -95,7 +131,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const [tokenFormName, setTokenFormName] = useState('');
   const [tokenFormAvatar, setTokenFormAvatar] = useState('');
   const [tokenFormSize, setTokenFormSize] = useState<number>(1);
-  const [tokenFormColor, setTokenFormColor] = useState('#4f46e5');
+  const [tokenFormColor, setTokenFormColor] = useState('#c86d51');
   const [tokenNpcDefense, setTokenNpcDefense] = useState<number>(10);
   const [tokenNpcDR, setTokenNpcDR] = useState<number>(0);
   const [tokenNpcResistances, setTokenNpcResistances] = useState('');
@@ -123,7 +159,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
     id: '',
     name: '',
     size: 1,
-    color: '#4f46e5',
+    color: '#c86d51',
     current_hp: 20,
     max_hp: 20,
     defense: 10,
@@ -201,6 +237,23 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
     }
   };
 
+  const loadConditions = useCallback(async (sceneId?: string | null) => {
+    try {
+      const conds = await api.getEnvironmentalConditions(campaign.id, sceneId);
+      if (!isMasterRef.current) {
+        setEnvironmentalConditions(conds.filter(c => Number(c.is_active) === 1 && Number(c.is_visible_to_players) === 1));
+      } else {
+        setEnvironmentalConditions(conds);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar condições ambientais:', e);
+    }
+  }, [campaign.id]);
+
+  useEffect(() => {
+    loadConditions(activeScene?.id || null);
+  }, [campaign.id, activeScene?.id, loadConditions]);
+
   // ==========================================
   // SINCRONIZAÇÃO EM TEMPO REAL VIA WEBSOCKET
   // ==========================================
@@ -223,6 +276,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       if (activeSceneRef.current?.id) {
         loadTokens(activeSceneRef.current.id);
       }
+      loadConditions(activeSceneRef.current?.id || null);
       return;
     }
 
@@ -308,8 +362,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       } : s));
     }
 
+    if (type === 'inventory:updated') {
+      setDockInventoryTrigger(prev => prev + 1);
+    }
+
     // 4. Combate
     else if (type.startsWith('combat:')) {
+      setDockInventoryTrigger(prev => prev + 1);
       if (type === 'combat:ended') {
         setCombatEncounter(null);
         setShowCombatDock(false);
@@ -320,7 +379,56 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         }
       }
     }
-  }, []);
+
+    // 5. Condições Ambientais da Cena / Campanha
+    else if (
+      type === 'scene:condition_updated' ||
+      type === 'environment:change' ||
+      type === 'environmental:updated' ||
+      type === 'environmental:created'
+    ) {
+      if (msg.removed && (msg.conditionId || msg.condition?.id)) {
+        const targetId = msg.conditionId || msg.condition?.id;
+        setEnvironmentalConditions(prev => prev.filter(c => c.id !== targetId));
+      } else if (msg.condition) {
+        const cond: EnvironmentalCondition = msg.condition;
+        const currentSceneId = activeSceneRef.current?.id;
+        const belongsToScene = !cond.scene_id || (currentSceneId && cond.scene_id === currentSceneId);
+
+        if (!belongsToScene) {
+          setEnvironmentalConditions(prev => prev.filter(c => c.id !== cond.id));
+          return;
+        }
+
+        if (!isMasterRef.current && (Number(cond.is_active) !== 1 || Number(cond.is_visible_to_players) !== 1)) {
+          setEnvironmentalConditions(prev => prev.filter(c => c.id !== cond.id));
+        } else {
+          setEnvironmentalConditions(prev => {
+            const exists = prev.some(c => c.id === cond.id);
+            if (exists) {
+              return prev.map(c => c.id === cond.id ? cond : c);
+            }
+            return [...prev, cond];
+          });
+        }
+      }
+    } else if (type === 'environmental:deleted') {
+      const targetId = msg.conditionId;
+      setEnvironmentalConditions(prev => prev.filter(c => c.id !== targetId));
+    }
+  }, [loadConditions]);
+
+  const renderConditionIcon = (iconName?: string | null) => {
+    const norm = (iconName || '').toLowerCase();
+    if (norm.includes('rain') || norm.includes('chuva')) return <CloudRain className="w-3.5 h-3.5 text-blue-400" />;
+    if (norm.includes('skull') || norm.includes('gas') || norm.includes('veneno')) return <Skull className="w-3.5 h-3.5 text-emerald-400" />;
+    if (norm.includes('zap') || norm.includes('raio') || norm.includes('tempestade')) return <Zap className="w-3.5 h-3.5 text-amber-400" />;
+    if (norm.includes('fog') || norm.includes('nevoa') || norm.includes('wind') || norm.includes('vento')) return <Wind className="w-3.5 h-3.5 text-slate-300" />;
+    if (norm.includes('fire') || norm.includes('fogo') || norm.includes('flame') || norm.includes('calor')) return <Flame className="w-3.5 h-3.5 text-orange-400" />;
+    if (norm.includes('sun') || norm.includes('sol') || norm.includes('luz')) return <Sun className="w-3.5 h-3.5 text-yellow-400" />;
+    if (norm.includes('moon') || norm.includes('lua') || norm.includes('escuridao') || norm.includes('noite')) return <Moon className="w-3.5 h-3.5 text-[#ebe7de]" />;
+    return <Sparkles className="w-3.5 h-3.5 text-[#c86d51]" />;
+  };
 
   useEffect(() => {
     if (subscribeVtt) {
@@ -338,6 +446,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   // ==========================================
   // CONTROLE DE NAVEGAÇÃO, ZOOM E ENQUADRAMENTO
   // ==========================================
+  const activeConditionsToDisplay = environmentalConditions.filter(c => {
+    if (isMaster) return true;
+    return Number(c.is_active) === 1 && Number(c.is_visible_to_players) === 1;
+  });
+
   const handleZoom = (delta: number) => {
     setZoom(prev => Math.max(0.15, Math.min(3, Math.round((prev + delta) * 10) / 10)));
   };
@@ -493,7 +606,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             }));
           }
         } catch (err: any) {
-          alert(`Não foi possível mover o token: ${err.message}`);
+          notify.error('Movimentação Bloqueada', err.message);
           loadTokens(activeScene.id);
         }
       }
@@ -507,11 +620,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
     const isOwner = token.owner_user_id === user.id;
     if (!isMaster && !isOwner) {
-      alert('Você não tem permissão para mover o token de outro participante.');
+      notify.warning('Acesso Negado', 'Você não tem permissão para mover o token de outro participante.');
       return;
     }
     if (token.is_locked && !isMaster) {
-      alert('Este token está bloqueado pelo mestre.');
+      notify.warning('Token Bloqueado', 'Este token está bloqueado pelo mestre.');
       return;
     }
 
@@ -633,7 +746,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       }
       setShowSceneModal(false);
     } catch (err: any) {
-      alert(`Erro ao salvar cena: ${err.message}`);
+      notify.error('Erro ao Salvar Cena', err.message);
     }
   };
 
@@ -643,20 +756,22 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       setActiveScene(activated);
       setScenes(prev => prev.map(s => ({ ...s, is_active: s.id === sceneId })));
     } catch (err: any) {
-      alert(`Erro ao ativar cena: ${err.message}`);
+      notify.error('Erro ao Ativar Cena', err.message);
     }
   };
 
   const handleDeleteScene = async (sceneId: string) => {
-    if (!confirm('Deseja excluir permanentemente esta cena e todos os seus tokens?')) return;
-    try {
-      await api.deleteScene(campaign.id, sceneId);
-      const res = await api.getScenes(campaign.id);
-      setScenes(res.scenes);
-      setActiveScene(res.activeScene);
-    } catch (err: any) {
-      alert(`Erro ao excluir cena: ${err.message}`);
-    }
+    notify.confirm('Deseja excluir permanentemente esta cena e todos os seus tokens?', async () => {
+      try {
+        await api.deleteScene(campaign.id, sceneId);
+        const res = await api.getScenes(campaign.id);
+        setScenes(res.scenes);
+        setActiveScene(res.activeScene);
+        notify.success('Cena Excluída');
+      } catch (err: any) {
+        notify.error('Erro ao excluir cena', err.message);
+      }
+    });
   };
 
   // ==========================================
@@ -709,7 +824,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       setTokenNpcHp(20);
       setTokenNpcMaxHp(20);
     } catch (err: any) {
-      alert(`Erro ao adicionar token: ${err.message}`);
+      notify.error('Erro ao Adicionar Token', err.message);
     }
   };
 
@@ -719,7 +834,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       id: token.id,
       name: token.name,
       size: token.size,
-      color: token.color || '#4f46e5',
+      color: token.color || '#c86d51',
       current_hp: token.current_hp ?? npc.current_hp ?? 20,
       max_hp: token.max_hp ?? npc.max_hp ?? 20,
       defense: npc.defense ?? 10,
@@ -761,19 +876,21 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       }
       setShowEditTokenModal(false);
     } catch (err: any) {
-      alert(`Erro ao atualizar token: ${err.message}`);
+      notify.error('Erro ao Atualizar Token', err.message);
     }
   };
 
   const handleDeleteToken = async (tokenId: string) => {
-    if (!confirm('Remover token do mapa?')) return;
-    try {
-      await api.deleteToken(campaign.id, tokenId);
-      setTokens(prev => prev.filter(t => t.id !== tokenId));
-      if (selectedToken?.id === tokenId) setSelectedToken(null);
-    } catch (err: any) {
-      alert(`Erro ao remover token: ${err.message}`);
-    }
+    notify.confirm('Remover token do mapa?', async () => {
+      try {
+        await api.deleteToken(campaign.id, tokenId);
+        setTokens(prev => prev.filter(t => t.id !== tokenId));
+        if (selectedToken?.id === tokenId) setSelectedToken(null);
+        notify.success('Token Removido');
+      } catch (err: any) {
+        notify.error('Erro ao remover token', err.message);
+      }
+    });
   };
 
   const handleToggleTokenVisibility = async (token: Token) => {
@@ -788,7 +905,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         } catch {}
       }
     } catch (err: any) {
-      alert(`Erro ao alterar visibilidade: ${err.message}`);
+      notify.error('Erro ao Alterar Visibilidade', err.message);
     }
   };
 
@@ -798,7 +915,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       setTokens(prev => prev.map(t => t.id === token.id ? updated : t));
       setSelectedToken(updated);
     } catch (err: any) {
-      alert(`Erro ao alterar travamento: ${err.message}`);
+      notify.error('Erro ao Alterar Travamento', err.message);
     }
   };
 
@@ -810,7 +927,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       setTokens(prev => prev.map(t => t.id === token.id ? updated : t));
       setSelectedToken(updated);
     } catch (err: any) {
-      alert(`Erro ao alterar tamanho do token: ${err.message}`);
+      notify.error('Erro ao Alterar Tamanho', err.message);
     }
   };
 
@@ -819,277 +936,290 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const mapHeight = activeScene?.height || 2000;
 
   return (
-    <div className="relative w-full h-[780px] bg-[#131211] border border-[#2c2825] rounded-lg overflow-hidden shadow-2xl flex flex-col select-none">
-      {/* BARRA SUPERIOR DE FERRAMENTAS DO VTT */}
-      <div className="h-12 bg-[#1a1816] border-b border-[#2c2825] px-4 flex items-center justify-between z-20">
-        {/* Seletor de Cenas */}
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <span className="font-serif text-sm font-bold text-[#ece3d0]">
-              {activeScene ? activeScene.name : 'Mesa Principal'}
-            </span>
-            {activeScene?.is_active && (
-              <span className="text-[10px] text-[#aaa292] font-mono bg-[#131211] px-1.5 py-0.5 rounded border border-[#2c2825]">
-                Cena ativa
-              </span>
-            )}
-            {isMaster && (
-              <select
-                value={activeScene?.id || ''}
-                onChange={(e) => {
-                  const match = scenes.find(s => s.id === e.target.value);
-                  if (match) {
-                    setActiveScene(match);
-                    localStorage.setItem(`arcanum_active_scene_${campaign.id}`, match.id);
-                  }
-                }}
-                className="bg-[#131211] border border-[#2c2825] rounded px-2 py-0.5 text-xs font-mono text-[#ece3d0] focus:outline-none focus:border-[#c9a04e]"
-              >
-                {scenes.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} {s.is_active ? '★ (Ativa)' : ''}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
+    <div className="relative w-full h-full min-h-0 bg-[#141716] overflow-hidden select-none">
+      {/* 
+        NOVA ARQUITETURA EDITORIAL DO VTT: MAPA EM 100% DA JANELA
+        Ilhas flutuantes retráteis (backdrop-blur-md) sem barras fixas ocupando espaço.
+      */}
 
-          {/* Botões administrativos do Mestre */}
-          {isMaster && (
-            <div className="flex items-center space-x-1 pl-2 border-l border-[#2c2825]">
+      {/* ÁREA CENTRAL: MAPA / VIEWPORT INTERATIVO (100% DA TELA) */}
+      <div 
+        ref={viewportRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onWheel={(e) => {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? -0.1 : 0.1;
+          handleZoom(delta);
+        }}
+        className={`absolute inset-0 w-full h-full overflow-hidden bg-[#141716] ${
+          fogMode !== 'view' ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
+      >
+        {/* ======================================================== */}
+        {/* ILHA 1 FLUTUANTE: CENAS & VISUALIZAÇÃO (TOP-LEFT)        */}
+        {/* ======================================================== */}
+        <div className="absolute top-3 left-3 z-40 pointer-events-auto flex items-center space-x-1.5 bg-[#181c1a]/90 backdrop-blur-md border border-[#343b37] rounded-xl p-1.5 shadow-xl text-xs">
+          {isSceneIslandCollapsed ? (
+            <button
+              onClick={() => setIsSceneIslandCollapsed(false)}
+              title="Expandir visualização do mapa"
+              className="p-1.5 text-[#c86d51] hover:text-[#ebe7de] transition-colors flex items-center space-x-1.5"
+            >
+              <MapIcon className="w-4 h-4 text-[#c86d51]" />
+              <span className="font-serif font-bold text-xs truncate max-w-[120px]">{activeScene?.name || 'Cena'}</span>
+            </button>
+          ) : (
+            <>
               <button
-                onClick={handleOpenCreateScene}
-                title="Nova Cena"
-                className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                onClick={() => setIsSceneIslandCollapsed(true)}
+                title="Minimizar barra"
+                className="p-1 text-[#9b9689] hover:text-[#ebe7de] rounded"
               >
-                <Plus className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
+
+              <div className="flex items-center space-x-1.5 pr-2 border-r border-[#343b37]">
+                <span className="font-serif font-bold text-xs text-[#ebe7de] max-w-[120px] truncate">
+                  {activeScene?.name || 'Mesa Principal'}
+                </span>
+                {isMaster && (
+                  <>
+                    {scenes.length > 1 && (
+                      <select
+                        value={activeScene?.id || ''}
+                        onChange={(e) => {
+                          const match = scenes.find(s => s.id === e.target.value);
+                          if (match) {
+                            setActiveScene(match);
+                            localStorage.setItem(`arcanum_active_scene_${campaign.id}`, match.id);
+                          }
+                        }}
+                        className="bg-[#141716] border border-[#343b37] rounded px-1.5 py-0.5 text-[11px] font-mono text-[#ebe7de]"
+                      >
+                        {scenes.map(s => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      onClick={handleOpenCreateScene}
+                      title="Nova Cena"
+                      className="p-1 text-[#c86d51] hover:bg-[#252a27] rounded"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                    {activeScene && (
+                      <>
+                        <button
+                          onClick={() => handleOpenEditScene(activeScene)}
+                          title="Configurar Cena"
+                          className="p-1 text-[#9b9689] hover:text-[#ebe7de] rounded"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                        </button>
+                        {!activeScene.is_active && (
+                          <button
+                            onClick={() => handleActivateScene(activeScene.id)}
+                            title="Ativar para Jogadores"
+                            className="px-1.5 py-0.5 text-[10px] font-mono text-[#6d9775] hover:bg-[#252a27] rounded"
+                          >
+                            Ativar
+                          </button>
+                        )}
+                        {scenes.length > 1 && (
+                          <button
+                            onClick={() => handleDeleteScene(activeScene.id)}
+                            title="Excluir Cena"
+                            className="p-1 text-[#b84a48] hover:bg-[#252a27] rounded"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Controles de Zoom & Grade */}
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => setShowGrid(!showGrid)}
+                  title="Alternar Grade"
+                  className={`p-1 rounded ${showGrid ? 'text-[#c86d51]' : 'text-[#9b9689]'}`}
+                >
+                  <Grid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => handleZoom(-0.1)}
+                  title="Diminuir Zoom"
+                  className="p-1 text-[#9b9689] hover:text-[#ebe7de]"
+                >
+                  <ZoomOut className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[10px] font-mono text-[#9b9689] w-7 text-center">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={() => handleZoom(0.1)}
+                  title="Aumentar Zoom"
+                  className="p-1 text-[#9b9689] hover:text-[#ebe7de]"
+                >
+                  <ZoomIn className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={resetView}
+                  title="Redefinir Visão (100%)"
+                  className="p-1 text-[#9b9689] hover:text-[#ebe7de]"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={fitToScreen}
+                  title="Enquadrar Mapa"
+                  className="p-1 text-[#9b9689] hover:text-[#c86d51]"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ======================================================== */}
+        {/* ILHA 2 FLUTUANTE: FERRAMENTAS & COMBATE (TOP-RIGHT)      */}
+        {/* ======================================================== */}
+        <div className="absolute top-3 right-3 z-40 pointer-events-auto flex items-center space-x-1.5 bg-[#181c1a]/90 backdrop-blur-md border border-[#343b37] rounded-xl p-1.5 shadow-xl text-xs">
+          {isToolsIslandCollapsed ? (
+            <button
+              onClick={() => setIsToolsIslandCollapsed(false)}
+              title="Expandir Ferramentas"
+              className="p-1.5 text-[#c86d51] hover:text-[#ebe7de] transition-colors"
+            >
+              <Swords className="w-4 h-4 text-[#c86d51]" />
+            </button>
+          ) : (
+            <>
+              {isMaster && activeScene && (
+                <div className="flex items-center space-x-1 pr-2 border-r border-[#343b37]">
+                  <button
+                    onClick={() => setFogMode('view')}
+                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'view' ? 'bg-[#252a27] text-white font-bold' : 'text-[#9b9689]'}`}
+                  >
+                    Mover
+                  </button>
+                  <button
+                    onClick={() => setFogMode('hide')}
+                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'hide' ? 'bg-[#b84a48] text-white font-bold' : 'text-[#9b9689]'}`}
+                  >
+                    Ocultar
+                  </button>
+                  <button
+                    onClick={() => setFogMode('reveal')}
+                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold' : 'text-[#9b9689]'}`}
+                  >
+                    Revelar
+                  </button>
+                  <button
+                    onClick={handleFogHideAll}
+                    title="Ocultar todo o mapa"
+                    className="px-1 text-[10px] text-[#9b9689] hover:text-[#b84a48]"
+                  >
+                    Ocultar Tudo
+                  </button>
+                  <button
+                    onClick={handleFogRevealAll}
+                    title="Revelar todo o mapa"
+                    className="px-1 text-[10px] text-[#9b9689] hover:text-[#6d9775]"
+                  >
+                    Revelar Tudo
+                  </button>
+                  {activeScene.fog_data && activeScene.fog_data.length > 0 && (
+                    <button onClick={handleFogUndo} title="Desfazer" className="p-1 text-[#9b9689] hover:text-[#c86d51]">
+                      <Undo className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              )}
 
               {activeScene && (
-                <>
-                  <button
-                    onClick={() => handleOpenEditScene(activeScene)}
-                    title="Configurar Cena"
-                    className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-
-                  {!activeScene.is_active && (
-                    <button
-                      onClick={() => handleActivateScene(activeScene.id)}
-                      title="Ativar para Jogadores"
-                      className="px-2.5 py-1 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                      Ativar Mesa
-                    </button>
-                  )}
-
-                  {scenes.length > 1 && (
-                    <button
-                      onClick={() => handleDeleteScene(activeScene.id)}
-                      title="Excluir Cena"
-                      className="p-1.5 bg-[#8a2c38]/30 hover:bg-[#8a2c38] text-[#ece3d0] border border-[#8a2c38] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Ferramentas de Visualização e Modos */}
-        <div className="flex items-center space-x-2">
-          {/* Toggle de Fog of War (Mestre) */}
-          {isMaster && activeScene && (
-            <div className="flex items-center bg-[#131211] rounded-xl border border-[#2c2825] p-0.5 space-x-0.5 backdrop-blur-sm">
-              <button
-                onClick={() => setFogMode('view')}
-                className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
-                  fogMode === 'view' ? 'bg-slate-800 text-white shadow-sm' : 'text-[#aaa292] hover:text-[#ece3d0]'
-                }`}
-                title="Modo Navegação e Mover"
-              >
-                Mover
-              </button>
-              <button
-                onClick={() => setFogMode('hide')}
-                className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
-                  fogMode === 'hide' ? 'bg-rose-600 text-white font-bold shadow-sm' : 'text-[#aaa292] hover:text-rose-300'
-                }`}
-                title="Arrastar no mapa para ocultar área com névoa"
-              >
-                + Ocultar
-              </button>
-              <button
-                onClick={() => setFogMode('reveal')}
-                className={`px-2 py-1 text-xs rounded-lg font-medium transition-all duration-200 ${
-                  fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'text-[#aaa292] hover:text-emerald-300'
-                }`}
-                title="Arrastar no mapa para revelar área (abrir buraco na névoa)"
-              >
-                - Revelar
-              </button>
-              <button
-                onClick={handleFogHideAll}
-                className="px-1.5 py-1 text-[11px] text-[#aaa292] hover:text-[#b24a52] hover:bg-slate-900 rounded-lg transition-all duration-150"
-                title="Ocultar todo o mapa de uma vez"
-              >
-                Ocultar Tudo
-              </button>
-              <button
-                onClick={handleFogRevealAll}
-                className="px-1.5 py-1 text-[11px] text-[#aaa292] hover:text-emerald-400 hover:bg-slate-900 rounded-lg transition-all duration-150"
-                title="Revelar todo o mapa para os jogadores"
-              >
-                Revelar Tudo
-              </button>
-              {activeScene.fog_data && activeScene.fog_data.length > 0 && (
                 <button
-                  onClick={handleFogUndo}
-                  className="p-1 text-[#aaa292] hover:text-[#c9a04e] hover:bg-slate-900 rounded"
-                  title="Desfazer última alteração de névoa"
+                  onClick={() => {
+                    if (selectedCharacter) {
+                      setTokenFormCharId(selectedCharacter.id);
+                      setTokenFormName(selectedCharacter.name);
+                      setTokenFormAvatar(selectedCharacter.avatar_url || '');
+                    }
+                    setShowAddTokenModal(true);
+                  }}
+                  className="px-2.5 py-1 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs flex items-center space-x-1"
                 >
-                  <Undo className="w-3 h-3" />
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Token</span>
                 </button>
               )}
-            </div>
+
+              <button
+                onClick={() => setShowCombatDock(!showCombatDock)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 border ${
+                  showCombatDock
+                    ? 'bg-[#c86d51] text-[#141716] font-bold border-transparent'
+                    : 'bg-[#141716] text-[#ebe7de] border-[#343b37] hover:border-[#c86d51]'
+                }`}
+              >
+                <Swords className="w-3.5 h-3.5 text-[#c86d51]" />
+                <span>Combate</span>
+                {combatEncounter && combatEncounter.status === 'active' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsToolsIslandCollapsed(true)}
+                title="Minimizar ferramentas"
+                className="p-1 text-[#9b9689] hover:text-[#ebe7de] rounded"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </>
           )}
-
-          {/* Botão Adicionar Token */}
-          {activeScene && (
-            <button
-              onClick={() => {
-                if (selectedCharacter) {
-                  setTokenFormCharId(selectedCharacter.id);
-                  setTokenFormName(selectedCharacter.name);
-                  setTokenFormAvatar(selectedCharacter.avatar_url || '');
-                }
-                setShowAddTokenModal(true);
-              }}
-              className="px-3 py-1.5 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Token</span>
-            </button>
-          )}
-
-          {/* Toggle Grade */}
-          <button
-            onClick={() => setShowGrid(!showGrid)}
-            title="Alternar Grade"
-            className={`p-1.5 rounded-xl border transition-all duration-200 hover:scale-[1.05] active:scale-[0.95] ${
-              showGrid 
-                ? 'bg-[#2c2825] text-[#c9a04e] border-[#c9a04e]' 
-                : 'bg-slate-800/80 text-[#aaa292] border-[#574e45] hover:text-white'
-            }`}
-          >
-            <Grid className="w-4 h-4" />
-          </button>
-
-          {/* Botão Enquadrar Mapa (Fit to Screen) */}
-          <button
-            onClick={fitToScreen}
-            title="Enquadrar Mapa (Centralizar e Ajustar Visão)"
-            className="px-2.5 py-1.5 bg-[#2c2825] hover:bg-[#574e45] border border-[#574e45] text-[#ece3d0] rounded text-xs font-medium flex items-center space-x-1 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Maximize2 className="w-3.5 h-3.5 text-[#c9a04e]" />
-            <span className="hidden sm:inline">Enquadrar</span>
-          </button>
-
-          {/* Controles de Zoom */}
-          <div className="flex items-center space-x-1 bg-[#131211] border border-[#2c2825] rounded-xl p-0.5 backdrop-blur-sm">
-            <button
-              onClick={() => handleZoom(-0.1)}
-              title="Diminuir Zoom"
-              className="p-1 text-[#aaa292] hover:text-white rounded-lg transition-colors"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-            <span className="text-[11px] font-mono text-[#ece3d0] w-10 text-center">
-              {Math.round(zoom * 100)}%
-            </span>
-            <button
-              onClick={() => handleZoom(0.1)}
-              title="Aumentar Zoom"
-              className="p-1 text-[#aaa292] hover:text-white rounded-lg transition-colors"
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={resetView}
-              title="Redefinir Visão (100%)"
-              className="p-1 text-[#aaa292] hover:text-white rounded-lg border-l border-[#2c2825] transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Botão de Alternar Painel de Combate */}
-          <button
-            onClick={() => setShowCombatDock(!showCombatDock)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border ${
-              showCombatDock
-                ? 'bg-[#c9a04e] text-[#131211] font-bold border-transparent shadow-sm'
-                : 'bg-[#2c2825] text-[#ece3d0] border-[#574e45] hover:border-[#c9a04e]'
-            }`}
-          >
-            <Swords className="w-4 h-4 text-[#c9a04e]" />
-            <span>Combate</span>
-            {combatEncounter && combatEncounter.status === 'active' && (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1" />
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* FITA DE INICIATIVA HORIZONTAL (Design Arcanum V2 - Imagem 5) */}
-      {combatEncounter && combatEncounter.status === 'active' && (
-        <div className="bg-[#1a1816] border-b border-[#2c2825] px-4 py-2 flex items-center justify-between z-20 overflow-x-auto shadow-md">
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="flex items-center space-x-1.5 shrink-0 pr-2 border-r border-[#2c2825]">
-              <span className="font-serif font-bold text-xs text-[#c9a04e]">Rodada {combatEncounter.round}</span>
-            </div>
+        {/* ======================================================== */}
+        {/* ILHA 3 FLUTUANTE: FITA DE INICIATIVA (TOP-CENTER)        */}
+        {/* ======================================================== */}
+        {combatEncounter && combatEncounter.status === 'active' && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center space-x-2 bg-[#181c1a]/95 backdrop-blur-md border border-[#343b37] rounded-full px-4 py-1.5 shadow-2xl max-w-[90vw] overflow-x-auto">
+            <span className="font-serif font-bold text-xs text-[#c86d51] shrink-0 pr-2 border-r border-[#343b37]">
+              Rodada {combatEncounter.round}
+            </span>
 
-            {/* Cartões Horizontais dos Combatentes */}
-            <div className="flex items-center space-x-2 overflow-x-auto py-0.5">
+            <div className="flex items-center space-x-1.5 overflow-x-auto py-0.5">
               {combatEncounter.combatants?.map((c, idx) => {
                 const isActive = idx === combatEncounter.turn_index;
                 const hpPercent = c.hp_percent ?? (c.max_hp ? Math.round(((c.current_hp || 0) / c.max_hp) * 100) : 100);
                 return (
                   <div
                     key={c.id}
-                    onClick={() => {
-                      setShowCombatDock(true);
-                    }}
-                    className={`flex items-center space-x-2 px-2.5 py-1 rounded border transition-all cursor-pointer whitespace-nowrap ${
+                    onClick={() => setShowCombatDock(true)}
+                    className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-full border text-xs cursor-pointer whitespace-nowrap transition-all ${
                       isActive
-                        ? 'bg-[#2c2825] border-[#c9a04e] ring-1 ring-[#c9a04e] text-[#ece3d0] shadow-sm'
-                        : 'bg-[#131211] border-[#2c2825] text-[#aaa292] hover:text-[#ece3d0] hover:border-[#574e45]'
+                        ? 'bg-[#252a27] border-[#c86d51] text-[#ebe7de] font-bold'
+                        : 'bg-[#141716] border-[#343b37] text-[#9b9689] hover:text-[#ebe7de]'
                     }`}
                   >
-                    <span className={`font-mono text-xs font-bold px-1.5 py-0.2 rounded ${
-                      isActive ? 'bg-[#c9a04e] text-[#131211]' : 'bg-[#1a1816] text-[#c9a04e] border border-[#2c2825]'
-                    }`}>
-                      {c.initiative}
-                    </span>
-                    <span className="font-serif text-xs font-semibold">{c.name}</span>
-                    <div className="w-8 h-1 bg-[#131211] rounded-full overflow-hidden border border-[#2c2825] shrink-0">
-                      <div
-                        className="h-full bg-[#b24a52] transition-all"
-                        style={{ width: `${Math.max(0, Math.min(100, hpPercent))}%` }}
-                      />
+                    <span className="font-mono text-[10px] text-[#c86d51]">{c.initiative}</span>
+                    <span className="truncate max-w-[90px]">{c.name}</span>
+                    <div className="w-5 h-1 bg-[#141716] rounded-full overflow-hidden border border-[#343b37]">
+                      <div className="h-full bg-[#b84a48]" style={{ width: `${Math.max(0, Math.min(100, hpPercent))}%` }} />
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
 
-          {/* Botão de Passar Turno */}
-          <div className="flex items-center space-x-2 shrink-0 pl-3">
             {(() => {
               const activeCombatant = combatEncounter.combatants?.[combatEncounter.turn_index];
               const canEndTurn = isMaster || (activeCombatant && activeCombatant.owner_user_id === user.id);
@@ -1104,33 +1234,86 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         console.error('Erro ao passar turno:', e);
                       }
                     }}
-                    className="px-3 py-1 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded text-xs font-serif font-bold transition-all shadow-sm flex items-center space-x-1"
+                    className="px-2.5 py-0.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] rounded-full text-[11px] font-bold shrink-0 ml-1 transition-all active:scale-95"
                   >
-                    <span>Encerrar turno</span>
+                    Passar Turno →
                   </button>
                 );
               }
               return null;
             })()}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ÁREA CENTRAL: MAPA / VIEWPORT INTERATIVO */}
-      <div 
-        ref={viewportRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onWheel={(e) => {
-          e.preventDefault();
-          const delta = e.deltaY > 0 ? -0.1 : 0.1;
-          handleZoom(delta);
-        }}
-        className={`flex-1 relative overflow-hidden bg-[#131211] ${
-          fogMode !== 'view' ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
-        }`}
-      >
+        {/* SOBREPOSIÇÃO DE CONDIÇÕES AMBIENTAIS ATIVAS (ActiveConditionsOverlay) */}
+        {activeConditionsToDisplay.length > 0 && (
+          <div className="absolute top-16 left-3 z-30 flex flex-wrap items-center gap-2 max-w-[calc(100%-120px)] pointer-events-auto select-none">
+            {activeConditionsToDisplay.map((cond) => {
+              const isActive = Number(cond.is_active) === 1;
+              const isVisible = Number(cond.is_visible_to_players) === 1;
+
+              return (
+                <div
+                  key={cond.id}
+                  className={`group relative flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border backdrop-blur-md shadow-lg transition-all duration-200 cursor-help ${
+                    isActive
+                      ? 'bg-[#141716]/85 border-[#c86d51]/60 hover:border-[#c86d51]'
+                      : 'bg-[#141716]/60 border-[#252a27] opacity-60'
+                  }`}
+                >
+                  {renderConditionIcon(cond.icon)}
+                  <span className={`text-xs font-serif font-semibold ${isActive ? 'text-[#ebe7de]' : 'text-[#9b9689]'}`}>
+                    {cond.name}
+                  </span>
+
+                  {isMaster && (
+                    <span className="text-[10px] text-[#9b9689]" title={isVisible ? 'Visível para os jogadores' : 'Oculto para os jogadores'}>
+                      {isVisible ? <Eye className="w-3 h-3 text-[#c86d51]" /> : <EyeOff className="w-3 h-3 text-[#b84a48]" />}
+                    </span>
+                  )}
+
+                  {cond.duration_rounds !== null && cond.duration_rounds !== undefined && (
+                    <span className="text-[10px] font-mono px-1 py-0.2 bg-[#252a27] text-[#c86d51] rounded border border-[#343b37]/50">
+                      {cond.duration_rounds}r
+                    </span>
+                  )}
+
+                  {/* Tooltip Descritivo Flutuante */}
+                  <div className="absolute top-full left-0 mt-2 hidden group-hover:flex flex-col w-64 p-3 bg-[#1c201e]/95 backdrop-blur-md border border-[#c86d51]/40 rounded-lg shadow-sm text-left z-50 pointer-events-none transition-all">
+                    <div className="flex items-center justify-between border-b border-[#252a27] pb-1.5 mb-1.5">
+                      <span className="font-serif font-bold text-xs text-[#c86d51]">{cond.name}</span>
+                      <div className="flex items-center space-x-1">
+                        {!isActive && (
+                          <span className="text-[9px] font-mono px-1 py-0.2 bg-[#b84a48]/30 text-[#b84a48] rounded">
+                            Inativa
+                          </span>
+                        )}
+                        {cond.duration_rounds && (
+                          <span className="text-[10px] font-mono text-[#9b9689]">
+                            {cond.duration_rounds} rodadas
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {cond.description ? (
+                      <p className="text-xs text-[#ebe7de] leading-relaxed mb-1">{cond.description}</p>
+                    ) : (
+                      <p className="text-xs text-[#9b9689] italic mb-1">Sem descrição detalhada.</p>
+                    )}
+
+                    {cond.effect_payload?.formula && (
+                      <div className="text-[10px] font-mono text-emerald-400 mt-1 pt-1 border-t border-[#252a27] flex items-center justify-between">
+                        <span>Fórmula: {cond.effect_payload.formula}</span>
+                        <span>{cond.effect_payload.damage_type || 'efeito'}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
         {activeScene ? (
           <div
             style={{
@@ -1170,14 +1353,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 onError={() => setImageError(true)}
               />
             ) : imageError ? (
-              <div className="w-full h-full bg-slate-900 border-2 border-dashed border-rose-800/60 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
-                <Layers className="w-12 h-12 text-rose-500/60 mb-2" />
-                <p className="text-[#ece3d0] font-bold text-sm">Não foi possível carregar a imagem de fundo.</p>
-                <p className="text-[#777064] text-xs mt-1">Verifique a URL ou substitua a imagem nas configurações da cena.</p>
+              <div className="w-full h-full bg-[#141716] border-2 border-dashed border-[#343b37] flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+                <Layers className="w-12 h-12 text-[#b84a48]/60 mb-2" />
+                <p className="text-[#ebe7de] font-bold text-sm">Não foi possível carregar a imagem de fundo.</p>
+                <p className="text-[#9b9689] text-xs mt-1">Verifique a URL ou substitua a imagem nas configurações da cena.</p>
               </div>
             ) : (
-              <div className="w-full h-full bg-slate-900 border-2 border-[#2c2825] flex items-center justify-center pointer-events-none">
-                <span className="text-[#574e45] text-sm font-bold tracking-wider uppercase">
+              <div className="w-full h-full bg-[#141716] border-2 border-[#252a27] flex items-center justify-center pointer-events-none">
+                <span className="text-[#343b37] text-sm font-bold tracking-wider uppercase">
                   Área do Mapa ({mapWidth}x{mapHeight}px)
                 </span>
               </div>
@@ -1229,13 +1412,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     height: `${tokenPxSize}px`
                   }}
                   className={`absolute cursor-pointer transition-shadow rounded-full flex flex-col items-center justify-center ${
-                    isSelected ? 'ring-2 ring-indigo-400 z-20' : isOwner ? 'ring-1 ring-emerald-400/80 z-10' : 'z-10'
+                    isSelected ? 'ring-2 ring-[#c86d51] z-20' : isOwner ? 'ring-1 ring-emerald-400/80 z-10' : 'z-10'
                   } ${isCombatTurn ? 'ring-4 ring-amber-400 animate-pulse z-20' : ''}`}
                 >
                   {/* Token Body / Ring com proporção 1:1 rigorosa sem distorção */}
                   <div 
-                    style={{ borderColor: token.color || '#4f46e5' }}
-                    className={`w-full h-full rounded-full border-2 overflow-hidden shadow-2xl relative bg-slate-900 flex items-center justify-center transition-transform ${
+                    style={{ borderColor: token.color || '#c86d51' }}
+                    className={`w-full h-full rounded-full border-2 overflow-hidden shadow-sm relative bg-[#141716] flex items-center justify-center transition-transform ${
                       !token.is_visible ? 'opacity-50' : 'opacity-100'
                     }`}
                   >
@@ -1249,19 +1432,19 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-indigo-950 font-bold text-white text-xs select-none">
+                      <div className="w-full h-full flex items-center justify-center bg-[#141716] font-bold text-white text-xs select-none">
                         {token.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
 
                     {/* Status icons: Bloqueado / Oculto */}
                     {token.is_locked && (
-                      <div className="absolute top-1 right-1 bg-black/80 p-0.5 rounded-full text-[#c9a04e] shadow">
+                      <div className="absolute top-1 right-1 bg-black/80 p-0.5 rounded-full text-[#c86d51] shadow">
                         <Lock className="w-2.5 h-2.5" />
                       </div>
                     )}
                     {!token.is_visible && (
-                      <div className="absolute bottom-1 right-1 bg-black/80 p-0.5 rounded-full text-[#b24a52] shadow">
+                      <div className="absolute bottom-1 right-1 bg-black/80 p-0.5 rounded-full text-[#b84a48] shadow">
                         <EyeOff className="w-2.5 h-2.5" />
                       </div>
                     )}
@@ -1270,10 +1453,10 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   {/* Barra de Vida Flutuante sobre o Token */}
                   {((token.current_hp !== null && token.max_hp && token.max_hp > 0) || (token.hp_percent !== undefined && token.hp_percent !== null)) && (
                     <div className="absolute -top-3 w-full px-1 pointer-events-none">
-                      <div className="w-full h-1.5 bg-[#131211] rounded-full overflow-hidden border border-[#574e45] shadow">
+                      <div className="w-full h-1.5 bg-[#141716] rounded-full overflow-hidden border border-[#343b37] shadow">
                         {(() => {
                           const pct = token.hp_percent ?? Math.round(((token.current_hp || 0) / (token.max_hp || 1)) * 100);
-                          const barColor = pct <= 25 ? 'bg-rose-500' : pct <= 50 ? 'bg-amber-500' : 'bg-emerald-500';
+                          const barColor = pct <= 25 ? 'bg-[#b84a48]' : pct <= 50 ? 'bg-amber-500' : 'bg-emerald-500';
                           return (
                             <div 
                               className={`h-full transition-all duration-300 ${barColor}`} 
@@ -1286,7 +1469,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   )}
 
                   {/* Nome do Token abaixo com contraste e legibilidade */}
-                  <div className="absolute -bottom-4 bg-[#131211] text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#2c2825] whitespace-nowrap pointer-events-none shadow-md max-w-[120px] truncate">
+                  <div className="absolute -bottom-4 bg-[#141716] text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#252a27] whitespace-nowrap pointer-events-none shadow-md max-w-[120px] truncate">
                     {token.name}
                   </div>
                 </div>
@@ -1325,7 +1508,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <rect
                   width={mapWidth}
                   height={mapHeight}
-                  fill={isMaster ? 'rgba(5, 8, 22, 0.72)' : '#050816'}
+                  fill={isMaster ? 'rgba(20, 23, 22, 0.72)' : '#141716'}
                   mask={`url(#vtt-fog-mask-${activeScene.id})`}
                 />
 
@@ -1342,7 +1525,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                           width={fog.width}
                           height={fog.height}
                           fill="none"
-                          stroke={isHide ? '#f43f5e' : '#10b981'}
+                          stroke={isHide ? '#b84a48' : '#6d9775'}
                           strokeWidth="1.5"
                           strokeDasharray="4 4"
                         />
@@ -1364,20 +1547,20 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 }}
                 className={`absolute border-2 pointer-events-none z-30 ${
                   fogMode === 'hide'
-                    ? 'border-rose-500 bg-rose-950/40'
+                    ? 'border-[#b84a48] bg-[#252a27]'
                     : 'border-emerald-500 bg-emerald-950/40'
                 }`}
               />
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-[#777064] text-sm">
+          <div className="flex flex-col items-center justify-center h-full text-[#9b9689] text-sm">
             <Layers className="w-12 h-12 text-slate-700 mb-3" />
-            <p className="font-semibold text-[#aaa292]">Nenhuma cena criada nesta campanha.</p>
+            <p className="font-semibold text-[#9b9689]">Nenhuma cena criada nesta campanha.</p>
             {isMaster && (
               <button
                 onClick={handleOpenCreateScene}
-                className="mt-3 px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-lg"
+                className="mt-3 px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-lg"
               >
                 + Criar Primeira Cena
               </button>
@@ -1387,12 +1570,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
         {/* POPOVER DE TOKEN SELECIONADO COM CONTROLES DE TAMANHO */}
         {selectedToken && (
-          <div className="absolute bottom-4 left-4 z-40 bg-slate-900/80 border border-[#2c2825] rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
-            <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 border border-[#574e45] shrink-0 flex items-center justify-center">
+          <div className="absolute bottom-4 left-4 z-40 bg-[#1c201e]/90 backdrop-blur-md border border-[#252a27] rounded-2xl p-3 shadow-sm backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
+            <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#252a27] border border-[#343b37] shrink-0 flex items-center justify-center">
               {selectedToken.avatar_url ? (
                 <img src={selectedToken.avatar_url} alt={selectedToken.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white bg-indigo-950">
+                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white bg-[#141716]">
                   {selectedToken.name.slice(0, 2).toUpperCase()}
                 </div>
               )}
@@ -1400,7 +1583,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
             <div className="min-w-0 flex-1">
               <h4 className="text-xs font-bold text-white truncate">{selectedToken.name}</h4>
-              <p className="text-[10px] text-[#aaa292] truncate">
+              <p className="text-[10px] text-[#9b9689] truncate">
                 Pos: ({Math.round(selectedToken.x)}, {Math.round(selectedToken.y)})
                 {selectedToken.current_hp !== null 
                   ? ` • PV: ${selectedToken.current_hp}${selectedToken.max_hp ? `/${selectedToken.max_hp}` : ''}`
@@ -1418,24 +1601,24 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               {/* Controle de Tamanho do Token (Mestre) */}
               {isMaster && (
                 <div className="flex items-center space-x-1.5 mt-1">
-                  <span className="text-[10px] text-[#aaa292] font-semibold">Tamanho:</span>
-                  <div className="flex items-center bg-[#131211] border border-[#574e45] rounded-lg overflow-hidden">
+                  <span className="text-[10px] text-[#9b9689] font-semibold">Tamanho:</span>
+                  <div className="flex items-center bg-[#141716] border border-[#343b37] rounded-lg overflow-hidden">
                     <button
                       onClick={() => handleResizeToken(selectedToken, -0.5)}
                       disabled={selectedToken.size <= 0.5}
                       title="Diminuir tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-[#ece3d0] hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
+                      className="px-1.5 py-0.5 text-xs text-[#ebe7de] hover:text-white hover:bg-[#252a27] disabled:opacity-40 transition-colors"
                     >
                       -
                     </button>
-                    <span className="px-1.5 text-[11px] font-mono font-bold text-[#c9a04e]">
+                    <span className="px-1.5 text-[11px] font-mono font-bold text-[#c86d51]">
                       {selectedToken.size}x
                     </span>
                     <button
                       onClick={() => handleResizeToken(selectedToken, 0.5)}
                       disabled={selectedToken.size >= 4}
                       title="Aumentar tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-[#ece3d0] hover:text-white hover:bg-slate-800 disabled:opacity-40 transition-colors"
+                      className="px-1.5 py-0.5 text-xs text-[#ebe7de] hover:text-white hover:bg-[#252a27] disabled:opacity-40 transition-colors"
                     >
                       +
                     </button>
@@ -1450,28 +1633,28 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <button
                   onClick={() => openEditTokenModal(selectedToken)}
                   title="Configurar Atributos e Estatísticas do Token / NPC"
-                  className="p-1.5 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handleToggleTokenVisibility(selectedToken)}
                   title={selectedToken.is_visible ? "Ocultar dos Jogadores" : "Revelar aos Jogadores"}
-                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#252a27]/90 hover:bg-[#343b37]/90 text-[#ebe7de] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
-                  {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-[#b24a52]" />}
+                  {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-[#b84a48]" />}
                 </button>
                 <button
                   onClick={() => handleToggleTokenLock(selectedToken)}
                   title={selectedToken.is_locked ? "Destravar Movimentação" : "Travar Movimentação"}
-                  className="p-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-[#ece3d0] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#252a27]/90 hover:bg-[#343b37]/90 text-[#ebe7de] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
-                  {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-[#c9a04e]" /> : <Unlock className="w-3.5 h-3.5 text-[#aaa292]" />}
+                  {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-[#c86d51]" /> : <Unlock className="w-3.5 h-3.5 text-[#9b9689]" />}
                 </button>
                 <button
                   onClick={() => handleDeleteToken(selectedToken.id)}
                   title="Remover do Mapa"
-                  className="p-1.5 bg-[#8a2c38]/30 hover:bg-[#8a2c38] text-[#ece3d0] border border-[#8a2c38] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#b84a48]/30 hover:bg-[#b84a48] text-[#ebe7de] border border-[#b84a48] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -1479,120 +1662,836 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             )}
             <button
               onClick={() => setSelectedToken(null)}
-              className="text-[#777064] hover:text-white transition-colors"
+              className="text-[#9b9689] hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* BARRA INFERIOR DE AÇÕES TÁTICAS (Design Arcanum V2 - Imagem 5) */}
+        {/* BARRA INFERIOR DE AÇÕES TÁTICAS (Design Arcanum V2 - Fidelidade Imagem 5) */}
         {combatEncounter && combatEncounter.status === 'active' && (() => {
-          const activeCombatant = combatEncounter.combatants?.[combatEncounter.turn_index];
-          const isMyTurn = isMaster || (activeCombatant && activeCombatant.owner_user_id === user.id);
-          if (!isMyTurn || !activeCombatant) return null;
+          const activeTurnCombatant = combatEncounter.combatants?.[combatEncounter.turn_index];
+          const selectedTokenCombatant = selectedToken ? combatEncounter.combatants?.find(c => c.token_id === selectedToken.id || (selectedToken.character_id && c.character_id === selectedToken.character_id)) : null;
+          const currentActor = (isMaster && selectedTokenCombatant) ? selectedTokenCombatant : (activeTurnCombatant || selectedTokenCombatant);
+          if (!currentActor) return null;
+
+          const actorChar = characters.find(c => c.id === currentActor.character_id || c.id === selectedToken?.character_id);
+          const isMyControl = isMaster || (currentActor.owner_user_id === user.id) || (actorChar?.user_id === user.id);
+          if (!isMyControl) return null;
+
+          // ==========================================
+          // 1. Catálogo Dinâmico Conectado à Ficha Real
+          // ==========================================
+          const isWeaponItem = (i: any) => {
+            const cat = String(i.category || '').toLowerCase();
+            const type = String(i.type || '').toLowerCase();
+            return (
+              cat === 'arma' || cat === 'weapon' ||
+              type === 'weapon' || type === 'arma' ||
+              i.is_weapon === 1 ||
+              Boolean(i.properties?.dano) ||
+              Boolean(i.properties?.damage_formula)
+            );
+          };
+
+          // Todas as armas do inventário (equipadas e na mochila)
+          const allWeapons = dockInventory.filter(isWeaponItem);
+
+          // Armas equipadas aparecem primeiro, seguidas pelas armas na mochila
+          const sortedWeapons = [...allWeapons].sort((a, b) => {
+            const aEq = (a.is_equipped === 1 || a.is_equipped === true) ? 1 : 0;
+            const bEq = (b.is_equipped === 1 || b.is_equipped === true) ? 1 : 0;
+            return bEq - aEq;
+          });
+
+          const weaponActions = sortedWeapons.map((w, idx) => {
+            const props = w.properties || {};
+            const dmgFormula = props.dano || props.damage_formula || '1d8';
+            const dmgType = props.tipo_dano || props.damage_type || 'Cortante';
+            const atqFormula = props.ataque || props.attack_formula || '1d20 + 4';
+            const reach = props.alcance || '1.5m';
+            const imbuedList = props.imbued_effects || [];
+            const isEquipped = w.is_equipped === 1 || w.is_equipped === true;
+
+            return {
+              id: w.id || `wep-${idx}`,
+              weapon_id: w.id,
+              title: w.item_name || w.name,
+              subtitle: isEquipped ? (props.tipo || w.category || 'Arma equipada') : 'Na mochila (desequipada)',
+              attackFormula: atqFormula,
+              damageFormula: `${dmgFormula} ${dmgType}`,
+              rawDamageFormula: dmgFormula,
+              damageType: dmgType.toLowerCase(),
+              costLabel: 'Ação principal 0/1 usada',
+              reach,
+              status: 'available' as const,
+              statusLabel: isEquipped ? (imbuedList.length > 0 ? `Imbuída (${imbuedList.length})` : 'Equipada') : 'Na mochila',
+              isEquipped,
+              imbuedEffects: imbuedList,
+              rawItem: w
+            };
+          });
+
+          const unarmedAction = {
+            id: 'unarmed-strike',
+            weapon_id: undefined,
+            title: 'Ataque Desarmado',
+            subtitle: 'Golpe físico padrão desarmado',
+            attackFormula: '1d20 + 2',
+            damageFormula: '1d4 + 2 Impacto',
+            rawDamageFormula: '1d4 + 2',
+            damageType: 'impacto',
+            costLabel: 'Ação principal 0/1 usada',
+            reach: '1.5m',
+            status: 'available' as const,
+            statusLabel: 'Desarmado',
+            isEquipped: false,
+            imbuedEffects: [],
+            rawItem: null
+          };
+
+          // Lista de Ataque: armas reais disponíveis na ficha + golpe desarmado padrão
+          const attackActions = weaponActions.length > 0 ? [...weaponActions, unarmedAction] : [unarmedAction];
+
+          // Aba HABILIDADES: Habilidades reais associadas ao personagem
+          const rawAbilities = actorChar?.raw_data?.abilities || actorChar?.raw_data?.habilidades || actorChar?.computed_data?.abilities || currentActor.npc_data?.actions || [];
+          const hasAbilities = Array.isArray(rawAbilities) && rawAbilities.length > 0;
+          const abilityActions = hasAbilities ? rawAbilities.map((ab: any, idx: number) => {
+            const name = typeof ab === 'string' ? ab : (ab.name || ab.title || `Habilidade ${idx+1}`);
+            const atq = typeof ab === 'object' && ab.roll ? ab.roll : (ab.attack_formula || '1d20 + 3');
+            const dmg = typeof ab === 'object' && ab.damage ? ab.damage : (ab.damage_formula || ab.effect || 'Efeito tático');
+            const cost = typeof ab === 'object' && ab.cost ? ab.cost : 'Ação principal';
+            const desc = typeof ab === 'object' && ab.description ? ab.description : 'Técnica de combate';
+            const vt = typeof ab === 'object' && ab.valid_targets ? ab.valid_targets : (ab.type === 'heal' ? ['self', 'allies'] : ['enemies', 'any']);
+
+            return {
+              id: ab.id || `ab-${idx}`,
+              title: name,
+              subtitle: desc,
+              attackFormula: atq,
+              damageFormula: dmg,
+              rawDamageFormula: String(dmg).split(' ')[0],
+              costLabel: cost,
+              reach: ab.reach || ab.range || '1.5m',
+              status: 'available' as const,
+              statusLabel: 'Pronta',
+              validTargets: vt
+            };
+          }) : [
+            {
+              id: 'no-abilities',
+              title: 'Nenhuma Habilidade',
+              subtitle: 'Este combatente não possui habilidades registradas',
+              attackFormula: '—',
+              damageFormula: '—',
+              rawDamageFormula: '0',
+              costLabel: '—',
+              reach: '—',
+              status: 'unavailable' as const,
+              statusLabel: '0 disp.',
+              validTargets: ['self']
+            }
+          ];
+
+          // Aba CONSUMÍVEIS: Itens com quantidade > 0 do inventário (exclui armas estritamente)
+          const isConsumableItem = (i: any) => {
+            if (isWeaponItem(i)) return false;
+            const cat = String(i.category || '').toLowerCase();
+            const type = String(i.type || '').toLowerCase();
+            const p = i.properties || {};
+            return (
+              cat === 'consumivel' || cat === 'consumable' || cat === 'pocao' || cat === 'oleo' ||
+              type === 'consumable' || type === 'potion' || type === 'oil' ||
+              p.cura !== undefined || p.heal_formula !== undefined ||
+              p.condition !== undefined || p.imbue_properties !== undefined ||
+              p.status !== undefined || p.is_consumable === true
+            ) && (i.quantity > 0);
+          };
+
+          const consumableItems = dockInventory.filter(isConsumableItem);
+
+          const consumableActions = consumableItems.length > 0 ? consumableItems.map((c, idx) => {
+            const p = c.properties || {};
+            let dmgLabel = 'Efeito ao consumir';
+            if (p.cura) dmgLabel = `Recupera ${p.cura} PV`;
+            else if (p.heal_formula) dmgLabel = `Cura ${p.heal_formula}`;
+            else if (p.dano) dmgLabel = `Causa ${p.dano} ${p.tipo_dano || 'dano'}`;
+            else if (p.damage_formula) dmgLabel = `Dano ${p.damage_formula} ${p.tipo_dano || ''}`;
+            else if (p.condition || p.status) dmgLabel = `Aplica ${p.condition || p.status}`;
+            else if (p.imbue_properties) dmgLabel = `Encanta arma (${p.imbue_properties.damage_type || 'mágico'})`;
+
+            const isImbue = !!p.imbue_properties || c.category === 'oleo' || (c.item_name && c.item_name.toLowerCase().includes('óleo'));
+
+            return {
+              id: c.id || `cons-${idx}`,
+              consumable_item_id: c.id,
+              title: c.item_name || c.name,
+              subtitle: p.descricao || p.description || (p.cura ? 'Restaura vitalidade' : isImbue ? 'Óleo de encantamento' : 'Item consumível'),
+              attackFormula: 'Automático',
+              damageFormula: dmgLabel,
+              rawDamageFormula: String(p.cura || p.dano || '0'),
+              costLabel: p.action_cost === 'main' ? 'Ação principal' : 'Ação bônus 0/1 usada',
+              reach: p.alcance || (p.cura ? 'Pessoal / Aliado' : isImbue ? 'Arma equipada' : 'Pessoal'),
+              status: 'available' as const,
+              statusLabel: `${c.quantity} disp.`,
+              isImbue,
+              rawItem: c,
+              validTargets: p.valid_targets || (p.cura ? ['self', 'allies'] : ['self', 'allies', 'enemies', 'any'])
+            };
+          }) : [
+            {
+              id: 'no-consumables',
+              consumable_item_id: undefined,
+              title: 'Mochila sem consumíveis',
+              subtitle: 'Nenhum consumível com unidades disponíveis',
+              attackFormula: '—',
+              damageFormula: '0',
+              rawDamageFormula: '0',
+              costLabel: '—',
+              reach: 'Pessoal',
+              status: 'unavailable' as const,
+              statusLabel: '0 disp.',
+              isImbue: false,
+              rawItem: null,
+              validTargets: ['self']
+            }
+          ];
+
+          // Aba DEFESA E ESQUIVA: Ações base universais para TODOS os personagens
+          const defenseActions = [
+            {
+              id: 'universal-defend',
+              actionMode: 'defend' as const,
+              title: 'Defesa Normal',
+              subtitle: 'Ergue a guarda ou escudo (+2 RD / Defesa)',
+              attackFormula: 'Automático',
+              damageFormula: '+2 RD até próximo turno',
+              rawDamageFormula: '0',
+              costLabel: 'Ação principal 0/1 usada',
+              reach: 'Pessoal',
+              status: 'available' as const,
+              statusLabel: 'Pronta',
+              validTargets: ['self']
+            },
+            {
+              id: 'universal-dodge',
+              actionMode: 'dodge' as const,
+              title: 'Esquiva Normal',
+              subtitle: 'Reação ágil: rola 1d20 + Agilidade (eleva defesa se maior)',
+              attackFormula: 'Automático',
+              formula: `1d20 + ${(actorChar?.raw_data?.agilidade ?? actorChar?.computed_data?.agilidade ?? 2)}`,
+              damageFormula: `1d20 + ${(actorChar?.raw_data?.agilidade ?? actorChar?.computed_data?.agilidade ?? 2)} (Defesa)`,
+              rawDamageFormula: '0',
+              costLabel: 'Ação principal / reação',
+              reach: 'Pessoal',
+              status: 'available' as const,
+              statusLabel: 'Pronta',
+              validTargets: ['self']
+            }
+          ];
+
+          const currentList = quickActionTab === 'attack' 
+            ? attackActions 
+            : quickActionTab === 'ability' 
+            ? abilityActions 
+            : quickActionTab === 'consumable' 
+            ? consumableActions 
+            : defenseActions;
+
+          const activeAction = currentList.find(a => a.id === selectedQuickActionId) || currentList[0];
+
+          // ==========================================
+          // 2. Seleção de Alvos (Aliados, Inimigos e Self)
+          // ==========================================
+          const allCombatants = combatEncounter.combatants || [];
+          
+          const getFaction = (c: any): 'ally' | 'enemy' => {
+            if (!c.is_npc) return 'ally';
+            const disp = (c.npc_data?.disposition || c.npc_data?.faction || (c.npc_data?.is_ally ? 'friendly' : 'hostile')).toLowerCase();
+            return (disp === 'friendly' || disp === 'ally') ? 'ally' : 'enemy';
+          };
+          const actorFaction = getFaction(currentActor);
+          const isCombatantAlly = (c: any) => getFaction(c) === actorFaction;
+          const isCombatantEnemy = (c: any) => getFaction(c) !== actorFaction;
+          const isCombatantSelf = (c: any) => c.id === currentActor.id;
+
+          // Validador de compatibilidade para a ação em foco
+          const isTargetCompatible = (c: any) => {
+            if (quickActionTab === 'defense') return isCombatantSelf(c);
+            if (quickActionTab === 'consumable') return true;
+            if (quickActionTab === 'ability') {
+              const vt = (activeAction as any).validTargets || ['enemies', 'any'];
+              if (vt.includes('any')) return true;
+              if (vt.includes('self') && isCombatantSelf(c)) return true;
+              if (vt.includes('allies') && isCombatantAlly(c)) return true;
+              if (vt.includes('enemies') && isCombatantEnemy(c)) return true;
+              return false;
+            }
+            return isCombatantEnemy(c);
+          };
+
+          // Define o alvo atual
+          const currentTarget = allCombatants.find(c => c.id === quickSelectedTargetId) || (
+            quickActionTab === 'defense' ? currentActor :
+            (allCombatants.find(c => c.id !== currentActor.id && isTargetCompatible(c)) || allCombatants[0] || null)
+          );
+
+          // Ciclar Alvos
+          const handleCycleTarget = () => {
+            if (allCombatants.length === 0) return;
+            const currentIndex = allCombatants.findIndex(t => t.id === currentTarget?.id);
+            const nextIndex = (currentIndex + 1) % allCombatants.length;
+            setQuickSelectedTargetId(allCombatants[nextIndex].id);
+          };
+
+          // ==========================================
+          // 3. Execução das Ações de Combate
+          // ==========================================
+          const handleExecuteCombatAction = async () => {
+            if (activeAction.status === 'unavailable') {
+              notify.warning('Ação Indisponível', activeAction.statusLabel);
+              return;
+            }
+
+            setIsExecutingQuickAction(true);
+            setQuickActionFeedback(null);
+
+            try {
+              let payload: any = {
+                actor_id: currentActor.id,
+                target_id: currentTarget ? currentTarget.id : currentActor.id
+              };
+
+              if (quickActionTab === 'attack') {
+                payload = {
+                  ...payload,
+                  action_mode: 'weapon',
+                  action_type: 'attack',
+                  weapon_id: (activeAction as any).weapon_id,
+                  attack_formula: activeAction.attackFormula,
+                  formula: (activeAction as any).rawDamageFormula || activeAction.damageFormula.split(' ')[0],
+                  damage_type: (activeAction as any).damageType || 'cortante',
+                  action_cost: 'main'
+                };
+              } else if (quickActionTab === 'ability') {
+                payload = {
+                  ...payload,
+                  action_mode: 'ability',
+                  ability_name: activeAction.title,
+                  attack_formula: activeAction.attackFormula.includes('d') ? activeAction.attackFormula : undefined,
+                  formula: (activeAction as any).rawDamageFormula !== '0' ? (activeAction as any).rawDamageFormula : undefined,
+                  action_cost: 'main'
+                };
+              } else if (quickActionTab === 'consumable') {
+                if (!(activeAction as any).consumable_item_id) {
+                  notify.warning('Sem Item', 'Selecione um consumível disponível.');
+                  setIsExecutingQuickAction(false);
+                  return;
+                }
+                payload = {
+                  ...payload,
+                  action_mode: 'consumable',
+                  consumable_item_id: (activeAction as any).consumable_item_id,
+                  notes: activeAction.title,
+                  action_cost: 'bonus'
+                };
+              } else {
+                // Defesa ou Esquiva Normal
+                payload = {
+                  ...payload,
+                  action_mode: (activeAction as any).actionMode || 'defend',
+                  formula: (activeAction as any).formula,
+                  action_cost: (activeAction as any).actionMode === 'dodge' ? 'reaction' : 'main'
+                };
+              }
+
+              const res = await api.applyCombatAction(campaign.id, combatEncounter.id, payload);
+              const updatedEnc = await api.getActiveCombat(campaign.id);
+              setCombatEncounter(updatedEnc);
+              setDockInventoryTrigger(prev => prev + 1);
+
+              const hitInfo = res.hit !== undefined ? (res.hit ? 'Acertou!' : 'Errou o golpe!') : 'Ação aplicada!';
+              const dmgInfo = res.finalDamage !== undefined ? ` Dano: ${res.finalDamage}` : '';
+              setQuickActionFeedback(`${hitInfo}${dmgInfo}`);
+              notify.success('Ação Realizada', `${activeAction.title}: ${hitInfo}${dmgInfo}`);
+              setTimeout(() => setQuickActionFeedback(null), 3500);
+            } catch (err: any) {
+              setQuickActionFeedback(`Falha: ${err.message}`);
+              notify.error('Erro na Ação', err.message);
+              setTimeout(() => setQuickActionFeedback(null), 3500);
+            } finally {
+              setIsExecutingQuickAction(false);
+            }
+          };
 
           return (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 w-full max-w-xl px-4 pointer-events-auto">
-              <div className="bg-[#1a1816]/95 border border-[#2c2825] rounded-xl p-3 shadow-2xl backdrop-blur-md">
-                {/* Abas de Tipos de Ação */}
-                <div className="flex items-center justify-between border-b border-[#2c2825] pb-2 mb-2">
-                  <div className="flex items-center space-x-1">
+            <div className="absolute bottom-2.5 inset-x-0 z-30 flex justify-center px-4 pointer-events-none">
+              <div className="w-full max-w-4xl bg-[#141716]/90 border border-[#343b37]/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden pointer-events-auto transition-all">
+                {/* Abas Superiores Estilizadas com Contadores Reais */}
+                <div className="flex items-center justify-between border-b border-[#343b37] bg-[#141716]/85 px-4 py-2">
+                  <div className="flex items-center space-x-1.5">
                     <button
                       type="button"
-                      onClick={() => setQuickActionTab('attack')}
-                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                      onClick={() => {
+                        setQuickActionTab('attack');
+                        if (attackActions.length > 0) setSelectedQuickActionId(attackActions[0].id);
+                      }}
+                      className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'attack'
-                          ? 'bg-[#2c2825] text-[#c9a04e] border border-[#c9a04e]'
-                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                          ? 'bg-[#252a27] text-[#c86d51] border border-[#c86d51]/60 shadow-md'
+                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
                       }`}
                     >
-                      Ataque
+                      <Swords className="w-3.5 h-3.5" />
+                      <span>Ataque</span>
+                      <span className="text-[10px] px-1.5 py-0.2 bg-[#141716] text-[#c86d51] rounded-md font-mono font-normal border border-[#343b37]">
+                        {attackActions.length}
+                      </span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setQuickActionTab('ability')}
-                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                      onClick={() => {
+                        setQuickActionTab('ability');
+                        if (abilityActions.length > 0) setSelectedQuickActionId(abilityActions[0].id);
+                      }}
+                      className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'ability'
-                          ? 'bg-[#2c2825] text-[#6f93ad] border border-[#6f93ad]'
-                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                          ? 'bg-[#252a27] text-[#5b8299] border border-[#5b8299]/60 shadow-md'
+                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
                       }`}
                     >
-                      Habilidades
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>Habilidades</span>
+                      <span className="text-[10px] px-1.5 py-0.2 bg-[#141716] text-[#5b8299] rounded-md font-mono font-normal border border-[#343b37]">
+                        {hasAbilities ? abilityActions.length : 0}
+                      </span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setQuickActionTab('consumable')}
-                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                      onClick={() => {
+                        setQuickActionTab('consumable');
+                        if (consumableActions.length > 0) setSelectedQuickActionId(consumableActions[0].id);
+                      }}
+                      className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'consumable'
-                          ? 'bg-[#2c2825] text-[#5e9b76] border border-[#5e9b76]'
-                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                          ? 'bg-[#252a27] text-[#6d9775] border border-[#6d9775]/60 shadow-md'
+                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
                       }`}
                     >
-                      Consumíveis
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Consumíveis</span>
+                      <span className="text-[10px] px-1.5 py-0.2 bg-[#141716] text-[#6d9775] rounded-md font-mono font-normal border border-[#252a27]">
+                        {consumableItems.length}
+                      </span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setQuickActionTab('defense')}
-                      className={`px-2.5 py-1 rounded text-xs font-serif font-bold transition-colors ${
+                      onClick={() => {
+                        setQuickActionTab('defense');
+                        setSelectedQuickActionId(defenseActions[0].id);
+                      }}
+                      className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'defense'
-                          ? 'bg-[#2c2825] text-[#9a83c6] border border-[#9a83c6]'
-                          : 'text-[#aaa292] hover:text-[#ece3d0]'
+                          ? 'bg-[#252a27] text-[#c86d51] border border-[#c86d51]/60 shadow-md'
+                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
                       }`}
                     >
-                      Defesa e esquiva
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>Defesa e Esquiva</span>
                     </button>
                   </div>
 
-                  <span className="text-[10px] text-[#aaa292] font-mono">
-                    Vez de: <strong className="text-[#ece3d0]">{activeCombatant.name}</strong>
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    {quickActionFeedback && (
+                      <span className="text-xs font-mono font-bold text-[#c86d51] bg-[#252a27] px-2.5 py-0.5 rounded-lg border border-[#c86d51]/60 animate-pulse">
+                        {quickActionFeedback}
+                      </span>
+                    )}
+                    <span className="text-[11px] text-[#9b9689] font-mono hidden sm:inline">
+                      Turno: <strong className="text-[#ebe7de]">{currentActor.name}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCombatDock(prev => !prev)}
+                      title="Alternar Visão Completa de Combate"
+                      className="text-xs font-serif text-[#c86d51] hover:text-[#c86d51] px-2 py-1 rounded-lg bg-[#252a27] border border-[#343b37] transition-colors"
+                    >
+                      HUD Detalhado
+                    </button>
+                  </div>
                 </div>
 
-                {/* Resolução de Ataque / Ação */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-serif font-bold text-sm text-[#ece3d0] truncate">
-                      {quickActionTab === 'attack' ? 'Atacar com Arma Principal' : quickActionTab === 'ability' ? 'Usar Habilidade Ativa' : quickActionTab === 'consumable' ? 'Usar Consumível' : 'Postura Defensiva'}
-                    </h4>
-                    <p className="text-xs text-[#aaa292] font-mono truncate">
-                      {quickActionTab === 'attack' ? 'Dano 1d8 + 3 Cortante • Alcance 1.5m' : quickActionTab === 'ability' ? 'Custo de Ação Principal • Recarga 1 turno' : quickActionTab === 'consumable' ? 'Recuperação ou Imbuição de Dano' : 'Aumenta Defesa até o próximo turno'}
-                    </p>
+                {/* Corpo de Duas Colunas da Imagem 5 */}
+                <div className="p-2.5 grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                  {/* Coluna Esquerda: Lista de Opções */}
+                  <div className="md:col-span-5 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                    {currentList.map((item) => {
+                      const isSelected = item.id === activeAction.id;
+                      const isUnavailable = item.status === 'unavailable';
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => setSelectedQuickActionId(item.id)}
+                          className={`p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                            isSelected
+                              ? 'bg-[#252a27] border-[#c86d51] ring-1 ring-[#c86d51] shadow-sm'
+                              : 'bg-[#141716] border-[#252a27] hover:border-[#343b37]'
+                          } ${isUnavailable ? 'opacity-60' : ''}`}
+                        >
+                          <div className="min-w-0 flex-1 pr-2">
+                            <h5 className={`font-serif text-xs font-bold truncate ${isSelected ? 'text-[#c86d51]' : 'text-[#ebe7de]'}`}>
+                              {item.title}
+                            </h5>
+                            <span className="text-[10px] text-[#9b9689] font-mono truncate block">
+                              {item.subtitle}
+                            </span>
+                          </div>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono shrink-0 whitespace-nowrap ${
+                            isUnavailable
+                              ? 'bg-[#b84a48]/20 text-[#b84a48] border-[#b84a48]/40'
+                              : 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
+                          }`}>
+                            {item.statusLabel}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  <div className="flex items-center space-x-2 shrink-0">
-                    {quickActionTab !== 'defense' && (
-                      <select
-                        value={quickSelectedTargetId}
-                        onChange={(e) => setQuickSelectedTargetId(e.target.value)}
-                        className="bg-[#131211] border border-[#2c2825] text-[#ece3d0] rounded px-2 py-1 text-xs font-mono focus:border-[#c9a04e] focus:outline-none max-w-[140px] truncate"
-                      >
-                        <option value="">Escolher Alvo...</option>
-                        {combatEncounter.combatants
-                          ?.filter(c => c.id !== activeCombatant.id)
-                          .map(c => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
-                            </option>
-                          ))}
-                      </select>
-                    )}
+                  {/* Coluna Direita: Card de Resolução e Confirmação */}
+                  <div className="md:col-span-7 bg-[#141716] border border-[#252a27] rounded-lg p-2.5 flex flex-col justify-between space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-serif font-bold text-xs text-[#ebe7de]">
+                          {activeAction.title}
+                        </h4>
+                        <span className="text-[10px] text-[#9b9689] font-mono">
+                          • {activeAction.reach}
+                        </span>
+                      </div>
 
-                    <button
-                      onClick={() => {
-                        setShowCombatDock(true);
-                      }}
-                      className="px-3.5 py-1.5 bg-[#8a2c38] hover:bg-[#8a2c38]/90 text-[#ece3d0] rounded text-xs font-serif font-bold transition-all shadow-md flex items-center space-x-1.5"
-                    >
-                      <Swords className="w-3.5 h-3.5 text-[#ece3d0]" />
-                      <span>Confirmar ataque</span>
-                    </button>
+                      {/* Botões contextuais da aba Ataque (Equipar/Desequipar e Imbuir) */}
+                      {quickActionTab === 'attack' && (activeAction as any).weapon_id && (
+                        <div className="flex items-center space-x-1.5">
+                          {dockCharId && (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  const item = (activeAction as any).rawItem;
+                                  const isEquipped = (activeAction as any).isEquipped;
+                                  const nextState = !isEquipped;
+                                  await api.updateCharacterInventoryItem(campaign.id, dockCharId, item.id, {
+                                    isEquipped: nextState
+                                  });
+                                  setDockInventoryTrigger(prev => prev + 1);
+                                  notify.success(
+                                    nextState ? 'Arma Equipada' : 'Arma Desequipada',
+                                    `${item.item_name || item.name} agora está ${nextState ? 'equipada para combate' : 'na mochila'}.`
+                                  );
+                                } catch (e: any) {
+                                  notify.error('Erro ao alternar equipamento', e.message);
+                                }
+                              }}
+                              className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-colors flex items-center space-x-1 ${
+                                (activeAction as any).isEquipped
+                                  ? 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40 hover:bg-[#6d9775]/30'
+                                  : 'bg-[#c86d51]/20 text-[#c86d51] border-[#c86d51]/40 hover:bg-[#c86d51]/30'
+                              }`}
+                            >
+                              <span>{(activeAction as any).isEquipped ? '✓ Equipada' : '+ Equipar'}</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedWeaponForImbue((activeAction as any).rawItem);
+                              setShowImbueModal(true);
+                            }}
+                            className="px-2 py-0.5 rounded bg-[#1c201e] hover:bg-[#c86d51] hover:text-[#141716] text-[#c86d51] border border-[#c86d51]/60 text-[10px] font-mono transition-colors flex items-center space-x-1"
+                          >
+                            <Sparkles className="w-2.5 h-2.5" />
+                            <span>Imbuir</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Três Métricas em Caixas (Imagem 5) */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="bg-[#1c201e] border border-[#252a27] rounded p-1.5 text-center">
+                        <span className="text-[9px] text-[#9b9689] block">Teste de ataque</span>
+                        <span className="font-mono text-xs font-bold text-[#c86d51]">
+                          {activeAction.attackFormula}
+                        </span>
+                      </div>
+                      <div className="bg-[#1c201e] border border-[#252a27] rounded p-1.5 text-center">
+                        <span className="text-[9px] text-[#9b9689] block">Dano / Efeito</span>
+                        <span className="font-mono text-xs font-bold text-[#ebe7de] truncate block">
+                          {activeAction.damageFormula}
+                        </span>
+                      </div>
+                      <div className="bg-[#1c201e] border border-[#252a27] rounded p-1.5 text-center">
+                        <span className="text-[9px] text-[#9b9689] block">Custo da ação</span>
+                        <span className="font-mono text-[10px] text-[#9b9689] truncate block">
+                          {activeAction.costLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Linha de Alvo e Botões */}
+                    <div className="flex items-center justify-between pt-1 border-t border-[#252a27] gap-2">
+                      {/* Alvo e Validação com Distinção Visual Aliado/Inimigo/Self */}
+                      <div className="flex items-center space-x-1.5 min-w-0">
+                        {currentTarget ? (
+                          <>
+                            <div className={`w-2 h-2 rounded-full shrink-0 ${
+                              isCombatantSelf(currentTarget) ? 'bg-[#c86d51]' :
+                              isCombatantAlly(currentTarget) ? 'bg-[#6d9775]' :
+                              'bg-[#b84a48]'
+                            }`} />
+                            <span className="text-xs font-serif text-[#ebe7de] font-semibold truncate">
+                              {currentTarget.name}
+                            </span>
+                            <span className={`text-[9px] font-mono px-1 py-0.2 rounded ${
+                              isCombatantSelf(currentTarget) ? 'text-[#c86d51] bg-[#c86d51]/10' :
+                              isCombatantAlly(currentTarget) ? 'text-[#6d9775] bg-[#6d9775]/10' :
+                              'text-[#b84a48] bg-[#b84a48]/10'
+                            }`}>
+                              {isCombatantSelf(currentTarget) ? 'Você' : isCombatantAlly(currentTarget) ? 'Aliado' : 'Inimigo'}
+                            </span>
+                            <span className={`text-[10px] font-mono hidden sm:inline ${isTargetCompatible(currentTarget) ? 'text-[#6d9775]' : 'text-[#b84a48]'}`}>
+                              {isTargetCompatible(currentTarget) ? '(Alvo válido)' : '(Incompatível)'}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-xs text-[#9b9689] font-mono">Nenhum alvo selecionado</span>
+                        )}
+
+                        <div className="flex items-center space-x-1 ml-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setShowTargetModal(true)}
+                            className="px-2 py-0.5 rounded bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] text-[10px] font-mono border border-[#343b37] transition-colors"
+                          >
+                            Trocar alvo
+                          </button>
+                          {allCombatants.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={handleCycleTarget}
+                              title="Ciclar próximo alvo"
+                              className="px-1.5 py-0.5 rounded bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] text-[10px] font-mono border border-[#252a27] transition-colors"
+                            >
+                              ⟳
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Botão de Confirmação em Vinho Oficial */}
+                      <button
+                        type="button"
+                        onClick={handleExecuteCombatAction}
+                        disabled={isExecutingQuickAction || activeAction.status === 'unavailable'}
+                        className="px-4 py-1.5 bg-[#b84a48] hover:bg-[#b84a48] disabled:opacity-50 text-[#ebe7de] rounded text-xs font-serif font-bold transition-all shadow-md flex items-center space-x-1.5 shrink-0"
+                      >
+                        <Swords className="w-3.5 h-3.5 text-[#ebe7de]" />
+                        <span>
+                          {isExecutingQuickAction 
+                            ? 'Executando...' 
+                            : quickActionTab === 'attack' 
+                            ? 'Confirmar ataque' 
+                            : quickActionTab === 'ability' 
+                            ? 'Usar habilidade' 
+                            : quickActionTab === 'consumable' 
+                            ? 'Consumir' 
+                            : 'Assumir postura'}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           );
         })()}
+
+        {/* MODAL: SELETOR DE ALVOS (Aliados, Inimigos e Self) */}
+        {showTargetModal && combatEncounter && (
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-4 shadow-sm text-[#ebe7de]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#252a27] mb-3">
+                <h3 className="font-serif font-bold text-sm text-[#c86d51]">
+                  Selecionar Alvo da Ação
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowTargetModal(false)}
+                  className="text-[#9b9689] hover:text-white text-xs font-mono"
+                >
+                  ✕ Fechar
+                </button>
+              </div>
+
+              <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                {(combatEncounter.combatants || []).map((cb) => {
+                  const isSel = cb.id === quickSelectedTargetId;
+                  const isSelf = dockCombatant ? cb.id === dockCombatant.id : false;
+                  const isAlly = dockCombatant ? (!cb.is_npc || cb.npc_data?.disposition === 'friendly') : false;
+
+                  return (
+                    <div
+                      key={cb.id}
+                      onClick={() => {
+                        setQuickSelectedTargetId(cb.id);
+                        setShowTargetModal(false);
+                      }}
+                      className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                        isSel
+                          ? 'bg-[#252a27] border-[#c86d51]'
+                          : 'bg-[#141716] border-[#252a27] hover:border-[#343b37]'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                          isSelf ? 'bg-[#c86d51]' : isAlly ? 'bg-[#6d9775]' : 'bg-[#b84a48]'
+                        }`} />
+                        <div>
+                          <div className="font-serif font-bold text-xs text-[#ebe7de] leading-tight">
+                            {cb.name}
+                          </div>
+                          <div className="text-[10px] text-[#9b9689] font-mono mt-0.5">
+                            PV: {cb.current_hp ?? '—'} / {cb.max_hp ?? '—'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                        isSelf
+                          ? 'bg-[#c86d51]/20 text-[#c86d51] border-[#c86d51]/40'
+                          : isAlly
+                          ? 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
+                          : 'bg-[#b84a48]/20 text-[#b84a48] border-[#b84a48]/40'
+                      }`}>
+                        {isSelf ? 'Você' : isAlly ? 'Aliado' : 'Inimigo'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: IMBUIR ARMA */}
+        {showImbueModal && selectedWeaponForImbue && (
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-4 shadow-sm text-[#ebe7de]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#252a27] mb-3">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-[#c86d51]" />
+                  <h3 className="font-serif font-bold text-sm text-[#c86d51]">
+                    Encantar / Imbuir Arma
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowImbueModal(false)}
+                  className="text-[#9b9689] hover:text-white text-xs font-mono"
+                >
+                  ✕ Fechar
+                </button>
+              </div>
+
+              <p className="text-xs text-[#9b9689] mb-3 font-sans">
+                Selecione um óleo ou consumível da sua mochila para encantar <strong className="text-[#ebe7de]">{selectedWeaponForImbue.item_name}</strong>:
+              </p>
+
+              {dockInventory.filter(i => (i.category === 'oleo' || !!i.properties?.imbue_properties || (i.item_name && i.item_name.toLowerCase().includes('óleo'))) && i.quantity > 0).length === 0 ? (
+                <div className="p-4 bg-[#141716] rounded-lg border border-[#252a27] text-center text-xs text-[#9b9689]">
+                  Nenhum óleo ou reagente de encantamento disponível nesta ficha.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-56 overflow-y-auto mb-4 pr-1">
+                  {dockInventory.filter(i => (i.category === 'oleo' || !!i.properties?.imbue_properties || (i.item_name && i.item_name.toLowerCase().includes('óleo'))) && i.quantity > 0).map(oil => {
+                    const isSelected = selectedOilForImbue === oil.id;
+                    const p = oil.properties || {};
+                    const imbueProp = p.imbue_properties || {};
+                    const dmgType = imbueProp.damage_type || p.tipo_dano || 'Elemental';
+
+                    return (
+                      <div
+                        key={oil.id}
+                        onClick={() => setSelectedOilForImbue(oil.id)}
+                        className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                          isSelected
+                            ? 'bg-[#252a27] border-[#c86d51] ring-1 ring-[#c86d51]'
+                            : 'bg-[#141716] border-[#252a27] hover:border-[#343b37]'
+                        }`}
+                      >
+                        <div>
+                          <div className="font-serif font-bold text-xs text-[#c86d51]">
+                            {oil.item_name}
+                          </div>
+                          <div className="text-[10px] text-[#9b9689] font-mono mt-0.5">
+                            {p.descricao || `Adiciona dano de ${dmgType} e efeitos aos ataques`}
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-[#6d9775] bg-[#6d9775]/10 px-2 py-0.5 rounded border border-[#6d9775]/30">
+                          {oil.quantity} disp.
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2 pt-2 border-t border-[#252a27]">
+                <button
+                  type="button"
+                  onClick={() => setShowImbueModal(false)}
+                  className="px-3 py-1.5 rounded text-xs font-mono text-[#9b9689] hover:text-white"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={!selectedOilForImbue || isExecutingImbue}
+                  onClick={async () => {
+                    if (!combatEncounter || !selectedWeaponForImbue || !selectedOilForImbue) return;
+                    setIsExecutingImbue(true);
+                    try {
+                      const actorId = dockCombatant?.id;
+                      if (!actorId) throw new Error('Combatente não encontrado.');
+                      await api.applyCombatAction(campaign.id, combatEncounter.id, {
+                        actor_id: actorId,
+                        action_mode: 'imbue',
+                        consumable_item_id: selectedOilForImbue,
+                        target_weapon_id: selectedWeaponForImbue.id,
+                        action_cost: 'bonus'
+                      });
+                      notify.success('✨ Arma Encantada!', 'O dano elemental foi imbuído com sucesso.');
+                      setShowImbueModal(false);
+                      setSelectedOilForImbue('');
+                      setDockInventoryTrigger(prev => prev + 1);
+                      const updatedEnc = await api.getActiveCombat(campaign.id);
+                      setCombatEncounter(updatedEnc);
+                    } catch (err: any) {
+                      notify.error('Erro ao Imbuir', err.message);
+                    } finally {
+                      setIsExecutingImbue(false);
+                    }
+                  }}
+                  className="px-4 py-1.5 rounded text-xs font-serif font-bold bg-[#b84a48] hover:bg-[#b84a48] disabled:opacity-50 text-[#ebe7de] transition-colors"
+                >
+                  {isExecutingImbue ? 'Imbuindo...' : 'Confirmar Encantamento'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* DOCK LATERAL DO TRACKER DE COMBATE */}
         {showCombatDock && (
@@ -1606,38 +2505,49 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               tokens={tokens}
               onEncounterUpdated={(enc) => setCombatEncounter(enc)}
               onCharacterUpdated={onCharacterUpdated}
+              lastChatMessage={lastVttEvent?.type === 'chat:message' ? lastVttEvent : undefined}
+              wsRef={wsRef}
             />
           </div>
         )}
       </div>
 
+      {/* MODAL DE DETALHES E HABILIDADES DO PERSONAGEM (CLIQUE NO TOKEN) */}
+      {selectedCharacterDetails && (
+        <CharacterDetails
+          character={selectedCharacterDetails}
+          campaignId={campaign.id}
+          onClose={() => setSelectedCharacterDetails(null)}
+        />
+      )}
+
       {/* MODAL: Criar / Editar Cena */}
       {showSceneModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-lg p-6 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
+          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-lg p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
               <h3 className="font-bold text-base text-white">
                 {isEditingScene ? 'Configurações da Cena' : 'Nova Cena do Mapa'}
               </h3>
-              <button onClick={() => setShowSceneModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
+              <button onClick={() => setShowSceneModal(false)} className="text-[#9b9689] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveScene} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome da Cena</label>
+                <label className="text-xs font-medium text-[#ebe7de] block mb-1">Nome da Cena</label>
                 <input
                   type="text"
                   required
                   value={sceneForm.name}
                   onChange={(e) => setSceneForm({ ...sceneForm, name: e.target.value })}
-                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#ece3d0] block mb-1">URL da Imagem de Fundo</label>
+                <label className="text-xs font-medium text-[#ebe7de] block mb-1">URL da Imagem de Fundo</label>
                 <div className="flex space-x-2">
                   <input
                     type="url"
@@ -1647,12 +2557,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setSceneForm({ ...sceneForm, image_url: e.target.value });
                       detectImageDimensions(e.target.value);
                     }}
-                    className="flex-1 bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="flex-1 bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                   <button
                     type="button"
                     onClick={() => detectImageDimensions(sceneForm.image_url)}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-[#ece3d0] hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap"
+                    className="px-3 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap"
                     title="Detectar resolução nativa da imagem"
                   >
                     Detectar
@@ -1662,78 +2572,78 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho da Grade (px)</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Tamanho da Grade (px)</label>
                   <input
                     type="number"
                     min="20"
                     max="200"
                     value={sceneForm.grid_size}
                     onChange={(e) => setSceneForm({ ...sceneForm, grid_size: parseInt(e.target.value, 10) || 50 })}
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Escala da Grade (m / ft)</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Escala da Grade (m / ft)</label>
                   <input
                     type="number"
                     step="0.5"
                     value={sceneForm.grid_scale}
                     onChange={(e) => setSceneForm({ ...sceneForm, grid_scale: parseFloat(e.target.value) || 1.5 })}
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Largura do Mapa (px)</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Largura do Mapa (px)</label>
                   <input
                     type="number"
                     min="500"
                     max="10000"
                     value={sceneForm.width}
                     onChange={(e) => setSceneForm({ ...sceneForm, width: parseInt(e.target.value, 10) || 2000 })}
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Altura do Mapa (px)</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Altura do Mapa (px)</label>
                   <input
                     type="number"
                     min="500"
                     max="10000"
                     value={sceneForm.height}
                     onChange={(e) => setSceneForm({ ...sceneForm, height: parseInt(e.target.value, 10) || 2000 })}
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                 </div>
               </div>
 
               <div className="flex items-center space-x-6 pt-1">
-                <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-[#ebe7de] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={sceneForm.fog_enabled}
                     onChange={(e) => setSceneForm({ ...sceneForm, fog_enabled: e.target.checked })}
-                    className="rounded bg-[#131211] border-[#574e45] text-indigo-600 focus:ring-0"
+                    className="rounded bg-[#141716] border-[#343b37] text-[#c86d51] focus:ring-0"
                   />
                   <span>Ativar Camada de Fog of War (Áreas Ocultas)</span>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#252a27]">
                 <button
                   type="button"
                   onClick={() => setShowSceneModal(false)}
-                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isEditingScene ? 'Salvar Alterações' : 'Criar Cena'}
                 </button>
@@ -1746,17 +2656,17 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Adicionar Token no Mapa */}
       {showAddTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
+          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
               <h3 className="font-bold text-base text-white">Posicionar Token no Mapa</h3>
-              <button onClick={() => setShowAddTokenModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
+              <button onClick={() => setShowAddTokenModal(false)} className="text-[#9b9689] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddToken} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-[#ece3d0] block mb-1">
+                <label className="text-xs font-medium text-[#ebe7de] block mb-1">
                   Vincular a Personagem da Campanha
                 </label>
                 <select
@@ -1769,7 +2679,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setTokenFormAvatar(match.avatar_url || '');
                     }
                   }}
-                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                 >
                   <option value="">Token Avulso (Monstro / NPC)</option>
                   {characters
@@ -1783,35 +2693,35 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Token</label>
+                <label className="text-xs font-medium text-[#ebe7de] block mb-1">Nome do Token</label>
                 <input
                   type="text"
                   required
                   value={tokenFormName}
                   onChange={(e) => setTokenFormName(e.target.value)}
                   placeholder="Nome do Token"
-                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#ece3d0] block mb-1">URL do Avatar / Token (Opcional)</label>
+                <label className="text-xs font-medium text-[#ebe7de] block mb-1">URL do Avatar / Token (Opcional)</label>
                 <input
                   type="url"
                   value={tokenFormAvatar}
                   onChange={(e) => setTokenFormAvatar(e.target.value)}
                   placeholder="https://exemplo.com/avatar.png"
-                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho (Quadrados)</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Tamanho (Quadrados)</label>
                   <select
                     value={tokenFormSize}
                     onChange={(e) => setTokenFormSize(parseFloat(e.target.value))}
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   >
                     <option value="0.5">0.5x0.5 (Miúdo / 0.5x)</option>
                     <option value="1">1x1 (Médio / Padrão - 1x)</option>
@@ -1823,120 +2733,120 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Cor do Anel</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Cor do Anel</label>
                   <input
                     type="color"
                     value={tokenFormColor}
                     onChange={(e) => setTokenFormColor(e.target.value)}
-                    className="w-full h-10 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1 cursor-pointer"
+                    className="w-full h-10 bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1 cursor-pointer"
                   />
                 </div>
               </div>
 
               {/* Atributos Mecânicos e Defensivos do Token / NPC */}
-              <div className="pt-2 border-t border-[#2c2825] space-y-3">
-                <h4 className="text-xs font-bold text-[#c9a04e] uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#252a27] space-y-3">
+                <h4 className="text-xs font-bold text-[#c86d51] uppercase tracking-wider">
                   Estatísticas de Combate e Defesas
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Defesa (CA)</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       value={tokenNpcDefense}
                       onChange={(e) => setTokenNpcDefense(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Redução de Dano (RD)</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       value={tokenNpcDR}
                       onChange={(e) => setTokenNpcDR(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Atual</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Atual</label>
                     <input
                       type="number"
                       value={tokenNpcHp}
                       onChange={(e) => setTokenNpcHp(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Máximo</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Máximo</label>
                     <input
                       type="number"
                       value={tokenNpcMaxHp}
                       onChange={(e) => setTokenNpcMaxHp(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={tokenNpcInitiativeFormula}
                     onChange={(e) => setTokenNpcInitiativeFormula(e.target.value)}
                     placeholder="ex: 1d20+2"
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Resistências (50%)</label>
+                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Resistências (50%)</label>
                     <input
                       type="text"
                       value={tokenNpcResistances}
                       onChange={(e) => setTokenNpcResistances(e.target.value)}
                       placeholder="fogo, corte"
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Vulnerabilidades (2x)</label>
+                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Vulnerabilidades (2x)</label>
                     <input
                       type="text"
                       value={tokenNpcVulnerabilities}
                       onChange={(e) => setTokenNpcVulnerabilities(e.target.value)}
                       placeholder="frio"
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Imunidades (0)</label>
+                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Imunidades (0)</label>
                     <input
                       type="text"
                       value={tokenNpcImmunities}
                       onChange={(e) => setTokenNpcImmunities(e.target.value)}
                       placeholder="veneno"
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#252a27]">
                 <button
                   type="button"
                   onClick={() => setShowAddTokenModal(false)}
-                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Posicionar no Mapa
                 </button>
@@ -1949,33 +2859,33 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Configurar / Editar Token & Defesas do NPC */}
       {showEditTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-2xl backdrop-blur-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
+          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-6 shadow-sm backdrop-blur-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
               <h3 className="font-bold text-base text-white">Configurar Token / Estatísticas do NPC</h3>
-              <button onClick={() => setShowEditTokenModal(false)} className="text-[#aaa292] hover:text-white transition-colors">
+              <button onClick={() => setShowEditTokenModal(false)} className="text-[#9b9689] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveEditToken} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Token</label>
+                <label className="text-xs font-medium text-[#ebe7de] block mb-1">Nome do Token</label>
                 <input
                   type="text"
                   required
                   value={editTokenForm.name}
                   onChange={(e) => setEditTokenForm({ ...editTokenForm, name: e.target.value })}
-                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho (Quadrados)</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Tamanho (Quadrados)</label>
                   <select
                     value={editTokenForm.size}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, size: parseFloat(e.target.value) })}
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   >
                     <option value="0.5">0.5x0.5 (Miúdo / 0.5x)</option>
                     <option value="1">1x1 (Médio / Padrão - 1x)</option>
@@ -1987,119 +2897,119 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Cor do Anel</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Cor do Anel</label>
                   <input
                     type="color"
                     value={editTokenForm.color}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, color: e.target.value })}
-                    className="w-full h-10 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1 cursor-pointer"
+                    className="w-full h-10 bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1 cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[#2c2825] space-y-3">
-                <h4 className="text-xs font-bold text-[#c9a04e] uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#252a27] space-y-3">
+                <h4 className="text-xs font-bold text-[#c86d51] uppercase tracking-wider">
                   Estatísticas de Combate e Defesas
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Defesa (CA)</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       value={editTokenForm.defense}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, defense: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Redução de Dano (RD)</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       value={editTokenForm.damage_reduction}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, damage_reduction: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Atual</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Atual</label>
                     <input
                       type="number"
                       value={editTokenForm.current_hp}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, current_hp: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Máximo</label>
+                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Máximo</label>
                     <input
                       type="number"
                       value={editTokenForm.max_hp}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, max_hp: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={editTokenForm.initiative_formula}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, initiative_formula: e.target.value })}
                     placeholder="ex: 1d20+2"
-                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
+                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Resistências (50%)</label>
+                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Resistências (50%)</label>
                     <input
                       type="text"
                       value={editTokenForm.resistances}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, resistances: e.target.value })}
                       placeholder="fogo, corte"
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Vulnerabilidades (2x)</label>
+                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Vulnerabilidades (2x)</label>
                     <input
                       type="text"
                       value={editTokenForm.vulnerabilities}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, vulnerabilities: e.target.value })}
                       placeholder="frio"
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#aaa292] block mb-0.5">Imunidades (0)</label>
+                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Imunidades (0)</label>
                     <input
                       type="text"
                       value={editTokenForm.immunities}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, immunities: e.target.value })}
                       placeholder="veneno"
-                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
+                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#252a27]">
                 <button
                   type="button"
                   onClick={() => setShowEditTokenModal(false)}
-                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#574e45] text-[#ece3d0] border border-[#574e45] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Salvar Alterações
                 </button>

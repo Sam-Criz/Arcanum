@@ -244,7 +244,7 @@ test('Bestiário, NPCs e Gerenciamento de Encontros (13 Cenários Obrigatórios)
     // Criar um personagem herói para participar do combate
     const charRes = await fetch(`${apiUrl}/campaigns/${campaign.id}/characters`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${player.token}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${master.token}` },
       body: JSON.stringify({
         name: 'Guerreiro Arthur',
         raw_data: { forca: 16, agilidade: 14, vida: 30, pv_atual: 30, pv_maximo: 30, defesa: 15, rd: 2 }

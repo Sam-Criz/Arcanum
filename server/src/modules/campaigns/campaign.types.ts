@@ -7,6 +7,8 @@ export interface Campaign {
   cover_image?: string | null;
   owner_id: string;
   is_archived: number;
+  require_character_approval?: number;
+  max_skills_per_character?: number;
   created_at: string;
   updated_at: string;
 }
@@ -22,12 +24,16 @@ export interface CreateCampaignDTO {
   description?: string;
   coverImage?: string;
   preset?: 'investigacao' | 'fantasia_d20' | 'cyberpunk';
+  requireCharacterApproval?: boolean;
+  maxSkillsPerCharacter?: number;
 }
 
 export interface UpdateCampaignDTO {
   name?: string;
   description?: string;
   coverImage?: string;
+  requireCharacterApproval?: boolean;
+  maxSkillsPerCharacter?: number;
 }
 
 export interface CreateInviteDTO {

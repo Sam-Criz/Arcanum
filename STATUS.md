@@ -1,7 +1,397 @@
 # Status do Projeto — Plataforma Modular de RPG de Mesa
 
-**Data da última atualização:** 2026-10-22  
-**Versão:** 0.18.0 (Segurança do Catálogo, Economia e Compras Atômicas + V2 Visual)
+**Data da última atualização:** 2026-11-13  
+**Versão:** 0.25.0 (Nova Identidade Autoral "Arquivo Cartográfico & Pergaminho Noturno", Eliminação Total de Clichês de IA, Tipografia Editorial, Build Limpo e Zero Erros de Console)
+
+---
+
+## Destaques da Versão 0.25.0 (Arquivo Cartográfico & Pergaminho Noturno — Anti-AI & Editorial)
+- **Eliminação Completa de Clichês Visuais de IA:**
+  - **Zero Brilhos Neon & Zero Gradientes Artificiais:** Removidos todos os efeitos de drop shadow exagerados (`shadow-[0_0_...glow]`), bordas brilhantes artificiais e gradientes repetitivos.
+  - **Fim da Simetria Robótica e Caixas Dentro de Caixas:** Hierarquia visual remodelada com divisórias de 1px hairline em pedra úmida (`#343b37`), espaçamentos fluidos e cartões assimétricos com respiração natural.
+- **Nova Paleta Orgânica de Arquivo Cartográfico & Pergaminho Noturno:**
+  - **Fundo Principal:** Ardósia Orgânica Profunda (`#141716`).
+  - **Superfícies Secundárias:** Musgo Escuro (`#1c201e`) e Papel Envelhecido Noturno (`#252a27`).
+  - **Bordas Sutis (Hairline):** Pedra Úmida (`#343b37`).
+  - **Texto Principal:** Linho Natural (`#ebe7de`).
+  - **Texto Secundário / Labels:** Cinza Cálido (`#9b9689`).
+  - **Acento Primário:** Terracota / Cobre Oxidado (`#c86d51`).
+  - **Acento Secundário:** Verde Sálvia / Musgo Vivo (`#6d9775`).
+  - **Vida / Perigo Tático:** Vermelho Ferrugem (`#b84a48`).
+  - **Recursos / Mana / Místico:** Azul Ardósia (`#5b8299`).
+- **Tipografia Editorial Autoral:**
+  - **Títulos e Cabeçalhos:** `Fraunces` com peso expressivo, estética literária e elegância cartográfica.
+  - **Corpo de Texto e Interface:** `Plus Jakarta Sans` para clareza máxima, leitura limpa e ergonomia visual.
+  - **Dados Técnicos, Valores e Fórmulas:** `JetBrains Mono` estritamente para modificadores, dados e valores numéricos.
+- **Remodelagem Integral das Telas de `client/src/`:**
+  - **Login & Cadastro (`AuthModal.tsx`):** Dossiê de registro dividido em painel cartográfico à esquerda com grade de campo, emblema de rosa-dos-ventos e formulário limpo em superfícies `#1c201e` com botão terracota.
+  - **Galeria de Campanhas (`CampaignList.tsx`):** Cards editoriais com badges sóbrios de função (Mestre Criador, Mestre, Jogador), contador de membros em Verde Sálvia, e botão de ação "+ Nova Campanha" em Terracota.
+  - **Workspace & Ficha de Personagem (`CampaignWorkspace.tsx`, `CharacterDetails.tsx`):**
+    - Menu lateral com ícones cartográficos e indicador de aba ativa com borda fina em Terracota (`#c86d51`).
+    - Barras vitais de precisão minimalista sem neon (PV em Ferrugem `#b84a48`, Sanidade/Mana em Azul Ardósia `#5b8299`, Carga em Terracota `#c86d51`).
+    - Matriz de atributos de alto contraste com valores em Fraunces e modificadores destacados para rolagem em 1 clique.
+    - Coluna de inventário rápido e antecedentes diagramados como um dossiê físico.
+  - **Mesa Virtual VTT (100% da Tela):** Mapa maximizado sem bordas luminosas estéreis, HUDs discretos e translúcidos (`backdrop-blur-md`, `#141716/90`) com névoa de guerra integrada.
+  - **Módulos Padronizados:** Mochila (`InventoryView.tsx`), Catálogo de Itens (`CatalogManager.tsx`), Bestiário (`BestiaryManager.tsx`), Editor de Modelos (`TemplateEditor.tsx`) e Ferramentas do Mestre (`MasterToolsManager.tsx`) harmonizados 100% com a nova paleta.
+- **Backend Intacto & Blindado:**
+  - `server/` permaneceu 100% preservado com `node:sqlite`, todas as rotas REST, contratos `api.ts`, WebSocket `subscribeVtt` e isolamento RBAC.
+- **Auditoria, Compilação e Validação Automatizada E2E:**
+  - **Compilação de Produção (`npm run build`):** Zero erros TypeScript no server e no client (`tsc && vite build` concluído com sucesso).
+  - **Suíte de Testes do Servidor (`npm run test --workspace=server`):** **57/57 testes passando (100% de sucesso)**.
+  - **Navegador Headless CDP (Edge/Chromium):** 7 telas inspecionadas com **0 erros de console JavaScript**.
+  - **Artefatos Comprovatórios:**
+    - `screen_1_login.png` (Tela de Login com Dossiê Cartográfico)
+    - `screen_2_campaigns.png` (Galeria Editorial de Campanhas)
+    - `screen_3_vtt_full.png` (Mesa Virtual VTT 100% Viewport)
+    - `screen_4_character_sheet.png` (Ficha de Personagem Dossiê & Barras Segmentadas)
+    - `screen_5_inventory.png` (Mochila e Inventário Atômico)
+    - `screen_6_catalog.png` (Catálogo de Itens da Campanha)
+    - `screen_7_bestiary.png` (Bestiário e Biblioteca de Criaturas)
+
+---
+
+## Destaques da Versão 0.24.0 (Remodelagem Visual Completa: Grimório Tático & VTT 100%)
+- **Estética Dark Fantasy Moderna & Grimório Tático:**
+  - **Fundo Profundo & Acentos:** Fundo em `#0e0d0c` (Tinta de Grimório) e `#161412` (Pergaminho Escuro), acentos refinados em Latão Forjado (`#c9a04e`) e Carmesim Rubro (`#8a2c38`), com bordas de `1px` em `#2c2825` e sombras ambientais imersivas.
+  - **Tipografia Heráldica e Dados Técnicos:** Títulos em `IM Fell English` e `Cinzel`, textos de leitura em `IBM Plex Sans` e números/modificadores em `IBM Plex Mono`.
+  - **Mesa Virtual VTT (100% da Tela):** Removidos espaçamentos internos estéreis (`p-0` no container central do VTT), transformando a barra superior e a fita de iniciativa em HUDs translúcidos flutuantes (`backdrop-blur-xl`, `#141210/90`) com visual moderno de VTT (estilo Foundry / Alchemy).
+  - **Ficha de Personagem & Workspace:**
+    - Barras vitais segmentadas com gradiente e animação (PV em Carmesim com efeito pulsante, Mana em Azul Místico e Carga atômica em Latão).
+    - Matriz de atributos de alto contraste com badges de modificador numérico e rolagem instantânea em um clique.
+    - Cartões de identificação, lista de personagens, equipamentos e antecedentes padronizados no design system.
+  - **Padronização dos Módulos:** Mochila/Inventário, Catálogo de Itens, Bestiário, Modelos de Ficha (Templates) e Ferramentas do Mestre unificados na paleta do Grimório.
+- **Validação E2E com Chromium Headless & Suíte Completa:**
+  - **Zero Erros de Console:** Navegação automatizada por todas as 7 telas principais (Login, Campanhas, Mesa VTT, Ficha, Mochila, Catálogo e Bestiário) interceptando **0 erros de JavaScript**.
+  - **Build 100% Limpo:** `npm run build` compilando cliente e servidor com **zero erros TypeScript**.
+  - **Testes Backend:** `npm run test --workspace=server` com **57/57 testes passando (100% de sucesso)**.
+  - **Evidências Visuais Salvas:** `screen_1_login.png`, `screen_2_campaigns.png`, `screen_3_vtt_full.png`, `screen_4_character_sheet.png`, `screen_5_inventory.png`, `screen_6_catalog.png`, `screen_7_bestiary.png`.
+
+---
+
+## Destaques da Versão 0.23.1 (Correção do Build do Servidor e `node:sqlite`)
+- **Migração Estrita para `node:sqlite` no Servidor (5 arquivos):**
+  - Substituída a dependência não-instalada `better-sqlite3` pelo driver nativo do Node.js 24 (`import { DatabaseSync } from 'node:sqlite'`) em:
+    - `src/modules/master-tools/campaign-events.service.ts`
+    - `src/modules/master-tools/environmental.service.ts`
+    - `src/modules/master-tools/master-notes.service.ts`
+    - `src/modules/master-tools/master-tools.service.ts`
+    - `src/modules/master-tools/revelation.service.ts`
+- **Correção de Tipagem no Bestiário (`bestiary.service.ts`):**
+  - Adicionado o campo opcional `attributes?: Record<string, any>` na interface `BestiaryCreature`, eliminando o erro TS2353 no retorno do método `mapRow()`.
+- **Validação de Compilação:**
+  - `npm run build --workspace=server`: Compilação TypeScript com **0 erros**.
+  - `npm --prefix client run build`: Compilação frontend com **0 erros**.
+  - `npm --prefix server test`: Suíte completa de **57/57 testes passando**.
+
+---
+
+## Destaques da Versão 0.23.0 (Remodelagem Visual Completa: Grimório Tático)
+- **Identidade Visual Dark Fantasy Moderna & Grimório Tático:**
+  - **Zero alterações no `server/`:** Toda a camada de banco de dados SQLite, regras de negócios, rotas REST e WebSockets foi 100% preservada e blindada.
+  - **Tela de Entrada e Login (`AuthModal.tsx`):**
+    - Layout split-screen imersivo com painel tático à esquerda (grid tático com tokens simulados de Mago e Orc em combate, glow atmosférico e tipografia heráldica).
+    - Formulário refinado com cartões de input com profundidade, badge dinâmico de segurança ("Acesso Restrito" / "Novo Aventureiro") e transições fluidas.
+  - **Dashboard de Campanhas (`CampaignList.tsx`):**
+    - Totalmente remodelado de lista plana para uma galeria de cards visuais atmosféricos com badges de sistema/regras, contador numérico de membros, destaque para função (Mestre/Jogador) e botão de ação rápida "Entrar na Mesa" com glow âmbar/dourado.
+    - Modais de criação de campanha e adesão por código enriquecidos com campos bem delimitados e feedback imediato.
+  - **Ficha de Personagem & Workspace (`CampaignWorkspace.tsx` / `CharacterDetails.tsx`):**
+    - **Barras Vitais Segmentadas e Animadas:** PV (Vinho Rubro com efeito pulsante de perigo para vida baixa), Mana/Esforço (Azul Místico / Turquesa Arcano) e Carga/Capacidade (Âmbar Latão com marcações de proporção).
+    - **Matriz de Atributos com Rolagem Direta:** Cards de atributos (FOR, DES, CON, INT, SAB, CAR) com separação destacada para o modificador numérico e acionamento de rolagem rápida em um clique.
+    - **Modal de Detalhes da Ficha (`CharacterDetails.tsx`):** Fita de status com PV, PE e DEF destacados, abas de Habilidades, Antecedentes e Estatísticas Derivadas, e lista estilizada de poderes com chips de custo e alvos.
+  - **Mesa Virtual VTT (`VirtualTabletop.tsx`):**
+    - HUD inferior de combate rápido transformado em dock translúcido (`backdrop-blur-xl`, `#141210/90`) com contorno sutil de `1px` em latão, preservando máxima visibilidade do grid e tokens do mapa.
+- **Validação e Compilação:**
+  - `npm --prefix client run build`: Compilação de produção com TypeScript estrito (`tsc`) e Vite passando com **zero erros**.
+  - `npm --prefix server test`: Suíte completa de **57/57 testes passando (100% de sucesso)**.
+  - Captura automatizada de telas com Chromium/Edge headless via CDP: comprovando transformação visual das telas de Login, Campanhas, Mesa VTT e Ficha.
+
+---
+
+## Destaques da Versão 0.22.0 (Auditoria, Segurança e Polimento Visual)
+- **Blindagem de Segurança e Rate Limiting (`config/index.ts`, `rate-limit.middleware.ts`, `app.ts`):**
+  - Implementada trava fatal de inicialização em produção: caso `JWT_SECRET` permaneça com a chave de fallback ou vazio, o servidor interrompe a execução com erro crítico imediato.
+  - Adicionado middleware de Rate Limiting em memória nas rotas de autenticação (`POST /api/auth/register` e `POST /api/auth/login`) com teto de 30 requisições por minuto por IP, mitigando ataques de força bruta e enumeração.
+- **Remodelagem Visual e Polimento Impeccable (`Navbar.tsx`, `CampaignWorkspace.tsx`):**
+  - Barra de navegação global modernizada com logo temática, badge comemorativo `VTT`, hierarquia aprimorada de usuário/mestre e botão de logout estilizado com ícone Lucide.
+  - Menu lateral do Workspace (`CampaignWorkspace.tsx`) otimizado com suporte responsivo refinado (escalas de tamanho para telas compactas e mobile), sombras de destaque na cor Latão (`#c9a04e`), contraste elevado nos textos secundários e microinterações suaves.
+- **Validação E2E com `agent-browser` e Suíte de Testes:**
+  - Homologação visual em navegador headless com captura de tela (`final_validated.png`) e zero erros no console (`agent-browser errors`).
+  - **57/57 testes automatizados de backend passando com 100% de sucesso.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.21.0 (Fase 6: Auditoria Geral, Integração e Estabilização de Produção)
+
+### 1. Classificação de Itens e Correções por Severidade (/security_auditor, /tdd_expert)
+- **Crítico:**
+  - **RBAC Horizontal e Multi-Tenant:** Bloqueio de acesso cruzado entre campanhas. Verificação de propriedade no endpoint de rolagens `POST /api/campaigns/:campaignId/dice/rolls` impedindo que jogadores forjem rolagens para personagens de outros jogadores ou gravem rolagens órfãs com HTTP 403.
+  - **Vazamento Zero de Dados em Notas Secretas:** Endpoint `GET /api/notes/:noteId` integrado com checagem de membro e resposta HTTP `404 Not Found` (em vez de 403) para não-mestres/não-autorizados, impossibilitando enumeração de IDs e vazamento de notas secretas.
+  - **Sanitização de Monstros Ocultos no Bestiário:** Monstros ocultos ou não revelados têm atributos mascarados para jogadores comuns, impedindo vazamento de fraquezas e ficha no payload.
+  - **Transações Atômicas no SQLite:** Compras, transferências e consumo de itens executados sob transação atômica (`db.transaction()`), garantindo rollback imediato em caso de saldo insuficiente, excesso de peso ou falha de concorrência.
+- **Alto:**
+  - **Eventos em Tempo Real Filtrados:** `broadcastEventNotification` refatorado para utilizar `broadcastFiltered`, assegurando que eventos `master_only` e direcionados a alvos específicos (`target_user_ids` / `target_user_id`) cheguem exclusivamente aos destinatários autorizados via WebSocket.
+  - **Eliminação de F5 no Chat e VTT:** Aliases `/api/campaigns/:campaignId/chat/messages` e `/api/campaigns/:campaignId/chat` unificados com suporte a `{ content }` e `{ text }`, e sincronização imediata sem recarregar tela.
+- **Médio:**
+  - **Design System "Tinta, Papel e Latão":** Erradicação de popups nativos (`confirm(...)`) em `MasterToolsManager.tsx`, substituídos por modal in-app `notify.confirm(...)`.
+  - **Viewport 100dvh no VTT:** `CampaignWorkspace.tsx` atualizado para `100dvh` e remoção de tons azulados/arroxeados residuais em `VirtualTabletop.tsx` com paleta canônica `#131211`, `#1a1816`, `#c9a04e` e `#ece3d0`.
+- **Baixo:**
+  - **Tratamento de Booleanos em SQLite:** Normalização de flags booleanas (`is_equipped`, `is_active`) armazenadas como inteiros `0 | 1` no banco SQLite nativo.
+
+### 2. Rotas e Arquivos Modificados
+- **Backend:**
+  - `server/src/app.ts`: Verificação prévia de posse do personagem nas rolagens, montagem segura de `GET /api/notes/:noteId`, rota unificada de chat e filtragem de WebSocket em eventos.
+  - `server/src/modules/master-tools/campaign-events.service.ts`: Compatibilidade com arrays e strings para `target_user_ids` / `target_user_id`.
+  - `server/src/modules/master-tools/revelation.service.ts`: Suporte a chaves flexíveis de fraqueza (`weakness`, `weaknesses`, `fraqueza`) na revelação granular.
+- **Frontend:**
+  - `client/src/components/MasterToolsManager.tsx`: Adoção do modal in-app `notify.confirm` para exclusão de notas.
+  - `client/src/components/VirtualTabletop.tsx`: Substituição de classe utilitária de cor não-canônica por `#ece3d0`.
+  - `client/src/components/CampaignWorkspace.tsx`: Altura fixada em `100dvh` e prevenção de overflow.
+- **Suítes de Testes Node.js 24 Criadas:**
+  - `server/tests/rbac_isolation.test.ts` (Multi-tenant, bloqueio entre campanhas e proteção de rolagens).
+  - `server/tests/payload_leakage.test.ts` (Sanitização do Bestiário e resposta 404 em notas secretas).
+  - `server/tests/atomic_transactions.test.ts` (Transações atômicas de inventário e rollback em saldo insuficiente).
+  - `server/tests/realtime_events.test.ts` (WebSocket direcionado sem vazamento e persistência do chat).
+  - `server/tests/regression_suite.test.ts` (Suíte completa de regressão: combate, inventário, fichas e tokens).
+
+### 3. Métricas de Validação
+- **Testes Backend:** 57/57 suítes passando (100% de sucesso no test runner nativo do Node.js 24).
+- **Compilação Frontend:** `tsc && vite build` com zero erros e bundle otimizado.
+- **Segurança:** Zero uso de `eval()`, zero vazamento de metadados, integridade relacional total.
+
+---
+
+## Destaques da Versão 0.20.1 (Sincronização e Visibilidade das Condições Ambientais no VTT)
+- **Correção da Consulta de Condições por Cena e Campanha (`app.ts`, `environmental.service.ts`):**
+  - Implementado o endpoint dedicado `GET /api/campaigns/:campaignId/scenes/:sceneId/conditions` (e alias `/api/campaigns/:campaignId/conditions`).
+  - Para jogadores comuns (`is_master = 0`): a consulta filtra estritamente `is_active = 1 AND is_visible_to_players = 1`, retornando condições ativas da cena e globais da campanha.
+  - Para o Mestre (`is_master = 1`): retorna todas as condições da cena (ativas, inativas, visíveis e ocultas).
+  - Sanitização de parâmetros de consulta: valores vazios ou literais de string são tratados com segurança para evitar quebras de query SQL.
+- **Sincronização Bidirecional em Tempo Real via WebSocket (`app.ts`, `CampaignWorkspace.tsx`):**
+  - Função `broadcastConditionEvent` utilizando `broadcastFiltered`:
+    - Mestres recebem todos os eventos de ciclo de vida (`created`, `updated`, `deleted`).
+    - Quando uma condição ativa visível (`is_visible_to_players = 1 && is_active = 1`) é criada ou atualizada, os jogadores recebem instantaneamente a condição via eventos `scene:condition_updated`, `environmental:updated` e `environment:change`.
+    - Quando uma condição é desativada (`is_active = 0`) ou ocultada (`is_visible_to_players = 0`), os jogadores recebem o evento com flag `removed: true`, expurgando a condição do mapa sem necessidade de recarregar a página (F5).
+  - `CampaignWorkspace.tsx`: expandido o filtro de repasse de mensagens para o VTT, incluindo `environmental:` e `environment:`.
+- **ActiveConditionsOverlay no Viewport do VTT (`VirtualTabletop.tsx`):**
+  - Adicionado banner flutuante no canto superior do mapa (`absolute top-3 left-3 z-30`), renderizando tags estilizadas no Design System.
+  - Design System "Tinta, Papel e Latão": bordas arredondadas (`rounded-lg`), fundo translúcido em Tinta (`bg-[#131211]/85 backdrop-blur-md`), borda em Latão (`border-[#c9a04e]/60`) e texto em tom Osso (`#ece3d0`).
+  - Mapeamento dinâmico de ícones temáticos (`CloudRain`, `Skull`, `Zap`, `Wind`, `Flame`, `Sun`, `Moon`, `Sparkles`).
+  - Tooltip flutuante no cursor (`group-hover`) com título, rodadas de duração, descrição narrativa e detalhamento mecânico (`formula` e `damage_type`).
+  - Indicador de visibilidade (`Eye` / `EyeOff`) visível exclusivamente para o Mestre.
+- **TDD e Validação Automatizada:**
+  - Atualizada a suíte `server/tests/environmental-conditions.test.ts` com conexões WebSocket reais (Mestre e Jogador).
+  - Validados os 3 fluxos obrigatórios:
+    1. Condição visível e ativa retornada no payload de jogador comum e propagada no WebSocket.
+    2. Condição oculta (`is_visible_to_players = 0`) omitida do payload do jogador e bloqueada no WebSocket.
+    3. Broadcast WebSocket disparando evento de remoção imediata (`removed: true`) ao desativar a condição.
+  - **52/52 testes de backend passando com 100% de sucesso.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.20.0 (Fase 5: Ferramentas Avançadas do Mestre)
+- **1. Condições Ambientais Persistentes por Cena e Campanha (`environmental.service.ts`, `MasterToolsManager.tsx`):**
+  - Modelagem em SQLite com tabela `environmental_conditions` vinculada a `campaign_id` e `scene_id`.
+  - Suporte a condições puramente narrativas e condições mecânicas com modificadores e fórmulas parseadas deterministicamente pelo Rules Engine (`Evaluator`).
+  - Alternância atômica de ativação (`is_active = 0 | 1`) com broadcast em tempo real via WebSocket (`ENVIRONMENTAL_CONDITION_UPDATED`).
+  - Isolamento multi-tenant estrito: Mestres de campanhas distintas não interferem nem listam condições de outras mesas.
+- **2. Agendamento e Disparo de Eventos de Campanha e Cena (`campaign-events.service.ts`):**
+  - Tabela `campaign_events` com tipos de gatilho: `manual`, `scheduled` e `trigger`.
+  - Persistência de agendamentos em disco: eventos agendados sobrevivem à reinicialização do servidor (`processScheduledEvents` reidrata e processa eventos pendentes no boot).
+  - Execução atômica de payloads de ação: disparo de mensagens no chat e ativação de condições ambientais programadas.
+  - Histórico auditável de execuções com atualização de `status` e timestamps de execução.
+- **3. Notas Secretas do Mestre com Censura Total no Backend (`master-notes.service.ts`):**
+  - Tabela `master_notes` com flags de privacidade (`is_private = 1`) e lista de destinatários autorizados (`shared_with_user_ids`).
+  - Censura estrita pré-serialização: Usuários comuns sem autorização recebem código HTTP `404 Not Found` (em vez de `403`), prevenindo enumeração de notas existentes e vazamento de metadados (/security_auditor).
+  - Compartilhamento granular com jogadores específicos da mesa e revogação imediata.
+- **4. Matriz de Acesso e Revelação Granular por Jogador (`revelation.service.ts`):**
+  - Tabela `entity_revelations` com suporte a entidades (`creature`, `npc`, `clue`, `note`).
+  - Suporte a visões assimétricas: revelação de campos específicos (ex: `stats`, `weaknesses`, `lore`, `abilities`) para jogadores individuais ou para a mesa inteira (`is_public = 1`).
+  - Sanitização de entidades no backend: criaturas do Bestiário têm seus atributos mascarados no payload antes do envio para jogadores que não possuem revelação concedida.
+- **5. Interface do Mestre Integrada ao Design System (`MasterToolsManager.tsx`, `CampaignWorkspace.tsx`):**
+  - Nova aba "Mestre" com ícone de Coroa na barra de navegação lateral (exclusiva para Mestres/Auxiliares).
+  - 4 sub-painéis temáticos em conformidade com o Design System ("Tinta, Papel e Latão"):
+    - *Condições Ambientais*: Listagem, toggles rápidos, filtros por cena e criação com modificadores mecânicos.
+    - *Eventos de Cena*: Disparo manual instantâneo, agendamento de eventos e visualização de ações atreladas.
+    - *Notas Secretas*: Editor de notas, controle de privacidade e modal de compartilhamento por membro.
+    - *Matriz de Revelação*: Configuração de campos revelados por entidade e por jogador.
+- **6. TDD e Validação Automatizada:**
+  - 4 novas suítes de testes cobrindo todas as frentes:
+    - `server/tests/environmental-conditions.test.ts`
+    - `server/tests/campaign-events.test.ts`
+    - `server/tests/master-notes-security.test.ts`
+    - `server/tests/entity-revelations.test.ts`
+  - **52/52 testes de backend passando com 100% de sucesso.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.19.6 (Desacoplamento de Fichas e Renderização de Recursos Reais)
+- **Desacoplamento de Recursos e Fim de Mocks Estáticos (`CampaignWorkspace.tsx`):**
+  - **Vida e Mana Reais:** Eliminados os fallbacks estáticos hardcoded (`36/50` e `5/20`) e larguras fixas de barra (`72%` e `25%`). Valores agora são recomputados via `useMemo` com base em `selectedCharacter.current_hp` / `max_hp` (ou `vida_atual` / `vida_max`, `mana_atual` / `mana_max`) e percentual dinâmico `Math.round((hp / maxHp) * 100)`.
+  - **Carga a partir do Inventário Real:** Eliminado o valor fixo `18 / 28 kg` e `64%`. A carga atual é calculada diretamente somando `weight * quantity` dos itens do inventário no SQLite, e a capacidade máxima é computada dinamicamente via `10 + Forca * 2` (ou regra configurada no ruleset).
+- **Estatísticas Derivadas Recalculadas Deterministicamente (`CampaignWorkspace.tsx`):**
+  - Defesa, Iniciativa e Redução de Dano (RD) não usam mais os valores fixos `16`, `+3` e `1`.
+  - Recalculados deterministicamente sem `eval`: Defesa base `10 + modDestreza` somada aos bônus de escudos/armaduras equipadas; Iniciativa baseada em `modDestreza` com sinal dinâmico (`+` / `-`); RD derivada da ficha somada aos bônus de equipamentos.
+- **Antecedentes Reais por Personagem (`CampaignWorkspace.tsx`, `CharacterDetails.tsx`):**
+  - Eliminados os textos repetidos ("Viajante dos Ermos", "Aventureiro", "Comum") e histórias padrão de investigador paranormal.
+  - Campos de Origem/Histórico, Ofício/Ocupação e Idiomas/Dialetos leem estritamente `selectedCharacter.raw_data` com fallback limpo para `" — "` quando não preenchidos.
+  - Subtítulo do cabeçalho da ficha agora reflete a classe/modelo autêntico da ficha em vez de rótulo fixo.
+- **Isolamento e Atualização no Backend (`character.service.ts`):**
+  - `computeCharacterFields`, `getCampaignCharacters` e `getCharacterById` sincronizam atomicamente `carga_atual` e `total_itens` consultando a tabela `character_inventory`.
+  - Atribuição de `carga_max` e `capacidade_carga` (`10 + Forca * 2`) diretamente na criação e recomputação da ficha.
+- **Otimizações Vercel Reviews e React 19:**
+  - `useMemo` com dependências estritas `[selectedCharacter, ruleset, characterInventory, equippedItems]` garantindo atualização instantânea sem renderizações residuais ou cache inconsistente ao trocar entre personagens na lista lateral.
+- **TDD e Validação Automatizada:**
+  - Criada a suíte `server/tests/character-resources-and-backgrounds.test.ts` cobrindo 3 cenários obrigatórios (isolamento de dados, independência de updates via PATCH e cálculo dinâmico de peso de itens na mochila).
+  - **48/48 testes de backend passando com 100% de sucesso.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.19.5 (Correções Críticas: Membros, Armas da Mochila, Chat WS e Dashboard)
+- **Correção da Exclusão de Membros (`campaign.service.ts`, `CampaignWorkspace.tsx`):**
+  - Resolvido mismatch de propriedade: `getMembers` agora retorna compatibilidade completa com `userId`, `user_id` e `id`.
+  - Backend com fallback inteligente para buscar tanto por `user_id` quanto por `membership_id`.
+  - Removido o erro "Jogador não é membro desta campanha" disparado ao confirmar exclusão.
+  - Atualização reativa imediata da lista de membros sem necessidade de F5.
+- **Dock Tático com Armas da Mochila e Ação de Equipar (`VirtualTabletop.tsx`):**
+  - A aba "Ataque" agora lista todas as armas do inventário (equipadas e na mochila), mantendo também o "Ataque Desarmado".
+  - Armas desequipadas na mochila exibem badge "Na mochila" e carregam seus dados reais de ataque e dano (ex: `1d8 Cortante`) ao serem selecionadas no painel central.
+  - Adicionado botão inline `+ Equipar` / `✓ Equipada` diretamente no card da arma selecionada no Dock Tático, permitindo alternar o equipamento em tempo real via `api.updateCharacterInventoryItem`.
+- **Chat em Tempo Real 100% Reativo com Auto-Scroll (`ws.server.ts`, `app.ts`, `CampaignWorkspace.tsx`, `CombatTracker.tsx`):**
+  - Padronizada a estrutura de broadcast WebSocket para propagar tanto payload direto quanto aninhado (`message`).
+  - Listeners em `CombatTracker.tsx` e `CampaignWorkspace.tsx` fazem append reativo instantâneo na lista local sem exigir recarga de página.
+  - Implementado auto-scroll automático para o final da conversa a cada nova mensagem enviada ou recebida.
+  - Chaves de renderização únicas baseadas no ID da mensagem para evitar re-renderizações e duplicações (diretrizes React 19).
+- **Dashboard: Ocultação Estrita do Card de Boas-Vindas (`CampaignList.tsx`, `App.tsx`):**
+  - O card "Conta nova, sem campanhas" é renderizado estritamente quando `campaigns.length === 0 && !isLoading`.
+  - Eliminado o bloco duplicado que era renderizado no rodapé quando o usuário já possuía campanhas cadastradas.
+- **TDD e Validação Automatizada:**
+  - Suíte `server/tests/skills-chat-and-member-management.test.ts` atualizada com 5 cenários completos.
+  - **47/47 testes de backend passando com 100% de sucesso.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.19.4 (Classificação no Dock, Habilidades Reais com Teto, Chat SQLite/WS e Kick de Jogador)
+- **Correção da Classificação de Armas vs Consumíveis no Dock Tático (`VirtualTabletop.tsx`):**
+  - Armas equipadas (como a "adaguinha" de tag ARMA) são estritamente direcionadas para a aba **"Ataque"**.
+  - O filtro de **"Consumíveis"** agora rejeita categoricamente armas (`isWeaponItem(i) === false`), exigindo itens de consumo/uso (`category in ('consumivel', 'pocao', 'oleo')` ou propriedades de cura/condição) com quantidade > 0.
+- **Correção de Serialização e Deduplicação da Imbuição de Armas (`InventoryView.tsx`, `inventory.service.ts`):**
+  - Eliminado o bug que exibia a tag quebrada `+undefined% veneno (permanente)` duplicada.
+  - Implementado cálculo com fallback dinâmico: se não houver percentual ou fórmula customizada, extrai diretamente o dano do óleo/consumível (`consumableProps.dano`).
+  - As tags no inventário são deduplicadas e exibem com precisão o número de cargas restantes (`eff.charges_remaining`).
+- **Eliminação de Habilidades Fantasmas e CRUD com Teto Configurável (`character.service.ts`, `CampaignWorkspace.tsx`):**
+  - Removido o fallback mock genérico `ab-foco` do Dock Tático e das Fichas: apenas habilidades autênticas da ficha do combatente são renderizadas. Se não houver habilidades, exibe badge `0` e estado vazio indicando ausência de técnicas aprendidas.
+  - Criada a coluna `max_skills_per_character` na tabela `campaigns` (padrão 6, configurável na criação/edição da campanha).
+  - Implementadas as rotas `POST /api/campaigns/:campaignId/characters/:characterId/skills` e `DELETE .../:skillId`:
+    - Adicionar habilidades além do teto bloqueia com `400 Bad Request`.
+    - Interface das fichas atualizada com botão `+ Nova Habilidade` (modal de nome, tipo de ação, custo, alcance e fórmulas), contagem `X / maxSkills` e botão de remoção por lixeira com confirmação.
+- **Chat de Combate e Mesa em Tempo Real Persistente no SQLite (`CombatTracker.tsx`, `campaign.service.ts`, `ws.server.ts`):**
+  - Criada a tabela `campaign_chat_messages` no SQLite com índices para recuperação de mensagens.
+  - Criados os endpoints `GET /api/campaigns/:campaignId/chat/messages` e `POST .../chat/messages`.
+  - Conectados o Chat da Mesa e a aba Chat do `CombatTracker.tsx`: hidratação automática no mount (persistente a recargas/F5) e sincronização instantânea sem duplicação via WebSocket `chat:message`.
+- **Gestão de Jogadores e Expulsão pelo Mestre (`campaign.service.ts`, `app.ts`, `CampaignWorkspace.tsx`):**
+  - Implementada a rota `DELETE /api/campaigns/:campaignId/members/:targetUserId`:
+    - Validação estrita de autorização: apenas Mestre/Owner pode remover (`403 Forbidden` para jogador comum).
+    - Desassocia tokens e participantes de combate do usuário removido.
+    - Emite evento WebSocket `campaign:member_removed` e encerra a conexão do jogador expulso com `campaign:kicked`.
+  - Painel de Membros na TopBar com lista de participantes e botão `Remover da Campanha` (estilizado em vinho `#b24a52`) com confirmação.
+- **TDD e Validação Automatizada:**
+  - Criada a suíte `server/tests/skills-chat-and-member-management.test.ts` cobrindo os 4 cenários essenciais.
+  - **46/46 testes de backend passando com 100% de sucesso.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.19.3 (Dock Tático Dinâmico, Alvos Aliados/Inimigos, Imbuir e Consumíveis)
+- **Dock Tático 100% Reativo ao Token/Personagem Selecionado (`VirtualTabletop.tsx`):**
+  - **Aba "Ataque":** Lista exclusivamente armas equipadas (`is_equipped = 1`) do inventário real no SQLite do personagem ativo. Se desarmado, disponibiliza automaticamente o "Ataque Desarmado".
+  - **Aba "Habilidades":** Carrega dinamicamente a lista de técnicas/magias reais associadas à ficha (`raw_data.abilities`), com fórmulas de rolagem e custo de ação.
+  - **Aba "Consumíveis":** Carrega consumíveis presentes na mochila com quantidade > 0, calculando se o efeito é cura, dano contínuo, condição ou encantamento.
+  - **Aba "Defesa e esquiva":** Implementadas as ações base universais para todos os combatentes: "Defesa Normal" (+2 RD) e "Esquiva Normal" (rola 1d20 + Agilidade para elevar defesa).
+- **Seleção Completa de Alvos (Aliados, Inimigos e Self):**
+  - Modal e ciclo rápido "Trocar alvo" (`TargetSelector`) com listagem de todos os combatentes da cena.
+  - Distinção visual explícita alinhada ao design system:
+    - **Você mesmo:** Indicador Latão `#c9a04e` (`[Você]`).
+    - **Aliado:** Indicador Verde Tático `#5e9b76` (`Aliado`).
+    - **Inimigo:** Indicador Vinho `#b24a52` (`Inimigo`).
+  - Permite auto-seleção (para curas, auto-buffs e consumíveis) e suporte a aliados, validando compatibilidade mecânica sem restringir a inimigos.
+- **Retorno da Ação "Imbuir Arma" no Combate:**
+  - Na aba "Ataque", armas equipadas contam com o botão "Imbuir Arma".
+  - Modal contextual lista óleos e reagentes de encantamento da mochila do personagem ativo.
+  - Execução atômica no backend (`action_mode: 'imbue'`) consumindo 1 unidade do óleo e vinculando tags de dano elemental e status na arma.
+- **Processador de Condições & Status de Consumíveis:**
+  - Consumíveis aplicam condições imediatas e contínuas no motor de regras (`envenenado`, `abencoado`, etc.) em transações SQLite atômicas.
+  - Suporte completo a itens prejudiciais (como tomar veneno) ou benéficos, debitando vida/recurso, deduzindo o inventário e sincronizando barra de vida e badges via WebSocket.
+- **TDD e Validação Automatizada:**
+  - Criada suíte de testes `server/tests/combat-dock-and-consumable-effects.test.ts` validando os 4 cenários essenciais.
+  - **41/41 suítes de teste de backend passando 100%.**
+  - **Build de produção do frontend (`tsc && vite build`) compilado com zero erros.**
+
+---
+
+## Destaques da Versão 0.19.2 (Fichas Reais, Habilidades, Toasts In-App e Viewport Tático)
+- **Eliminação de Mocks e Vínculo Reativo Real nas Fichas (`CampaignWorkspace.tsx`):**
+  - **Coluna 3 ("Equipado"):** Conectada a `api.getCharacterInventory`, filtrando em tempo real itens com `is_equipped === 1`, com contador dinâmico e tooltip com tipo e bônus.
+  - **Coluna 3 ("Antecedentes"):** Renderiza dados autênticos do personagem (`raw_data.history`, `antecedentes`, `languages`, `idiomas`, `crafting`, `oficio`) com fallback elegante, eliminando valores estáticos.
+  - **Coluna 3 ("Rolagens Recentes"):** Conectada ao histórico real de rolagens WebSocket/API (`rollHistory`), filtrada exclusivamente para o personagem ativo ou rolagens globais da campanha.
+- **Aba Dedicada de "Habilidades & Magias" (`CampaignWorkspace.tsx` e `CharacterDetails.tsx`):**
+  - Adicionada aba navegável com lista de habilidades da ficha (`raw_data.abilities` / `habilidades`), custo de PE/Ação e botão de execução direta de rolagem determinística via `api.rollDice` (sem `eval`).
+  - Atualizado [`CharacterDetails.tsx`](file:///c:/Users/clauc/Documents/Rpg/client/src/components/CharacterDetails.tsx) com abas completas ("Habilidades", "Antecedentes", "Atributos & Dados") e integração ao motor de regras.
+- **Sistema de Notificações / Toasts In-App & Modais de Confirmação (`NotificationProvider.tsx`):**
+  - Criado o componente [NotificationProvider.tsx](file:///c:/Users/clauc/Documents/Rpg/client/src/components/NotificationProvider.tsx) e exportado singleton `notify` / hook `useNotification`.
+  - Design estrito no tema "tinta, papel e latão" (Papel `#1a1816`, Tinta `#131211`, Couro `#2c2825`, Latão `#c9a04e`, Osso `#ece3d0`, Vinho `#b24a52`), com indicador de acessibilidade `[IIII]` e auto-dismiss (4s).
+  - Substituídas **100% das chamadas nativas** `window.alert()`, `confirm()` e `window.prompt()` em todos os componentes (`VirtualTabletop.tsx`, `CombatTracker.tsx`, `BestiaryManager.tsx`, `CatalogManager.tsx`, `InventoryView.tsx`, `TemplateEditor.tsx`, `CampaignWorkspace.tsx`).
+- **Enquadramento Perfeito do Mapa Tático (Viewport 100vh sem Scroll):**
+  - Em [`VirtualTabletop.tsx`](file:///c:/Users/clauc/Documents/Rpg/client/src/components/VirtualTabletop.tsx), substituído container estático `h-[780px]` por `h-full flex-1 min-h-0 relative overflow-hidden`.
+  - Em [`CampaignWorkspace.tsx`](file:///c:/Users/clauc/Documents/Rpg/client/src/components/CampaignWorkspace.tsx), TopBar condensada oculta quando `activeTab === 'vtt'`, garantindo dock tático perfeitamente visível na base da tela sem rolagem vertical desnecessária.
+- **Validação Automatizada:**
+  - 40/40 suítes de teste de backend passando 100%.
+  - Build de produção do frontend (`tsc && vite build`) compilado com zero erros.
+
+---
+
+## Destaques da Versão 0.19.1 (Refinamento VTT, CharacterDetails e Segurança de Criação)
+- **Centralização Geométrica do Dock Tático Inferior:**
+  - Em [`VirtualTabletop.tsx`](file:///c:/Users/clauc/Documents/Rpg/client/src/components/VirtualTabletop.tsx), reposicionado o container de ação de combate para `absolute bottom-3 inset-x-0 z-30 flex justify-center px-4 pointer-events-none` com filho `max-w-4xl pointer-events-auto`, eliminando desvios de subpixel de translação.
+- **Integração de CharacterDetails no VTT:**
+  - Componente [`CharacterDetails.tsx`](file:///c:/Users/clauc/Documents/Rpg/client/src/components/CharacterDetails.tsx) importado e tipado.
+  - Clique no token de jogador no mapa tático (ou no HUD inferior esquerdo `[Ficha]`) abre a modal com habilidades especiais, magias, PV e antecedentes.
+- **Trava de Segurança Estrita em Criação de Personagens (403 Unauthorized/Forbidden):**
+  - Em [`server/src/app.ts`](file:///c:/Users/clauc/Documents/Rpg/server/src/app.ts#L515-L539), se uma requisição `POST /api/campaigns/:campaignId/characters` for realizada por jogador comum (`!isMaster`), a rota rejeita com **`403 Forbidden`**, registra a pendência no banco SQLite e emite notificação WebSocket (`character_request:created`) para o Mestre da campanha.
+- **Sanitização de Cores das Telas Secundárias e Chat:**
+  - Removidos fundos azulados e arroxeados residuais de todas as telas secundárias (Chat, Rolagens, Regras, Modais e Bestiário), padronizando para `#131211` / `#1a1816` com `backdrop-blur-md` e borda `#2c2825`.
+- **Validação Automatizada:**
+  - 40/40 suítes de teste de backend passando 100%.
+  - Build do cliente compilando com 0 erros (`tsc && vite build`).
+
+---
+
+## Destaques da Versão 0.19.0 (Combate Tático V2, Segurança de Rolagens e Aprovação de Fichas)
+- **Barra Inferior de Combate no VTT (Fidelidade Total à Imagem 5):**
+  - Barra de ações táticas expandida em 2 colunas com abas superiores e contadores numéricos (`Ataque 3`, `Habilidades 3`, `Consumíveis 2`, `Defesa e esquiva`).
+  - **Coluna Esquerda:** Lista vertical de ações com badges de disponibilidade (`Equipada`, `Indisponível: sem munição`, `Pronta`, `1 disponível`).
+  - **Coluna Direita:** Card descritivo com 3 caixas de métricas calculadas em tempo real (`Teste de ataque`, `Dano se acertar`, `Custo da ação`), linha de alvo com validação (`Alvo válido`) e botão para `Trocar alvo` ciclando entre inimigos válidos.
+  - **Botão de Confirmação:** Destaque em vinho oficial (`#8a2c38` / `#b24a52`) executando `api.applyCombatAction` diretamente com feedback dinâmico de acerto/dano na própria barra.
+- **Dock Lateral Contextual de Combate (Ficha, Registro, Rolagens, Chat):**
+  - Implementadas as 4 abas requeridas pela especificação: `Ficha` (estatísticas táticas do combatente ativo), `Registro` (logs discriminados com dano e ataques), `Rolagens` (histórico de rolagens com fórmulas e dados) e `Chat` (mensagens rápidas da mesa).
+- **Segurança — Impedir Rolagens em Fichas de Outros Jogadores:**
+  - O endpoint `POST /campaigns/:campaignId/rules/roll` e `/dice/roll` agora valida rigorosamente a propriedade do personagem. Se `characterId` for fornecido e pertencer a outro jogador, o backend rejeita imediatamente com `403 Forbidden` (`char.user_id === req.user.userId || isMaster`).
+  - Na interface de Fichas (`CampaignWorkspace.tsx`), jogadores comuns têm os cliques de teste de atributos bloqueados com indicador de somente leitura quando visualizam fichas alheias.
+- **Segurança — Aprovação de Criação de Personagens (Migração 11):**
+  - Adicionada a coluna `require_character_approval` em `campaigns` e a tabela `character_creation_requests` para campanhas que exigem aprovação de novos personagens pelo Mestre.
+  - Quando ativada a aprovação, requisições de criação de personagens por jogadores retornam `202 Accepted` (`pending_approval`) e aguardam revisão do Mestre.
+  - Endpoints administrativos: `GET /character-requests`, `POST /character-requests/:requestId/approve` (instancia a ficha e notifica via WebSocket) e `POST /character-requests/:requestId/reject` (registra motivo e descarta).
+  - Interface no painel de Fichas com lista de aprovações pendentes para o Mestre e aviso de status para o jogador.
+- **Harmonização Visual Estrita — Eliminação Total de Roxo/Índigo Residual:**
+  - Varredura completa em todos os 10 componentes do frontend (`client/src/components/*`), eliminando todas as classes `indigo-*`, `purple-*` e `violet-*` decorativas residuais e aplicando os tokens oficiais do Arcanum (Latão `#c9a04e`, Vinho `#8a2c38`, Carvão `#131211`, Papel `#1a1816`, Couro `#2c2825`, Osso `#ece3d0`, Borda `#574e45`).
+- **TDD e Qualidade de Código:**
+  - Criada a nova suíte `server/tests/character-approval-and-roll-security.test.ts` com 10 testes cobrindo todas as novas regras de autorização e aprovação.
+  - **41 testes do backend passando com 100% de sucesso.**
+  - **Compilação do frontend (`tsc && vite build`) passando com código 0 e sem avisos.**
 
 ---
 

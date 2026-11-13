@@ -2094,6 +2094,7 @@ export class CombatService {
     const earlyValidTargets = data.valid_targets || abilityDefPre?.valid_targets || itemPropsPre?.valid_targets || (
       data.action_mode === 'weapon' ? ['enemies', 'any'] :
       data.action_type === 'heal' || abilityDefPre?.type === 'heal' || itemPropsPre?.cura !== undefined ? ['self', 'allies'] :
+      data.action_mode === 'consumable' ? ['self', 'allies', 'enemies', 'any'] :
       ['enemies', 'any']
     );
 
@@ -2486,26 +2487,40 @@ export class CombatService {
       }
 
       if (consumableProps.apply_conditions) {
-        if (Array.isArray(consumableProps.apply_conditions)) conditionCandidates.push(...consumableProps.apply_conditions);
-        else conditionCandidates.push(consumableProps.apply_conditions);
+        if (Array.isArray(consumableProps.apply_conditions)) conditionCandidates.push(...consumableProps.apply_conditions.map((c: any) => typeof c === 'string' ? { condition: c, requires_damage: false } : { requires_damage: false, ...c }));
+        else conditionCandidates.push(typeof consumableProps.apply_conditions === 'string' ? { condition: consumableProps.apply_conditions, requires_damage: false } : { requires_damage: false, ...consumableProps.apply_conditions });
       }
       if (consumableProps.condition) {
-        conditionCandidates.push({ condition: consumableProps.condition, chance_percent: consumableProps.chance_percent });
+        conditionCandidates.push({ condition: consumableProps.condition, chance_percent: consumableProps.chance_percent, requires_damage: false });
       }
       if (consumableProps.conditions) {
-        if (Array.isArray(consumableProps.conditions)) conditionCandidates.push(...consumableProps.conditions);
-        else conditionCandidates.push(consumableProps.conditions);
+        if (Array.isArray(consumableProps.conditions)) conditionCandidates.push(...consumableProps.conditions.map((c: any) => typeof c === 'string' ? { condition: c, requires_damage: false } : { requires_damage: false, ...c }));
+        else conditionCandidates.push({ condition: consumableProps.conditions, requires_damage: false });
       }
       if (consumableProps.condicao_aplicada) {
-        conditionCandidates.push({ condition: consumableProps.condicao_aplicada, chance_percent: consumableProps.chance_percent });
+        conditionCandidates.push({ condition: consumableProps.condicao_aplicada, chance_percent: consumableProps.chance_percent, requires_damage: false });
       }
       if (consumableProps.condicao) {
-        conditionCandidates.push({ condition: consumableProps.condicao, chance_percent: consumableProps.chance_percent });
+        conditionCandidates.push({ condition: consumableProps.condicao, chance_percent: consumableProps.chance_percent, requires_damage: false });
+      }
+      if (consumableProps.status) {
+        conditionCandidates.push({ condition: consumableProps.status, chance_percent: consumableProps.chance_percent, requires_damage: false });
+      }
+      if (consumableProps.status_effect) {
+        conditionCandidates.push({ condition: consumableProps.status_effect, chance_percent: consumableProps.chance_percent, requires_damage: false });
+      }
+      if (consumableProps.status_effects) {
+        if (Array.isArray(consumableProps.status_effects)) conditionCandidates.push(...consumableProps.status_effects.map((c: any) => typeof c === 'string' ? { condition: c, requires_damage: false } : { requires_damage: false, ...c }));
+        else conditionCandidates.push({ condition: consumableProps.status_effects, requires_damage: false });
+      }
+      if (consumableProps.efeito && typeof consumableProps.efeito === 'string') {
+        conditionCandidates.push({ condition: consumableProps.efeito, chance_percent: consumableProps.chance_percent, requires_damage: false });
       }
       if (consumableProps.imbue_properties?.condition) {
         conditionCandidates.push({
           condition: consumableProps.imbue_properties.condition,
-          chance_percent: consumableProps.imbue_properties.chance_percent
+          chance_percent: consumableProps.imbue_properties.chance_percent,
+          requires_damage: false
         });
       }
       if (consumableProps.remove_conditions) {
@@ -2658,6 +2673,7 @@ export class CombatService {
       data.action_mode === 'weapon' ? ['enemies', 'any'] :
       data.action_type === 'heal' ? ['self', 'allies'] :
       data.action_mode === 'consumable' && (consumableProps.cura !== undefined || consumableProps.heal_formula) ? ['self', 'allies'] :
+      data.action_mode === 'consumable' ? ['self', 'allies', 'enemies', 'any'] :
       ['enemies', 'any']
     );
 

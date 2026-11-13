@@ -66,6 +66,7 @@ export interface BestiaryCreature {
   equipment: CreatureEquipmentItem[];
   raw_data: Record<string, any>;
   computed_data: Record<string, any>;
+  attributes?: Record<string, any>;
   actions: any[];
   properties: Record<string, any>;
   public_notes: string;
@@ -229,7 +230,7 @@ export class BestiaryService {
     const publicNotes = data.public_notes?.trim() || '';
     const privateNotes = data.private_notes?.trim() || (data.properties?.gm_notes || '');
 
-    const rawData = data.raw_data || {};
+    const rawData = data.raw_data ? { ...data.raw_data, ...(data as any).attributes } : ((data as any).attributes || {});
     let computedData = data.computed_data || {};
 
     if (templateId && this.characterService) {
@@ -660,6 +661,7 @@ export class BestiaryService {
       equipment,
       raw_data: rawData,
       computed_data: computedData,
+      attributes: Object.keys(rawData).length > 0 ? rawData : (Object.keys(computedData).length > 0 ? computedData : properties.attributes),
       actions,
       properties,
       public_notes: row.public_notes || '',

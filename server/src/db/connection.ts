@@ -715,6 +715,142 @@ export function runMigrations(db: DatabaseSync): void {
   if (!hasIsPurchasable) {
     db.exec(`ALTER TABLE items ADD COLUMN is_purchasable INTEGER NOT NULL DEFAULT 1;`);
   }
+
+  // -----------------------------------------------------------------------
+  // Migração 11: Aprovação de Criação de Personagens
+  // -----------------------------------------------------------------------
+  const campaignColsMigration11 = db.prepare(`PRAGMA table_info(campaigns)`).all() as any[];
+  const hasRequireApproval = campaignColsMigration11.some((c: any) => c.name === 'require_character_approval');
+  if (!hasRequireApproval) {
+    db.exec(`ALTER TABLE campaigns ADD COLUMN require_character_approval INTEGER NOT NULL DEFAULT 0;`);
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS character_creation_requests (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      template_id TEXT,
+      raw_data_json TEXT NOT NULL DEFAULT '{}',
+      avatar_url TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+      rejection_reason TEXT,
+      reviewed_by_user_id TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (reviewed_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+  `);
+
+  // -----------------------------------------------------------------------
+  // Migração 12: Teto de Habilidades e Chat de Campanha
+  // -----------------------------------------------------------------------
+  const campaignColsMigration12 = db.prepare(`PRAGMA table_info(campaigns)`).all() as any[];
+  const hasMaxSkills = campaignColsMigration12.some((c: any) => c.name === 'max_skills_per_character');
+  if (!hasMaxSkills) {
+    db.exec(`ALTER TABLE campaigns ADD COLUMN max_skills_per_character INTEGER NOT NULL DEFAULT 6;`);
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS campaign_chat_messages (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      sender_id TEXT NOT NULL,
+      sender_name TEXT NOT NULL,
+      content TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'text',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_chat_messages_campaign ON campaign_chat_messages(campaign_id, created_at);
+
+    -- Fase 5: Condições Ambientais (Mecânicas e Narrativas)
+    CREATE TABLE IF NOT EXISTS environmental_conditions (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      scene_id TEXT,
+      name TEXT NOT NULL,
+      description TEXT,
+      icon TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      is_visible_to_players INTEGER NOT NULL DEFAULT 1,
+      duration_rounds INTEGER,
+      rule_modifier_id TEXT,
+      effect_payload TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_env_cond_campaign ON environmental_conditions(campaign_id);
+    CREATE INDEX IF NOT EXISTS idx_env_cond_scene ON environmental_conditions(scene_id);
+
+    -- Fase 5: Eventos de Campanha e Cena (Agendados e Gatilhos)
+    CREATE TABLE IF NOT EXISTS campaign_events (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      scene_id TEXT,
+      title TEXT NOT NULL,
+      description TEXT,
+      event_type TEXT NOT NULL DEFAULT 'manual',
+      status TEXT NOT NULL DEFAULT 'pending',
+      trigger_conditions TEXT,
+      visibility TEXT NOT NULL DEFAULT 'master_only',
+      target_user_ids TEXT NOT NULL DEFAULT '[]',
+      action_payload TEXT,
+      scheduled_at TEXT,
+      triggered_at TEXT,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE SET NULL,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_campaign_events_camp ON campaign_events(campaign_id);
+    CREATE INDEX IF NOT EXISTS idx_campaign_events_sched ON campaign_events(status, scheduled_at);
+
+    -- Fase 5: Notas Secretas do Mestre (Isolamento e Vazamento Zero)
+    CREATE TABLE IF NOT EXISTS master_notes (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      scene_id TEXT,
+      entity_type TEXT,
+      entity_id TEXT,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'general',
+      tags TEXT NOT NULL DEFAULT '[]',
+      is_private INTEGER NOT NULL DEFAULT 1,
+      shared_with_user_ids TEXT NOT NULL DEFAULT '[]',
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (scene_id) REFERENCES scenes(id) ON DELETE SET NULL,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_master_notes_camp ON master_notes(campaign_id);
+    CREATE INDEX IF NOT EXISTS idx_master_notes_entity ON master_notes(entity_type, entity_id);
+
+    -- Fase 5: Controle Granular de Revelações por Jogador (Data Access Matrix)
+    CREATE TABLE IF NOT EXISTS entity_revelations (
+      id TEXT PRIMARY KEY,
+      campaign_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      revealed_to_user_id TEXT,
+      revealed_fields TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+      FOREIGN KEY (revealed_to_user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_revelations_camp ON entity_revelations(campaign_id);
+    CREATE INDEX IF NOT EXISTS idx_revelations_entity ON entity_revelations(campaign_id, entity_type, entity_id);
+  `);
 }
 
 export function closeDatabase(): void {

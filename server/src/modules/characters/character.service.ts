@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { Character, CharacterTemplate, CreateCharacterDTO, TemplateSchema } from './character.types';
+import { Character, CharacterTemplate, CharacterCreationRequest, CreateCharacterDTO, TemplateSchema } from './character.types';
 import { RulesService } from '../rules-engine/rules.service';
 import { Evaluator } from '../rules-engine/evaluator';
 import { ActiveCondition } from '../rules-engine/rules.types';
@@ -272,6 +272,14 @@ export class CharacterService {
       } catch {}
     }
 
+    const forcaVal = Number(computed.forca ?? computed.Forca ?? rawData.forca ?? rawData.Forca ?? 10);
+    if (computed['carga_max'] === undefined) {
+      computed['carga_max'] = 10 + forcaVal * 2;
+    }
+    if (computed['capacidade_carga'] === undefined) {
+      computed['capacidade_carga'] = 10 + forcaVal * 2;
+    }
+
     return computed;
   }
 
@@ -283,7 +291,7 @@ export class CharacterService {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const rawData = data.rawData || (data as any).raw_data || {};
-    const computedData = this.computeCharacterFields(campaignId, rawData, data.templateId);
+    const computedData = this.computeCharacterFields(campaignId, rawData, data.templateId, id);
 
     this.db.prepare(`
       INSERT INTO characters (
@@ -344,6 +352,18 @@ export class CharacterService {
       if (computedData.carga_atual === undefined) {
         computedData = this.computeCharacterFields(campaignId, rawData, r.template_id, r.id);
       }
+      try {
+        const invRow = this.db.prepare(`
+          SELECT COALESCE(SUM(weight * quantity), 0) as total_weight, COALESCE(SUM(quantity), 0) as total_items
+          FROM character_inventory
+          WHERE character_id = ?
+        `).get(r.id) as any;
+        const totalWeight = Math.round((Number(invRow?.total_weight) || 0) * 100) / 100;
+        computedData.carga_atual = totalWeight;
+        computedData.peso_total = totalWeight;
+        computedData.peso_carregado = totalWeight;
+        computedData.total_itens = Math.round(Number(invRow?.total_items) || 0);
+      } catch {}
       let conditions: ActiveCondition[] = [];
       try {
         conditions = JSON.parse(r.conditions_json || '[]');
@@ -383,6 +403,18 @@ export class CharacterService {
     if (computedData.carga_atual === undefined) {
       computedData = this.computeCharacterFields(campaignId, rawData, row.template_id, row.id);
     }
+    try {
+      const invRow = this.db.prepare(`
+        SELECT COALESCE(SUM(weight * quantity), 0) as total_weight, COALESCE(SUM(quantity), 0) as total_items
+        FROM character_inventory
+        WHERE character_id = ?
+      `).get(row.id) as any;
+      const totalWeight = Math.round((Number(invRow?.total_weight) || 0) * 100) / 100;
+      computedData.carga_atual = totalWeight;
+      computedData.peso_total = totalWeight;
+      computedData.peso_carregado = totalWeight;
+      computedData.total_itens = Math.round(Number(invRow?.total_items) || 0);
+    } catch {}
     let conditions: ActiveCondition[] = [];
     try {
       conditions = JSON.parse(row.conditions_json || '[]');
@@ -601,5 +633,230 @@ export class CharacterService {
 
     this.recomputeCharacter(campaignId, characterId);
     return true;
+  }
+
+  /**
+   * Verifica se a campanha exige aprovação para novos personagens
+   */
+  getCampaignApprovalSetting(campaignId: string): boolean {
+    const row = this.db.prepare('SELECT require_character_approval FROM campaigns WHERE id = ?').get(campaignId) as any;
+    return Boolean(row && row.require_character_approval === 1);
+  }
+
+  /**
+   * Cria uma solicitação de personagem pendente de aprovação do mestre
+   */
+  createCharacterRequest(campaignId: string, userId: string, data: CreateCharacterDTO): CharacterCreationRequest {
+    if (!data.name || !data.name.trim()) {
+      throw new Error('O nome do personagem é obrigatório.');
+    }
+
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const rawData = data.rawData || (data as any).raw_data || {};
+
+    this.db.prepare(`
+      INSERT INTO character_creation_requests (
+        id, campaign_id, user_id, name, template_id, raw_data_json, avatar_url, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+    `).run(
+      id,
+      campaignId,
+      userId,
+      data.name.trim(),
+      data.templateId || null,
+      JSON.stringify(rawData),
+      data.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(data.name)}`,
+      now,
+      now
+    );
+
+    return this.getCharacterRequestById(campaignId, id)!;
+  }
+
+  getCharacterRequestById(campaignId: string, requestId: string): CharacterCreationRequest | null {
+    const row = this.db.prepare(`
+      SELECT r.*, u.username, u.email as user_email, t.name as template_name
+      FROM character_creation_requests r
+      INNER JOIN users u ON u.id = r.user_id
+      LEFT JOIN character_templates t ON t.id = r.template_id
+      WHERE r.campaign_id = ? AND r.id = ?
+    `).get(campaignId, requestId) as any;
+
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      campaign_id: row.campaign_id,
+      user_id: row.user_id,
+      username: row.username,
+      user_email: row.user_email,
+      name: row.name,
+      template_id: row.template_id,
+      template_name: row.template_name,
+      raw_data: JSON.parse(row.raw_data_json || '{}'),
+      avatar_url: row.avatar_url,
+      status: row.status,
+      rejection_reason: row.rejection_reason,
+      reviewed_by_user_id: row.reviewed_by_user_id,
+      created_at: row.created_at,
+      updated_at: row.updated_at
+    };
+  }
+
+  getCharacterRequests(campaignId: string, userId?: string, isMaster: boolean = false): CharacterCreationRequest[] {
+    let sql = `
+      SELECT r.*, u.username, u.email as user_email, t.name as template_name
+      FROM character_creation_requests r
+      INNER JOIN users u ON u.id = r.user_id
+      LEFT JOIN character_templates t ON t.id = r.template_id
+      WHERE r.campaign_id = ? 
+    `;
+
+    const params: any[] = [campaignId];
+    if (!isMaster && userId) {
+      sql += ` AND r.user_id = ?`;
+      params.push(userId);
+    }
+
+    sql += ` ORDER BY r.created_at DESC`;
+
+    const rows = this.db.prepare(sql).all(...params) as any[];
+
+    return rows.map((row: any) => ({
+      id: row.id,
+      campaign_id: row.campaign_id,
+      user_id: row.user_id,
+      username: row.username,
+      user_email: row.user_email,
+      name: row.name,
+      template_id: row.template_id,
+      template_name: row.template_name,
+      raw_data: JSON.parse(row.raw_data_json || '{}'),
+      avatar_url: row.avatar_url,
+      status: row.status,
+      rejection_reason: row.rejection_reason,
+      reviewed_by_user_id: row.reviewed_by_user_id,
+      created_at: row.created_at,
+      updated_at: row.updated_at
+    }));
+  }
+
+  approveCharacterRequest(campaignId: string, requestId: string, reviewerId: string): { character: Character; request: CharacterCreationRequest } {
+    const req = this.getCharacterRequestById(campaignId, requestId);
+    if (!req) {
+      throw new Error('Solicitação de personagem não encontrada.');
+    }
+    if (req.status !== 'pending') {
+      throw new Error(`Esta solicitação já foi finalizada com status "${req.status}".`);
+    }
+
+    const character = this.createCharacter(campaignId, req.user_id, {
+      name: req.name,
+      templateId: req.template_id || undefined,
+      avatarUrl: req.avatar_url || undefined,
+      rawData: req.raw_data
+    });
+
+    const now = new Date().toISOString();
+    this.db.prepare(`
+      UPDATE character_creation_requests
+      SET status = 'approved', reviewed_by_user_id = ?, updated_at = ?
+      WHERE campaign_id = ? AND id = ?
+    `).run(reviewerId, now, campaignId, requestId);
+
+    const updatedReq = this.getCharacterRequestById(campaignId, requestId)!;
+    return { character, request: updatedReq };
+  }
+
+  rejectCharacterRequest(campaignId: string, requestId: string, reviewerId: string, reason?: string): CharacterCreationRequest {
+    const req = this.getCharacterRequestById(campaignId, requestId);
+    if (!req) {
+      throw new Error('Solicitação de personagem não encontrada.');
+    }
+    if (req.status !== 'pending') {
+      throw new Error(`Esta solicitação já foi finalizada com status "${req.status}".`);
+    }
+
+    const now = new Date().toISOString();
+    this.db.prepare(`
+      UPDATE character_creation_requests
+      SET status = 'rejected', rejection_reason = ?, reviewed_by_user_id = ?, updated_at = ?
+      WHERE campaign_id = ? AND id = ?
+    `).run(reason?.trim() || 'Solicitação rejeitada pelo Mestre.', reviewerId, now, campaignId, requestId);
+
+    return this.getCharacterRequestById(campaignId, requestId)!;
+  }
+
+  addSkillToCharacter(
+    campaignId: string,
+    characterId: string,
+    skillData: { name: string; cost?: string; roll?: string; formula?: string; damage?: string; description?: string; type?: string; id?: string },
+    requesterUserId: string,
+    isMaster: boolean
+  ): { character: Character; skill: any } {
+    const char = this.getCharacterById(campaignId, characterId);
+    if (!char) throw new Error('Personagem não encontrado.');
+
+    if (char.user_id !== requesterUserId && !isMaster) {
+      throw new Error('Você não tem permissão para adicionar habilidades a este personagem.');
+    }
+
+    if (!skillData.name || !skillData.name.trim()) {
+      throw new Error('O nome da habilidade é obrigatório.');
+    }
+
+    // Obter teto da campanha
+    const campaign = this.db.prepare(`SELECT max_skills_per_character FROM campaigns WHERE id = ?`).get(campaignId) as any;
+    const maxSkills = campaign?.max_skills_per_character !== undefined ? Number(campaign.max_skills_per_character) : 6;
+
+    const raw = { ...char.raw_data };
+    const abilities: any[] = Array.isArray(raw.abilities) ? [...raw.abilities] : (Array.isArray(raw.habilidades) ? [...raw.habilidades] : []);
+
+    if (abilities.length >= maxSkills) {
+      throw new Error(`Limite de habilidades atingido: Este personagem já atingiu o teto de ${maxSkills} habilidades da campanha.`);
+    }
+
+    const newSkill = {
+      id: skillData.id || crypto.randomUUID(),
+      name: skillData.name.trim(),
+      cost: skillData.cost?.trim() || '1 PE',
+      roll: skillData.roll?.trim() || skillData.formula?.trim() || '1d20',
+      damage: skillData.damage?.trim() || '',
+      description: skillData.description?.trim() || '',
+      type: skillData.type?.trim() || 'Tático'
+    };
+
+    abilities.push(newSkill);
+    raw.abilities = abilities;
+
+    const updated = this.updateCharacter(campaignId, characterId, { rawData: raw }, requesterUserId, isMaster);
+    return { character: updated, skill: newSkill };
+  }
+
+  removeSkillFromCharacter(
+    campaignId: string,
+    characterId: string,
+    skillId: string,
+    requesterUserId: string,
+    isMaster: boolean
+  ): Character {
+    const char = this.getCharacterById(campaignId, characterId);
+    if (!char) throw new Error('Personagem não encontrado.');
+
+    if (char.user_id !== requesterUserId && !isMaster) {
+      throw new Error('Você não tem permissão para remover habilidades deste personagem.');
+    }
+
+    const raw = { ...char.raw_data };
+    const abilities: any[] = Array.isArray(raw.abilities) ? [...raw.abilities] : (Array.isArray(raw.habilidades) ? [...raw.habilidades] : []);
+
+    const filtered = abilities.filter(a => {
+      if (typeof a === 'string') return a !== skillId;
+      return a.id !== skillId && a.name !== skillId;
+    });
+
+    raw.abilities = filtered;
+    return this.updateCharacter(campaignId, characterId, { rawData: raw }, requesterUserId, isMaster);
   }
 }

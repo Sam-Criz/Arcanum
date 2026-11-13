@@ -957,6 +957,8 @@ export class InventoryService {
     const imbueProps: Partial<ImbueProperties> = consumableProps.imbue_properties || {};
     const canImbue = consumableProps.can_imbue === true ||
       imbueProps.can_imbue === true ||
+      consumableRow.category === 'oleo' ||
+      !!consumableProps.imbue_properties ||
       !!consumableProps.tipo_dano_imbuicao ||
       !!consumableProps.dano_adicional_imbuicao ||
       (consumableRow.category === 'consumivel' && (!!consumableProps.tipo_dano || !!consumableProps.dano_adicional || !!consumableProps.condicao_aplicada));
@@ -989,6 +991,7 @@ export class InventoryService {
       consumableProps.dano_adicional_imbuicao ||
       consumableProps.dano_adicional ||
       consumableProps.damage_formula ||
+      (consumableProps.dano !== undefined ? String(consumableProps.dano) : undefined) ||
       undefined;
 
     const percentageDamage = imbueProps.percentage_damage !== undefined

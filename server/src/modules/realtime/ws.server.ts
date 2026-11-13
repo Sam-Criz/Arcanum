@@ -3,6 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { AuthService } from '../auth/auth.service';
 import { RbacService, CampaignRole } from '../permissions/rbac.service';
 import { VttService } from '../vtt/vtt.service';
+import { CampaignService } from '../campaigns/campaign.service';
 
 interface AuthenticatedClient {
   ws: WebSocket;
@@ -16,6 +17,7 @@ export class RealtimeServer {
   private wss: WebSocketServer;
   private clients = new Map<WebSocket, AuthenticatedClient>();
   private vttService?: VttService;
+  private campaignService?: CampaignService;
 
   constructor(
     server: HttpServer,
@@ -28,6 +30,10 @@ export class RealtimeServer {
 
   setVttService(vtt: VttService) {
     this.vttService = vtt;
+  }
+
+  setCampaignService(campaignService: CampaignService) {
+    this.campaignService = campaignService;
   }
 
   private setupListeners(): void {
@@ -112,12 +118,35 @@ export class RealtimeServer {
     // Processamento de mensagens em tempo real da mesa
     switch (data.type) {
       case 'chat:send': {
+        const text = String(data.text || '').slice(0, 1000);
+        let msgId = `msg-${Date.now()}`;
+        let timestamp = new Date().toISOString();
+        if (this.campaignService) {
+          try {
+            const saved = this.campaignService.addChatMessage(
+              client.campaignId,
+              client.userId,
+              client.username,
+              text,
+              data.messageType || 'chat'
+            );
+            msgId = saved.id;
+            timestamp = saved.created_at;
+          } catch (e) {
+            console.error('Erro ao persistir chat via WS:', e);
+          }
+        }
         this.broadcast(client.campaignId, {
           type: 'chat:message',
+          id: msgId,
           sender: client.username,
+          sender_name: client.username,
           userId: client.userId,
-          text: String(data.text || '').slice(0, 1000),
-          timestamp: new Date().toISOString()
+          sender_id: client.userId,
+          text,
+          content: text,
+          timestamp,
+          created_at: timestamp
         });
         break;
       }
@@ -207,6 +236,20 @@ export class RealtimeServer {
       const payload = filterFn(client);
       if (payload !== null && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(payload));
+      }
+    }
+  }
+
+  disconnectUserFromCampaign(campaignId: string, userId: string): void {
+    for (const [ws, client] of this.clients.entries()) {
+      if (client.campaignId === campaignId && client.userId === userId) {
+        try {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'campaign:kicked', message: 'Você foi removido desta campanha pelo mestre.' }));
+            ws.close();
+          }
+        } catch {}
+        this.clients.delete(ws);
       }
     }
   }

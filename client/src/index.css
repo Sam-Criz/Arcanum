@@ -4,22 +4,27 @@
 
 @layer base {
   body {
-    @apply bg-[#131211] text-[#ece3d0] min-h-screen selection:bg-[#c9a04e] selection:text-[#131211] font-sans;
+    @apply bg-[#141716] text-[#ebe7de] min-h-screen selection:bg-[#c86d51] selection:text-[#141716] font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight text-[#ebe7de];
   }
 }
 
-/* Custom scrollbar for Arcanum Dark Leather theme */
+/* Custom scrollbar for Cartographic Archive & Night Parchment theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #131211;
+  background: #141716;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c2825;
-  border-radius: 3px;
+  background: #252a27;
+  border-radius: 4px;
+  border: 1px solid #1c201e;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #574e45;
+  background: #c86d51;
 }

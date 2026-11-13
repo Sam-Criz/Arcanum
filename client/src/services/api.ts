@@ -229,6 +229,12 @@ export interface Character {
   computed_data: Record<string, any>;
   conditions?: ActiveCondition[];
   owner_username?: string;
+  current_hp?: number;
+  max_hp?: number;
+  current_mana?: number;
+  max_mana?: number;
+  current_pe?: number;
+  max_pe?: number;
 }
 
 export interface CatalogItem {
@@ -679,12 +685,30 @@ class ApiService {
     return res.characters;
   }
 
-  async createCharacter(campaignId: string, data: { name: string; rawData: Record<string, any>; templateId?: string; isNpc?: boolean }): Promise<Character> {
-    const res = await this.request<{ character: Character }>(`/campaigns/${campaignId}/characters`, {
+  async createCharacter(campaignId: string, data: { name: string; rawData: Record<string, any>; templateId?: string; isNpc?: boolean }): Promise<any> {
+    const res = await this.request<any>(`/campaigns/${campaignId}/characters`, {
       method: 'POST',
       body: JSON.stringify(data)
     });
-    return res.character;
+    return res.character || res;
+  }
+
+  async getCharacterRequests(campaignId: string): Promise<any[]> {
+    const res = await this.request<{ requests: any[] }>(`/campaigns/${campaignId}/character-requests`);
+    return res.requests || [];
+  }
+
+  async approveCharacterRequest(campaignId: string, requestId: string): Promise<any> {
+    return this.request(`/campaigns/${campaignId}/character-requests/${requestId}/approve`, {
+      method: 'POST'
+    });
+  }
+
+  async rejectCharacterRequest(campaignId: string, requestId: string, reason?: string): Promise<any> {
+    return this.request(`/campaigns/${campaignId}/character-requests/${requestId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    });
   }
 
   async updateCharacter(campaignId: string, characterId: string, data: { name?: string; rawData?: Record<string, any> }): Promise<Character> {
@@ -693,6 +717,42 @@ class ApiService {
       body: JSON.stringify(data)
     });
     return res.character;
+  }
+
+  async addCharacterSkill(campaignId: string, characterId: string, data: { name: string; cost?: string; roll?: string; damage?: string; description?: string; type?: string }): Promise<any> {
+    return this.request(`/campaigns/${campaignId}/characters/${characterId}/skills`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deleteCharacterSkill(campaignId: string, characterId: string, skillId: string): Promise<any> {
+    return this.request(`/campaigns/${campaignId}/characters/${characterId}/skills/${skillId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async getCampaignMembers(campaignId: string): Promise<any[]> {
+    const res = await this.request<{ members: any[] }>(`/campaigns/${campaignId}/members`);
+    return res.members || [];
+  }
+
+  async removeCampaignMember(campaignId: string, userId: string): Promise<any> {
+    return this.request(`/campaigns/${campaignId}/members/${userId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async getChatMessages(campaignId: string, limit: number = 100): Promise<any[]> {
+    const res = await this.request<{ messages: any[] }>(`/campaigns/${campaignId}/chat/messages?limit=${limit}`);
+    return res.messages || [];
+  }
+
+  async sendChatMessage(campaignId: string, content: string, type: string = 'text'): Promise<any> {
+    return this.request(`/campaigns/${campaignId}/chat/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content, type })
+    });
   }
 
   // Catálogo de Itens
@@ -1068,10 +1128,12 @@ class ApiService {
       actor_name?: string;
       target_id?: string | null;
       action_type?: 'damage' | 'heal' | 'resource_mod' | 'attack';
-      action_mode?: 'weapon' | 'ability' | 'manual' | 'defend' | 'dodge';
+      action_mode?: 'weapon' | 'ability' | 'manual' | 'defend' | 'dodge' | 'consumable' | 'imbue';
       action_cost?: 'main' | 'bonus' | 'reaction' | 'free';
       weapon_id?: string;
+      target_weapon_id?: string;
       ability_name?: string;
+      consumable_item_id?: string;
       resource_name?: string;
       amount?: number;
       formula?: string;
@@ -1364,6 +1426,210 @@ class ApiService {
       body: JSON.stringify(data)
     });
   }
+
+  // --- FASE 5: FERRAMENTAS DO MESTRE ---
+  async getEnvironmentalConditions(campaignId: string, sceneId?: string | null): Promise<EnvironmentalCondition[]> {
+    const query = sceneId ? `?sceneId=${encodeURIComponent(sceneId)}` : '';
+    const res = await this.request<{ conditions: EnvironmentalCondition[] }>(`/campaigns/${campaignId}/environmental-conditions${query}`);
+    return res.conditions || [];
+  }
+
+  async getSceneConditions(campaignId: string, sceneId: string): Promise<EnvironmentalCondition[]> {
+    const res = await this.request<{ conditions: EnvironmentalCondition[] }>(`/campaigns/${campaignId}/scenes/${sceneId}/conditions`);
+    return res.conditions || [];
+  }
+
+  async createEnvironmentalCondition(campaignId: string, data: Partial<EnvironmentalCondition>): Promise<EnvironmentalCondition> {
+    const res = await this.request<{ condition: EnvironmentalCondition }>(`/campaigns/${campaignId}/environmental-conditions`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return res.condition;
+  }
+
+  async updateEnvironmentalCondition(campaignId: string, conditionId: string, data: Partial<EnvironmentalCondition>): Promise<EnvironmentalCondition> {
+    const res = await this.request<{ condition: EnvironmentalCondition }>(`/campaigns/${campaignId}/environmental-conditions/${conditionId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    });
+    return res.condition;
+  }
+
+  async toggleEnvironmentalCondition(campaignId: string, conditionId: string, isActive?: boolean): Promise<EnvironmentalCondition> {
+    const res = await this.request<{ condition: EnvironmentalCondition }>(`/campaigns/${campaignId}/environmental-conditions/${conditionId}/toggle`, {
+      method: 'POST',
+      body: JSON.stringify({ isActive })
+    });
+    return res.condition;
+  }
+
+  async deleteEnvironmentalCondition(campaignId: string, conditionId: string): Promise<boolean> {
+    const res = await this.request<{ success: boolean }>(`/campaigns/${campaignId}/environmental-conditions/${conditionId}`, {
+      method: 'DELETE'
+    });
+    return res.success;
+  }
+
+  async getCampaignEvents(campaignId: string, sceneId?: string | null): Promise<CampaignEvent[]> {
+    const query = sceneId ? `?sceneId=${encodeURIComponent(sceneId)}` : '';
+    const res = await this.request<{ events: CampaignEvent[] }>(`/campaigns/${campaignId}/events${query}`);
+    return res.events || [];
+  }
+
+  async createCampaignEvent(campaignId: string, data: Partial<CampaignEvent>): Promise<CampaignEvent> {
+    const res = await this.request<{ event: CampaignEvent }>(`/campaigns/${campaignId}/events`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return res.event;
+  }
+
+  async triggerCampaignEvent(campaignId: string, eventId: string): Promise<{ event: CampaignEvent; executionResult: any }> {
+    return this.request(`/campaigns/${campaignId}/events/${eventId}/trigger`, {
+      method: 'POST'
+    });
+  }
+
+  async deleteCampaignEvent(campaignId: string, eventId: string): Promise<boolean> {
+    const res = await this.request<{ success: boolean }>(`/campaigns/${campaignId}/events/${eventId}`, {
+      method: 'DELETE'
+    });
+    return res.success;
+  }
+
+  async getMasterNotes(campaignId: string, filters?: Record<string, any>): Promise<MasterNote[]> {
+    const params = new URLSearchParams();
+    if (filters) {
+      for (const [k, v] of Object.entries(filters)) {
+        if (v !== undefined && v !== null) params.append(k, String(v));
+      }
+    }
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const res = await this.request<{ notes: MasterNote[] }>(`/campaigns/${campaignId}/notes${query}`);
+    return res.notes || [];
+  }
+
+  async getMasterNoteById(campaignId: string, noteId: string): Promise<MasterNote> {
+    const res = await this.request<{ note: MasterNote }>(`/campaigns/${campaignId}/notes/${noteId}`);
+    return res.note;
+  }
+
+  async createMasterNote(campaignId: string, data: Partial<MasterNote>): Promise<MasterNote> {
+    const res = await this.request<{ note: MasterNote }>(`/campaigns/${campaignId}/notes`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return res.note;
+  }
+
+  async updateMasterNote(campaignId: string, noteId: string, data: Partial<MasterNote>): Promise<MasterNote> {
+    const res = await this.request<{ note: MasterNote }>(`/campaigns/${campaignId}/notes/${noteId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    });
+    return res.note;
+  }
+
+  async shareMasterNote(campaignId: string, noteId: string, sharedWithUserIds: string[], isPrivate?: boolean): Promise<MasterNote> {
+    const res = await this.request<{ note: MasterNote }>(`/campaigns/${campaignId}/notes/${noteId}/share`, {
+      method: 'POST',
+      body: JSON.stringify({ sharedWithUserIds, isPrivate })
+    });
+    return res.note;
+  }
+
+  async deleteMasterNote(campaignId: string, noteId: string): Promise<boolean> {
+    const res = await this.request<{ success: boolean }>(`/campaigns/${campaignId}/notes/${noteId}`, {
+      method: 'DELETE'
+    });
+    return res.success;
+  }
+
+  async getEntityRevelations(campaignId: string, entityType?: string, entityId?: string): Promise<EntityRevelation[]> {
+    const params = new URLSearchParams();
+    if (entityType) params.append('entity_type', entityType);
+    if (entityId) params.append('entity_id', entityId);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const res = await this.request<{ revelations: EntityRevelation[] }>(`/campaigns/${campaignId}/revelations${query}`);
+    return res.revelations || [];
+  }
+
+  async revealEntity(campaignId: string, data: { entity_type: string; entity_id: string; revealed_to_user_id?: string | null; revealed_fields: string[] }): Promise<EntityRevelation> {
+    const res = await this.request<{ revelation: EntityRevelation }>(`/campaigns/${campaignId}/revelations`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    return res.revelation;
+  }
+
+  async unrevealEntity(campaignId: string, data: { entity_type: string; entity_id: string; revealed_to_user_id?: string | null }): Promise<boolean> {
+    const res = await this.request<{ success: boolean }>(`/campaigns/${campaignId}/revelations`, {
+      method: 'DELETE',
+      body: JSON.stringify(data)
+    });
+    return res.success;
+  }
+}
+
+export interface EnvironmentalCondition {
+  id: string;
+  campaign_id: string;
+  scene_id?: string | null;
+  name: string;
+  description?: string | null;
+  icon?: string | null;
+  is_active: number;
+  is_visible_to_players: number;
+  duration_rounds?: number | null;
+  rule_modifier_id?: string | null;
+  effect_payload?: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CampaignEvent {
+  id: string;
+  campaign_id: string;
+  scene_id?: string | null;
+  title: string;
+  description?: string | null;
+  event_type: 'manual' | 'scheduled' | 'trigger';
+  status: 'pending' | 'triggered' | 'completed' | 'cancelled';
+  trigger_conditions?: Record<string, any> | null;
+  visibility: 'master_only' | 'public' | 'targeted';
+  target_user_ids: string[];
+  action_payload?: Record<string, any> | null;
+  scheduled_at?: string | null;
+  triggered_at?: string | null;
+  created_by: string;
+  created_at: string;
+}
+
+export interface MasterNote {
+  id: string;
+  campaign_id: string;
+  scene_id?: string | null;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  is_private: number;
+  shared_with_user_ids: string[];
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EntityRevelation {
+  id: string;
+  campaign_id: string;
+  entity_type: 'npc' | 'monster' | 'clue' | 'note' | 'scene_prop';
+  entity_id: string;
+  revealed_to_user_id?: string | null;
+  revealed_fields: string[];
+  created_at: string;
 }
 
 export const api = new ApiService();

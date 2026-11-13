@@ -4,8 +4,9 @@ import { Navbar } from './components/Navbar';
 import { AuthModal } from './components/AuthModal';
 import { CampaignList } from './components/CampaignList';
 import { CampaignWorkspace } from './components/CampaignWorkspace';
+import { NotificationProvider } from './components/NotificationProvider';
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
@@ -64,47 +65,44 @@ export const App: React.FC = () => {
       window.location.hash = `campaign=${c.id}`;
     } else {
       localStorage.removeItem('arcanum_active_campaign_id');
-      if (window.location.hash.includes('campaign=')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
+      window.location.hash = '';
     }
-  };
-
-  const handleAuthSuccess = async (authUser: User) => {
-    setUser(authUser);
-    await loadCampaigns();
   };
 
   const handleLogout = () => {
     api.logout();
-    localStorage.removeItem('arcanum_active_campaign_id');
-    if (window.location.hash.includes('campaign=')) {
-      window.history.replaceState(null, '', window.location.pathname);
-    }
     setUser(null);
     setSelectedCampaign(null);
-    setCampaigns([]);
+    localStorage.removeItem('arcanum_active_campaign_id');
+    window.location.hash = '';
+  };
+
+  const handleAuthSuccess = (u: User) => {
+    setUser(u);
+    loadCampaigns();
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#131211] text-[#c9a04e]">
+      <div className="min-h-screen flex items-center justify-center bg-[#141716] text-[#c86d51]">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-10 h-10 border-4 border-[#2c2825] border-t-[#c9a04e] rounded-full animate-spin" />
-          <p className="text-sm font-semibold tracking-wider uppercase text-[#aaa292]">Iniciando Arcanum VTT...</p>
+          <div className="w-9 h-9 border-2 border-[#252a27] border-t-[#c86d51] rounded-full animate-spin" />
+          <p className="text-xs font-mono uppercase tracking-widest text-[#9b9689]">Iniciando Arquivo Arcanum...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#131211] text-[#ece3d0] flex flex-col font-sans selection:bg-[#c9a04e] selection:text-[#131211]">
-      <Navbar
-        user={user}
-        onLogout={handleLogout}
-        onBackToDashboard={() => handleSelectCampaign(null)}
-        activeCampaignName={selectedCampaign?.name}
-      />
+    <div className="min-h-screen bg-[#141716] text-[#ebe7de] flex flex-col font-sans selection:bg-[#c86d51] selection:text-[#141716]">
+      {!selectedCampaign && (
+        <Navbar
+          user={user}
+          onLogout={handleLogout}
+          onBackToDashboard={() => handleSelectCampaign(null)}
+          activeCampaignName={undefined}
+        />
+      )}
 
       <main className="flex-1">
         {!user ? (
@@ -117,16 +115,27 @@ export const App: React.FC = () => {
               handleSelectCampaign(null);
               loadCampaigns();
             }}
+            onLogout={handleLogout}
           />
         ) : (
           <CampaignList
             campaigns={campaigns}
             onSelectCampaign={(c) => handleSelectCampaign(c)}
             onRefreshCampaigns={loadCampaigns}
+            isLoading={loading}
           />
         )}
       </main>
     </div>
   );
 };
+
+export const App: React.FC = () => {
+  return (
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
+  );
+};
+
 export default App;
