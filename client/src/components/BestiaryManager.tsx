@@ -408,13 +408,13 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
   return (
     <div className="space-y-6">
       {/* Top Header / Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#1c201e] backdrop-blur-md p-4 rounded-2xl border border-[#252a27] shadow-sm transition-all">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#1a1816] backdrop-blur-md p-4 rounded-2xl border border-[#2c2825] shadow-sm transition-all">
         <div>
           <div className="flex items-center space-x-2">
-            <Skull className="w-6 h-6 text-[#b84a48]" />
+            <Skull className="w-6 h-6 text-[#b24a52]" />
             <h2 className="text-xl font-bold text-white">Bestiário & Biblioteca de Criaturas</h2>
           </div>
-          <p className="text-xs text-[#9b9689] mt-1">
+          <p className="text-xs text-[#8a8578] mt-1">
             Biblioteca de matrizes e modelos reutilizáveis. Todas as criaturas começam <strong>ocultas por padrão</strong>. O mestre decide quando e o que revelar.
           </p>
         </div>
@@ -422,7 +422,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
         {isMaster && (
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-[#b84a48] hover:bg-[#b84a48] text-white rounded-xl text-xs font-semibold shadow-lg shadow-black/20 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-[#b24a52] hover:bg-[#b24a52] text-white rounded-xl text-xs font-semibold shadow-lg shadow-black/20 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             <span>Nova Criatura</span>
@@ -434,27 +434,27 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
         {/* Barra de Busca */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-[#9b9689] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8a8578] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, raça, categoria ou descrição..."
-            className="w-full bg-[#1c201e] backdrop-blur-sm border border-[#252a27] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#b84a48] transition-all duration-200"
+            className="w-full bg-[#1a1816] backdrop-blur-sm border border-[#2c2825] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#b24a52] transition-all duration-200"
           />
         </div>
 
         {/* Categoria */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0">
-          <Filter className="w-4 h-4 text-[#9b9689] shrink-0" />
+          <Filter className="w-4 h-4 text-[#8a8578] shrink-0" />
           {CATEGORIES.map(cat => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap ${
                 selectedCategory === cat.id
-                  ? 'bg-[#b84a48] text-white shadow-md shadow-black/20'
-                  : 'bg-[#1c201e] text-[#9b9689] hover:text-white border border-[#252a27]'
+                  ? 'bg-[#b24a52] text-white shadow-md shadow-black/20'
+                  : 'bg-[#1a1816] text-[#8a8578] hover:text-white border border-[#2c2825]'
               }`}
             >
               {cat.label}
@@ -465,12 +465,12 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
       {/* Grid de Criaturas */}
       {loading ? (
-        <div className="p-12 text-center text-[#9b9689] text-sm">Carregando criaturas do bestiário...</div>
+        <div className="p-12 text-center text-[#8a8578] text-sm">Carregando criaturas do bestiário...</div>
       ) : creatures.length === 0 ? (
-        <div className="p-12 text-center bg-[#1c201e] rounded-2xl border border-[#252a27]">
-          <Skull className="w-12 h-12 text-[#343b37] mx-auto mb-3" />
+        <div className="p-12 text-center bg-[#1a1816] rounded-2xl border border-[#2c2825]">
+          <Skull className="w-12 h-12 text-[#3a3530] mx-auto mb-3" />
           <h3 className="text-sm font-semibold text-white">Nenhuma criatura disponível</h3>
-          <p className="text-xs text-[#9b9689] mt-1">
+          <p className="text-xs text-[#8a8578] mt-1">
             {isMaster 
               ? 'Crie sua primeira criatura no bestiário. Ela nascerá protegida e oculta dos jogadores até você decidir revelá-la.'
               : 'Nenhuma criatura foi revelada pelo mestre nesta campanha até o momento.'}
@@ -478,7 +478,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
           {isMaster && (
             <button
               onClick={handleOpenCreateModal}
-              className="mt-4 px-4 py-2 bg-[#b84a48] hover:bg-[#b84a48] text-white rounded-xl text-xs font-semibold inline-flex items-center space-x-2"
+              className="mt-4 px-4 py-2 bg-[#b24a52] hover:bg-[#b24a52] text-white rounded-xl text-xs font-semibold inline-flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>Criar Criatura</span>
@@ -521,13 +521,13 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
             return (
               <div 
                 key={creature.id}
-                className="bg-[#1c201e] backdrop-blur-md rounded-2xl border border-[#252a27] hover:border-[#343b37]/80 transition-all duration-200 hover:scale-[1.01] p-4 flex flex-col justify-between group shadow-sm"
+                className="bg-[#1a1816] backdrop-blur-md rounded-2xl border border-[#2c2825] hover:border-[#3a3530]/80 transition-all duration-200 hover:scale-[1.01] p-4 flex flex-col justify-between group shadow-sm"
               >
                 <div>
                   {/* Cabeçalho do Card */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 rounded-xl bg-[#252a27] border border-[#343b37] overflow-hidden flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-[#2c2825] border border-[#3a3530] overflow-hidden flex items-center justify-center shrink-0">
                         {creature.avatar_url || creature.token_url ? (
                           <img 
                             src={creature.avatar_url || creature.token_url!} 
@@ -535,7 +535,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                             className="w-full h-full object-cover" 
                           />
                         ) : (
-                          <Skull className="w-6 h-6 text-[#b84a48]" />
+                          <Skull className="w-6 h-6 text-[#b24a52]" />
                         )}
                       </div>
                       <div>
@@ -543,20 +543,20 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                           <span>{creature.name}</span>
                           {!isRevealed && (
                             <span title="Oculto para jogadores no bestiário">
-                              <EyeOff className="w-3.5 h-3.5 text-[#c86d51]" />
+                              <EyeOff className="w-3.5 h-3.5 text-[#c9a04e]" />
                             </span>
                           )}
                         </h3>
                         <div className="flex items-center space-x-2 mt-1">
-                          <span className="px-2 py-0.5 rounded bg-[#252a27] text-[#b84a48] border border-[#343b37] text-[10px] uppercase font-semibold">
+                          <span className="px-2 py-0.5 rounded bg-[#2c2825] text-[#b24a52] border border-[#3a3530] text-[10px] uppercase font-semibold">
                             {creature.category}
                           </span>
                           {creature.race && (
-                            <span className="text-[10px] text-[#9b9689]">
+                            <span className="text-[10px] text-[#8a8578]">
                               {creature.race}
                             </span>
                           )}
-                          <span className="text-[10px] text-[#9b9689]">
+                          <span className="text-[10px] text-[#8a8578]">
                             {creature.size}x
                           </span>
                         </div>
@@ -572,7 +572,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                             <span>Revelado</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#252a27] text-[#b84a48] border border-[#343b37]">
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#2c2825] text-[#b24a52] border border-[#3a3530]">
                             <EyeOff className="w-3 h-3" />
                             <span>Oculto</span>
                           </span>
@@ -583,43 +583,43 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                   {/* Nome Mascarado se houver (visível apenas para o mestre para conferência) */}
                   {isMaster && creature.display_name_players && (
-                    <div className="bg-[#141716] border border-[#252a27] rounded-lg px-2.5 py-1 mb-2.5 text-[11px] text-[#9b9689]">
+                    <div className="bg-[#131211] border border-[#2c2825] rounded-lg px-2.5 py-1 mb-2.5 text-[11px] text-[#8a8578]">
                       Nome visto pelos jogadores: <strong className="text-amber-300">"{creature.display_name_players}"</strong>
                     </div>
                   )}
 
                   {/* Descrição */}
                   {creature.description && (
-                    <p className="text-xs text-[#9b9689] line-clamp-2 mb-3">
+                    <p className="text-xs text-[#8a8578] line-clamp-2 mb-3">
                       {creature.description}
                     </p>
                   )}
 
                   {/* Atributos Mecânicos */}
-                  <div className="grid grid-cols-4 gap-1.5 bg-[#141716] p-2.5 rounded-xl border border-[#252a27]/60 text-center mb-3">
+                  <div className="grid grid-cols-4 gap-1.5 bg-[#131211] p-2.5 rounded-xl border border-[#2c2825]/60 text-center mb-3">
                     <div>
-                      <span className="text-[10px] text-[#9b9689] flex items-center justify-center space-x-0.5">
-                        <Heart className="w-3 h-3 text-[#b84a48]" />
+                      <span className="text-[10px] text-[#8a8578] flex items-center justify-center space-x-0.5">
+                        <Heart className="w-3 h-3 text-[#b24a52]" />
                         <span>PV</span>
                       </span>
                       <span className="text-xs font-bold text-white mt-0.5 block">{hpDisplay}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-[#9b9689] flex items-center justify-center space-x-0.5">
-                        <Shield className="w-3 h-3 text-[#c86d51]" />
+                      <span className="text-[10px] text-[#8a8578] flex items-center justify-center space-x-0.5">
+                        <Shield className="w-3 h-3 text-[#c9a04e]" />
                         <span>Defesa</span>
                       </span>
                       <span className="text-xs font-bold text-white mt-0.5 block">{defDisplay}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-[#9b9689] flex items-center justify-center space-x-0.5">
-                        <Shield className="w-3 h-3 text-[#c86d51]" />
+                      <span className="text-[10px] text-[#8a8578] flex items-center justify-center space-x-0.5">
+                        <Shield className="w-3 h-3 text-[#c9a04e]" />
                         <span>RD</span>
                       </span>
                       <span className="text-xs font-bold text-white mt-0.5 block">{rdDisplay}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-[#9b9689] flex items-center justify-center space-x-0.5">
+                      <span className="text-[10px] text-[#8a8578] flex items-center justify-center space-x-0.5">
                         <Zap className="w-3 h-3 text-emerald-400" />
                         <span>Inic.</span>
                       </span>
@@ -630,13 +630,13 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   {/* Equipamentos & Armas */}
                   {creature.equipment && creature.equipment.length > 0 && (isMaster || revealed.equipment) && (
                     <div className="space-y-1 mb-3">
-                      <span className="text-[10px] font-bold text-[#9b9689] uppercase tracking-wider">Armas & Equipamentos ({creature.equipment.length})</span>
+                      <span className="text-[10px] font-bold text-[#8a8578] uppercase tracking-wider">Armas & Equipamentos ({creature.equipment.length})</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {creature.equipment.map((eq, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded bg-[#252a27] text-[11px] text-[#ebe7de] border border-[#343b37]/60 flex items-center space-x-1">
-                            <Swords className="w-3 h-3 text-[#c86d51]" />
+                          <span key={i} className="px-2 py-0.5 rounded bg-[#2c2825] text-[11px] text-[#ece3d0] border border-[#3a3530]/60 flex items-center space-x-1">
+                            <Swords className="w-3 h-3 text-[#c9a04e]" />
                             <span>{eq.name}</span>
-                            {showInit && eq.damage_formula && <span className="text-[#9b9689] font-mono text-[10px]">({eq.damage_formula})</span>}
+                            {showInit && eq.damage_formula && <span className="text-[#8a8578] font-mono text-[10px]">({eq.damage_formula})</span>}
                           </span>
                         ))}
                       </div>
@@ -646,17 +646,17 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   {/* Lista de Ações / Habilidades da Criatura */}
                   {creature.actions && creature.actions.length > 0 && (isMaster || revealed.abilities) && (
                     <div className="space-y-1 mb-3">
-                      <span className="text-[10px] font-bold text-[#9b9689] uppercase tracking-wider">Ações ({creature.actions.length})</span>
+                      <span className="text-[10px] font-bold text-[#8a8578] uppercase tracking-wider">Ações ({creature.actions.length})</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {creature.actions.slice(0, 3).map((act, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded bg-[#252a27] text-[11px] text-[#ebe7de] border border-[#343b37]/60 flex items-center space-x-1">
-                            <Swords className="w-3 h-3 text-[#b84a48]" />
+                          <span key={i} className="px-2 py-0.5 rounded bg-[#2c2825] text-[11px] text-[#ece3d0] border border-[#3a3530]/60 flex items-center space-x-1">
+                            <Swords className="w-3 h-3 text-[#b24a52]" />
                             <span>{act.name}</span>
-                            {showInit && act.formula && <span className="text-[#9b9689] font-mono text-[10px]">({act.formula})</span>}
+                            {showInit && act.formula && <span className="text-[#8a8578] font-mono text-[10px]">({act.formula})</span>}
                           </span>
                         ))}
                         {creature.actions.length > 3 && (
-                          <span className="px-1.5 py-0.5 text-[10px] text-[#9b9689]">+{creature.actions.length - 3}</span>
+                          <span className="px-1.5 py-0.5 text-[10px] text-[#8a8578]">+{creature.actions.length - 3}</span>
                         )}
                       </div>
                     </div>
@@ -664,8 +664,8 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                   {/* Notas Privadas do Mestre */}
                   {isMaster && creature.private_notes && (
-                    <div className="bg-[#141716] border border-[#252a27] rounded-lg p-2 mb-3 text-[11px] text-[#9b9689]">
-                      <strong className="text-[#b84a48] block mb-0.5">Notas do Mestre (Confidencial):</strong>
+                    <div className="bg-[#131211] border border-[#2c2825] rounded-lg p-2 mb-3 text-[11px] text-[#8a8578]">
+                      <strong className="text-[#b24a52] block mb-0.5">Notas do Mestre (Confidencial):</strong>
                       <span className="line-clamp-2">{creature.private_notes}</span>
                     </div>
                   )}
@@ -673,14 +673,14 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                 {/* Ações / Botões do Card */}
                 {isMaster && (
-                  <div className="pt-3 border-t border-[#252a27] space-y-2">
+                  <div className="pt-3 border-t border-[#2c2825] space-y-2">
                     {/* Botões de Visibilidade e Revelação */}
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleReveal(creature)}
                         className={`flex-1 py-1 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors ${
                           isRevealed 
-                            ? 'bg-[#252a27] hover:bg-[#343b37] text-[#b84a48] border border-[#343b37]' 
+                            ? 'bg-[#2c2825] hover:bg-[#3a3530] text-[#b24a52] border border-[#3a3530]' 
                             : 'bg-emerald-600/90 hover:bg-emerald-500 text-white shadow-sm'
                         }`}
                         title={isRevealed ? 'Ocultar criatura no bestiário dos jogadores' : 'Revelar criatura no bestiário dos jogadores'}
@@ -691,7 +691,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                       <button
                         onClick={() => handleOpenRevealFieldsModal(creature)}
-                        className="py-1 px-2.5 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] rounded-lg text-xs font-semibold flex items-center space-x-1 border border-[#343b37]"
+                        className="py-1 px-2.5 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] rounded-lg text-xs font-semibold flex items-center space-x-1 border border-[#3a3530]"
                         title="Configurar quais campos são visíveis progressivamente aos jogadores"
                       >
                         <Sliders className="w-3.5 h-3.5" />
@@ -703,7 +703,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                     <div className="flex items-center justify-between gap-2">
                       <button
                         onClick={() => handleOpenSpawnModal(creature)}
-                        className="flex-1 py-1.5 px-3 bg-[#b84a48] hover:bg-[#b84a48] text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-black/20"
+                        className="flex-1 py-1.5 px-3 bg-[#b24a52] hover:bg-[#b24a52] text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-black/20"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
                         <span>Instanciar</span>
@@ -711,7 +711,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                       <button
                         onClick={() => handleDuplicate(creature)}
-                        className="p-1.5 text-[#9b9689] hover:text-white bg-[#252a27] hover:bg-[#343b37] rounded-lg transition-colors border border-[#343b37]"
+                        className="p-1.5 text-[#8a8578] hover:text-white bg-[#2c2825] hover:bg-[#3a3530] rounded-lg transition-colors border border-[#3a3530]"
                         title="Duplicar para Criar Variante"
                       >
                         <Copy className="w-4 h-4" />
@@ -719,7 +719,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                       <button
                         onClick={() => handleOpenEditModal(creature)}
-                        className="p-1.5 text-[#9b9689] hover:text-white bg-[#252a27] hover:bg-[#343b37] rounded-lg transition-colors border border-[#343b37]"
+                        className="p-1.5 text-[#8a8578] hover:text-white bg-[#2c2825] hover:bg-[#3a3530] rounded-lg transition-colors border border-[#3a3530]"
                         title="Editar Modelo Completo"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -727,7 +727,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
                       <button
                         onClick={() => handleDelete(creature)}
-                        className="p-1.5 text-[#9b9689] hover:text-[#b84a48] bg-[#252a27] hover:bg-[#343b37] rounded-lg transition-colors border border-[#343b37]"
+                        className="p-1.5 text-[#8a8578] hover:text-[#b24a52] bg-[#2c2825] hover:bg-[#3a3530] rounded-lg transition-colors border border-[#3a3530]"
                         title="Excluir do Bestiário"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -744,23 +744,23 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
       {/* MODAL: CONFIGURAÇÃO DE REVELAÇÃO PROGRESSIVA */}
       {showRevealFieldsModal && creatureForReveal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-lg p-6 shadow-sm backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252a27]">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-lg p-6 shadow-sm backdrop-blur-md space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825]">
               <div className="flex items-center space-x-2">
-                <Sliders className="w-5 h-5 text-[#c86d51]" />
+                <Sliders className="w-5 h-5 text-[#c9a04e]" />
                 <h3 className="text-base font-bold text-white">
                   Revelação Progressiva: {creatureForReveal.name}
                 </h3>
               </div>
               <button 
                 onClick={() => setShowRevealFieldsModal(false)}
-                className="p-1 text-[#9b9689] hover:text-white rounded-lg"
+                className="p-1 text-[#8a8578] hover:text-white rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-[#9b9689]">
+            <p className="text-xs text-[#8a8578]">
               Controle granularmente quais informações os jogadores podem visualizar na ficha desta criatura. Campos desmarcados permanecem estritamente mascarados pelo backend.
             </p>
 
@@ -771,32 +771,32 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   <div 
                     key={def.key}
                     onClick={() => setDraftRevealedFields({ ...draftRevealedFields, [def.key]: !isChecked })}
-                    className="flex items-start space-x-3 p-2.5 bg-[#141716] rounded-xl border border-[#252a27] hover:border-[#343b37] cursor-pointer transition-colors"
+                    className="flex items-start space-x-3 p-2.5 bg-[#131211] rounded-xl border border-[#2c2825] hover:border-[#3a3530] cursor-pointer transition-colors"
                   >
-                    <div className="mt-0.5 text-[#c86d51]">
-                      {isChecked ? <CheckSquare className="w-4 h-4 text-[#c86d51]" /> : <Square className="w-4 h-4 text-[#343b37]" />}
+                    <div className="mt-0.5 text-[#c9a04e]">
+                      {isChecked ? <CheckSquare className="w-4 h-4 text-[#c9a04e]" /> : <Square className="w-4 h-4 text-[#3a3530]" />}
                     </div>
                     <div className="flex-1">
                       <div className="text-xs font-semibold text-white">{def.label}</div>
-                      <div className="text-[11px] text-[#9b9689]">{def.desc}</div>
+                      <div className="text-[11px] text-[#8a8578]">{def.desc}</div>
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#252a27]">
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={() => setShowRevealFieldsModal(false)}
-                className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] rounded-xl text-xs font-semibold"
+                className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] rounded-xl text-xs font-semibold"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleSaveRevealedFields}
-                className="px-5 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-lg shadow-black/50"
+                className="px-5 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-lg shadow-black/50"
               >
                 Salvar Preferências
               </button>
@@ -808,17 +808,17 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
       {/* MODAL: CRIAR / EDITAR CRIATURA COMPLETA */}
       {showEditorModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 shadow-sm backdrop-blur-md">
-            <div className="flex items-center justify-between pb-4 border-b border-[#252a27] mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between pb-4 border-b border-[#2c2825] mb-4">
               <div className="flex items-center space-x-2">
-                <Skull className="w-5 h-5 text-[#b84a48]" />
+                <Skull className="w-5 h-5 text-[#b24a52]" />
                 <h3 className="text-base font-bold text-white">
                   {editingCreature ? `Editar Criatura: ${editingCreature.name}` : 'Criar Nova Criatura / Modelo de NPC'}
                 </h3>
               </div>
               <button 
                 onClick={() => setShowEditorModal(false)}
-                className="p-1 text-[#9b9689] hover:text-white rounded-lg transition-colors"
+                className="p-1 text-[#8a8578] hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -828,34 +828,34 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
               {/* Linha 1: Nome Verdadeiro, Nome Mascarado e Raça */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Nome Real (Mestre) *</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Nome Real (Mestre) *</label>
                   <input
                     type="text"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Ex: Vampiro Ancião Lorde Malakar"
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Nome Mascarado (Jogadores)</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Nome Mascarado (Jogadores)</label>
                   <input
                     type="text"
                     value={formDisplayNamePlayers}
                     onChange={(e) => setFormDisplayNamePlayers(e.target.value)}
                     placeholder="Ex: Figura Encapuzada, Sombra Misteriosa"
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Raça / Espécie</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Raça / Espécie</label>
                   <input
                     type="text"
                     value={formRace}
                     onChange={(e) => setFormRace(e.target.value)}
                     placeholder="Ex: Morto-Vivo, Dracônico, Elfo Corrompido"
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
               </div>
@@ -863,11 +863,11 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
               {/* Linha 2: Categoria, Tamanho e Visibilidade Inicial */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Categoria</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Categoria</label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   >
                     {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.label}</option>
@@ -875,11 +875,11 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Tamanho da Criatura (Grid)</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Tamanho da Criatura (Grid)</label>
                   <select
                     value={formSize}
                     onChange={(e) => setFormSize(Number(e.target.value))}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   >
                     {SIZE_OPTIONS.map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -887,12 +887,12 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   </select>
                 </div>
                 <div className="flex items-center pt-5">
-                  <label className="flex items-center space-x-2 text-xs text-[#ebe7de] cursor-pointer">
+                  <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formIsRevealed}
                       onChange={(e) => setFormIsRevealed(e.target.checked)}
-                      className="rounded bg-[#141716] border-[#252a27] text-[#b84a48] focus:ring-0"
+                      className="rounded bg-[#131211] border-[#2c2825] text-[#b24a52] focus:ring-0"
                     />
                     <span>Revelado aos jogadores no bestiário</span>
                   </label>
@@ -901,142 +901,142 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
               {/* Descrição */}
               <div>
-                <label className="block text-xs font-medium text-[#9b9689] mb-1">Descrição & Lore</label>
+                <label className="block text-xs font-medium text-[#8a8578] mb-1">Descrição & Lore</label>
                 <textarea
                   rows={2}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   placeholder="Comportamento, táticas, ecologia..."
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                 />
               </div>
 
               {/* Imagens / URLs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Avatar / Imagem (URL)</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Avatar / Imagem (URL)</label>
                   <input
                     type="text"
                     value={formAvatarUrl}
                     onChange={(e) => setFormAvatarUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Token para Mapa (URL)</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Token para Mapa (URL)</label>
                   <input
                     type="text"
                     value={formTokenUrl}
                     onChange={(e) => setFormTokenUrl(e.target.value)}
                     placeholder="https://... (ou vazio para usar avatar)"
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
               </div>
 
               {/* Estatísticas de Combate */}
-              <div className="p-3 bg-[#141716] rounded-xl border border-[#252a27]">
-                <span className="text-xs font-bold text-[#b84a48] block mb-2">Estatísticas de Combate & Vida</span>
+              <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825]">
+                <span className="text-xs font-bold text-[#b24a52] block mb-2">Estatísticas de Combate & Vida</span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Pontos de Vida (PV)</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Pontos de Vida (PV)</label>
                     <input
                       type="number"
                       min={1}
                       value={formHp}
                       onChange={(e) => setFormHp(Number(e.target.value))}
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Defesa (CA)</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       min={0}
                       value={formDefense}
                       onChange={(e) => setFormDefense(Number(e.target.value))}
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Redução de Dano (RD)</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       min={0}
                       value={formRd}
                       onChange={(e) => setFormRd(Number(e.target.value))}
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Fórmula Iniciativa</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Fórmula Iniciativa</label>
                     <input
                       type="text"
                       value={formInitiativeFormula}
                       onChange={(e) => setFormInitiativeFormula(e.target.value)}
                       placeholder="1d20 + 2"
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Tipos de Dano: Resistências, Vulnerabilidades e Imunidades */}
-              <div className="p-3 bg-[#141716] rounded-xl border border-[#252a27] space-y-2">
-                <span className="text-xs font-bold text-[#c86d51] block">Resistências, Vulnerabilidades & Imunidades</span>
+              <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] space-y-2">
+                <span className="text-xs font-bold text-[#c9a04e] block">Resistências, Vulnerabilidades & Imunidades</span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Resistências (Dano 50%)</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Resistências (Dano 50%)</label>
                     <input
                       type="text"
                       value={formResistances}
                       onChange={(e) => setFormResistances(e.target.value)}
                       placeholder="fogo, frio, corte, perfuracao..."
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Vulnerabilidades (Dano 150%)</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Vulnerabilidades (Dano 150%)</label>
                     <input
                       type="text"
                       value={formVulnerabilities}
                       onChange={(e) => setFormVulnerabilities(e.target.value)}
                       placeholder="sagrado, radiante, fogo..."
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#9b9689] mb-1">Imunidades (Dano 0%)</label>
+                    <label className="block text-[11px] text-[#8a8578] mb-1">Imunidades (Dano 0%)</label>
                     <input
                       type="text"
                       value={formImmunities}
                       onChange={(e) => setFormImmunities(e.target.value)}
                       placeholder="veneno, eletrico, psiquico..."
-                      className="w-full bg-[#1c201e] border border-[#252a27] rounded-lg px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[#1a1816] border border-[#2c2825] rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Armas & Equipamentos Equipados */}
-              <div className="p-3 bg-[#141716] rounded-xl border border-[#252a27] space-y-2">
-                <span className="text-xs font-bold text-[#c86d51] block">Armas & Equipamentos Equipados</span>
+              <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] space-y-2">
+                <span className="text-xs font-bold text-[#c9a04e] block">Armas & Equipamentos Equipados</span>
                 
                 {formEquipment.map((eq, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-[#1c201e] p-2 rounded-lg border border-[#252a27] text-xs">
+                  <div key={idx} className="flex items-center justify-between bg-[#1a1816] p-2 rounded-lg border border-[#2c2825] text-xs">
                     <div className="flex items-center space-x-2">
-                      <Swords className="w-3.5 h-3.5 text-[#c86d51]" />
+                      <Swords className="w-3.5 h-3.5 text-[#c9a04e]" />
                       <strong className="text-white">{eq.name}</strong>
-                      <span className="text-[#9b9689] text-[10px] uppercase">({eq.item_type || 'item'})</span>
-                      {eq.damage_formula && <span className="text-[#b84a48] font-mono text-[10px]">Dano: {eq.damage_formula} ({eq.damage_type || 'físico'})</span>}
+                      <span className="text-[#8a8578] text-[10px] uppercase">({eq.item_type || 'item'})</span>
+                      {eq.damage_formula && <span className="text-[#b24a52] font-mono text-[10px]">Dano: {eq.damage_formula} ({eq.damage_type || 'físico'})</span>}
                       {eq.defense_bonus ? <span className="text-emerald-400 text-[10px]">+{eq.defense_bonus} Def</span> : null}
-                      {eq.damage_reduction ? <span className="text-[#c86d51] text-[10px]">+{eq.damage_reduction} RD</span> : null}
+                      {eq.damage_reduction ? <span className="text-[#c9a04e] text-[10px]">+{eq.damage_reduction} RD</span> : null}
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveEquipmentFromForm(idx)}
-                      className="text-[#9b9689] hover:text-[#b84a48] p-1"
+                      className="text-[#8a8578] hover:text-[#b24a52] p-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -1044,18 +1044,18 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                 ))}
 
                 {/* Adicionar Equipamento */}
-                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 pt-2 border-t border-[#252a27]">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 pt-2 border-t border-[#2c2825]">
                   <input
                     type="text"
                     value={eqName}
                     onChange={(e) => setEqName(e.target.value)}
                     placeholder="Nome do item / arma"
-                    className="sm:col-span-2 bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white"
+                    className="sm:col-span-2 bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white"
                   />
                   <select
                     value={eqType}
                     onChange={(e) => setEqType(e.target.value as any)}
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white"
                   >
                     <option value="weapon">Arma</option>
                     <option value="armor">Armadura</option>
@@ -1067,19 +1067,19 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                     value={eqDmgFormula}
                     onChange={(e) => setEqDmgFormula(e.target.value)}
                     placeholder="Dano (ex: 2d6+4)"
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white font-mono"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white font-mono"
                   />
                   <input
                     type="text"
                     value={eqDamageType}
                     onChange={(e) => setEqDamageType(e.target.value)}
                     placeholder="Tipo de Dano"
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white"
                   />
                   <button
                     type="button"
                     onClick={handleAddEquipmentToForm}
-                    className="bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-lg text-xs font-semibold py-1.5"
+                    className="bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-lg text-xs font-semibold py-1.5"
                   >
                     + Equipar
                   </button>
@@ -1087,23 +1087,23 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
               </div>
 
               {/* Ações e Ataques Adicionais */}
-              <div className="p-3 bg-[#141716] rounded-xl border border-[#252a27] space-y-2">
-                <span className="text-xs font-bold text-[#b84a48] block">Ações Especiais do Monstro</span>
+              <div className="p-3 bg-[#131211] rounded-xl border border-[#2c2825] space-y-2">
+                <span className="text-xs font-bold text-[#b24a52] block">Ações Especiais do Monstro</span>
                 
                 {formActions.map((act, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-[#1c201e] p-2 rounded-lg border border-[#252a27] text-xs">
+                  <div key={idx} className="flex items-center justify-between bg-[#1a1816] p-2 rounded-lg border border-[#2c2825] text-xs">
                     <div className="flex items-center space-x-2">
-                      <Swords className="w-3.5 h-3.5 text-[#b84a48]" />
+                      <Swords className="w-3.5 h-3.5 text-[#b24a52]" />
                       <strong className="text-white">{act.name}</strong>
-                      <span className="text-[#9b9689] font-mono">({act.formula})</span>
-                      <span className="text-[10px] uppercase text-[#ebe7de] bg-[#141716] px-1.5 py-0.5 rounded border border-[#343b37]">
+                      <span className="text-[#8a8578] font-mono">({act.formula})</span>
+                      <span className="text-[10px] uppercase text-[#ece3d0] bg-[#131211] px-1.5 py-0.5 rounded border border-[#3a3530]">
                         {act.damage_type || 'físico'}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveActionFromForm(idx)}
-                      className="text-[#9b9689] hover:text-[#b84a48] p-1"
+                      className="text-[#8a8578] hover:text-[#b24a52] p-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -1111,32 +1111,32 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                 ))}
 
                 {/* Adicionar nova ação */}
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2 border-t border-[#252a27]">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2 border-t border-[#2c2825]">
                   <input
                     type="text"
                     value={actionName}
                     onChange={(e) => setActionName(e.target.value)}
                     placeholder="Nome da ação (ex: Mordida)"
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white"
                   />
                   <input
                     type="text"
                     value={actionFormula}
                     onChange={(e) => setActionFormula(e.target.value)}
                     placeholder="Dano (ex: 2d6 + 3)"
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white font-mono"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white font-mono"
                   />
                   <input
                     type="text"
                     value={actionDamageType}
                     onChange={(e) => setActionDamageType(e.target.value)}
                     placeholder="Tipo (físico, fogo, etc.)"
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white"
                   />
                   <select
                     value={actionCost}
                     onChange={(e) => setActionCost(e.target.value)}
-                    className="bg-[#1c201e] border border-[#252a27] rounded-lg px-2 py-1.5 text-xs text-white"
+                    className="bg-[#1a1816] border border-[#2c2825] rounded-lg px-2 py-1.5 text-xs text-white"
                   >
                     <option value="main">Principal</option>
                     <option value="bonus">Bônus / Livre</option>
@@ -1145,7 +1145,7 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                   <button
                     type="button"
                     onClick={handleAddActionToForm}
-                    className="bg-[#b84a48] hover:bg-[#b84a48] text-white rounded-lg text-xs font-semibold py-1.5"
+                    className="bg-[#b24a52] hover:bg-[#b24a52] text-white rounded-lg text-xs font-semibold py-1.5"
                   >
                     + Ação
                   </button>
@@ -1155,39 +1155,39 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
               {/* Notas Públicas e Notas Privadas do Mestre */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#9b9689] mb-1">Notas Públicas (Lore / Visível a jogadores quando revelado)</label>
+                  <label className="block text-xs font-medium text-[#8a8578] mb-1">Notas Públicas (Lore / Visível a jogadores quando revelado)</label>
                   <textarea
                     rows={2}
                     value={formPublicNotes}
                     onChange={(e) => setFormPublicNotes(e.target.value)}
                     placeholder="Comportamento público, fraquezas conhecidas pelos estudiosos..."
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#b84a48] mb-1">Notas Privadas do Mestre (100% Confidencial)</label>
+                  <label className="block text-xs font-medium text-[#b24a52] mb-1">Notas Privadas do Mestre (100% Confidencial)</label>
                   <textarea
                     rows={2}
                     value={formPrivateNotes}
                     onChange={(e) => setFormPrivateNotes(e.target.value)}
                     placeholder="Objetivos de cena, táticas sujas, tesouro oculto..."
-                    className="w-full bg-[#141716] border border-[#343b37] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b84a48]"
+                    className="w-full bg-[#131211] border border-[#3a3530] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#b24a52]"
                   />
                 </div>
               </div>
 
               {/* Botões do Modal */}
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#252a27]">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowEditorModal(false)}
-                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] rounded-xl text-xs font-semibold"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#b84a48] hover:bg-[#b84a48] text-white rounded-xl text-xs font-semibold shadow-lg shadow-black/20"
+                  className="px-5 py-2 bg-[#b24a52] hover:bg-[#b24a52] text-white rounded-xl text-xs font-semibold shadow-lg shadow-black/20"
                 >
                   Salvar Criatura
                 </button>
@@ -1200,43 +1200,43 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
       {/* MODAL: INSTANCIAR CRIATURA NO COMBATE E MAPA */}
       {showSpawnModal && creatureToSpawn && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-md p-6 shadow-sm backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-md p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <div className="flex items-center space-x-2">
-                <UserPlus className="w-5 h-5 text-[#b84a48]" />
+                <UserPlus className="w-5 h-5 text-[#b24a52]" />
                 <h3 className="text-base font-bold text-white">Instanciar Criatura</h3>
               </div>
               <button 
                 onClick={() => setShowSpawnModal(false)}
-                className="p-1 text-[#9b9689] hover:text-white rounded-lg transition-colors"
+                className="p-1 text-[#8a8578] hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleExecuteSpawn} className="space-y-4">
-              <div className="bg-[#141716] p-3 rounded-xl border border-[#252a27] flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-lg bg-[#252a27] overflow-hidden flex items-center justify-center shrink-0">
+              <div className="bg-[#131211] p-3 rounded-xl border border-[#2c2825] flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-[#2c2825] overflow-hidden flex items-center justify-center shrink-0">
                   {creatureToSpawn.avatar_url ? (
                     <img src={creatureToSpawn.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Skull className="w-5 h-5 text-[#b84a48]" />
+                    <Skull className="w-5 h-5 text-[#b24a52]" />
                   )}
                 </div>
                 <div>
                   <h4 className="font-bold text-white text-xs">{creatureToSpawn.name}</h4>
-                  <span className="text-[10px] text-[#9b9689]">Modelo: {creatureToSpawn.category}</span>
+                  <span className="text-[10px] text-[#8a8578]">Modelo: {creatureToSpawn.category}</span>
                 </div>
               </div>
 
               {/* Quantidade */}
               <div>
-                <label className="block text-xs font-medium text-[#9b9689] mb-1">Quantidade de Instâncias Independentes</label>
+                <label className="block text-xs font-medium text-[#8a8578] mb-1">Quantidade de Instâncias Independentes</label>
                 <div className="flex items-center space-x-2">
                   <button
                     type="button"
                     onClick={() => setSpawnCount(Math.max(1, spawnCount - 1))}
-                    className="w-8 h-8 rounded-lg bg-[#252a27] text-white font-bold flex items-center justify-center hover:bg-[#343b37]"
+                    className="w-8 h-8 rounded-lg bg-[#2c2825] text-white font-bold flex items-center justify-center hover:bg-[#3a3530]"
                   >
                     -
                   </button>
@@ -1246,16 +1246,16 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
                     max={20}
                     value={spawnCount}
                     onChange={(e) => setSpawnCount(Math.max(1, Math.min(20, Number(e.target.value))))}
-                    className="w-16 text-center bg-[#141716] border border-[#252a27] rounded-lg py-1 text-xs text-white font-bold"
+                    className="w-16 text-center bg-[#131211] border border-[#2c2825] rounded-lg py-1 text-xs text-white font-bold"
                   />
                   <button
                     type="button"
                     onClick={() => setSpawnCount(Math.min(20, spawnCount + 1))}
-                    className="w-8 h-8 rounded-lg bg-[#252a27] text-white font-bold flex items-center justify-center hover:bg-[#343b37]"
+                    className="w-8 h-8 rounded-lg bg-[#2c2825] text-white font-bold flex items-center justify-center hover:bg-[#3a3530]"
                   >
                     +
                   </button>
-                  <span className="text-xs text-[#9b9689] ml-2">
+                  <span className="text-xs text-[#8a8578] ml-2">
                     {spawnCount > 1 ? `Criará: ${spawnNamePrefix} 1, 2, ... ${spawnCount}` : 'Instância única'}
                   </span>
                 </div>
@@ -1263,22 +1263,22 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
               {/* Prefixo de Nome */}
               <div>
-                <label className="block text-xs font-medium text-[#9b9689] mb-1">Nome / Prefixo da Instância</label>
+                <label className="block text-xs font-medium text-[#8a8578] mb-1">Nome / Prefixo da Instância</label>
                 <input
                   type="text"
                   value={spawnNamePrefix}
                   onChange={(e) => setSpawnNamePrefix(e.target.value)}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-lg px-3 py-1.5 text-xs text-white"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-lg px-3 py-1.5 text-xs text-white"
                 />
               </div>
 
               {/* Seleção do Encontro */}
               <div>
-                <label className="block text-xs font-medium text-[#9b9689] mb-1">Encontro de Combate Alvo</label>
+                <label className="block text-xs font-medium text-[#8a8578] mb-1">Encontro de Combate Alvo</label>
                 <select
                   value={selectedEncounterId}
                   onChange={(e) => setSelectedEncounterId(e.target.value)}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-lg px-3 py-1.5 text-xs text-white"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-lg px-3 py-1.5 text-xs text-white"
                 >
                   {encounters.map(enc => (
                     <option key={enc.id} value={enc.id}>
@@ -1290,11 +1290,11 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
 
               {/* Seleção de Cena / Mapa */}
               <div>
-                <label className="block text-xs font-medium text-[#9b9689] mb-1">Posicionar Token no Mapa (Opcional)</label>
+                <label className="block text-xs font-medium text-[#8a8578] mb-1">Posicionar Token no Mapa (Opcional)</label>
                 <select
                   value={selectedSceneId}
                   onChange={(e) => setSelectedSceneId(e.target.value)}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-lg px-3 py-1.5 text-xs text-white"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-lg px-3 py-1.5 text-xs text-white"
                 >
                   <option value="">Nenhum (apenas na iniciativa)</option>
                   {scenes.map(sc => (
@@ -1306,28 +1306,28 @@ export const BestiaryManager: React.FC<BestiaryManagerProps> = ({ campaignId, is
               </div>
 
               {/* Oculto / Reforço Surpresa */}
-              <label className="flex items-center space-x-2 text-xs text-[#ebe7de] cursor-pointer pt-1">
+              <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={spawnIsHidden}
                   onChange={(e) => setSpawnIsHidden(e.target.checked)}
-                  className="rounded bg-[#141716] border-[#252a27] text-[#b84a48]"
+                  className="rounded bg-[#131211] border-[#2c2825] text-[#b24a52]"
                 />
                 <span>Oculto para os jogadores (Invisível na iniciativa e mapa)</span>
               </label>
 
               {/* Botões */}
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#252a27]">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowSpawnModal(false)}
-                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] rounded-xl text-xs font-semibold"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#b84a48] hover:bg-[#b84a48] text-white rounded-xl text-xs font-semibold shadow-lg shadow-black/20"
+                  className="px-5 py-2 bg-[#b24a52] hover:bg-[#b24a52] text-white rounded-xl text-xs font-semibold shadow-lg shadow-black/20"
                 >
                   Instanciar no Encontro
                 </button>

@@ -67,25 +67,25 @@ export const CampaignList: React.FC<CampaignListProps> = ({
     switch (role) {
       case 'owner':
         return (
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#2a221e] text-[#c86d51] border border-[#c86d51]/40">
+          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#2a2218] text-[#c9a04e] border border-[#c9a04e]/40">
             Mestre Criador
           </span>
         );
       case 'master':
         return (
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#1e2522] text-[#6d9775] border border-[#6d9775]/40">
+          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#1a2218] text-[#5a7a5a] border border-[#5a7a5a]/40">
             Co-Mestre
           </span>
         );
       case 'assistant':
         return (
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#1e2226] text-[#5b8299] border border-[#5b8299]/40">
+          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#1a1e24] text-[#4a7a8a] border border-[#4a7a8a]/40">
             Auxiliar
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#222623] text-[#ebe7de] border border-[#343b37]">
+          <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase tracking-wider font-semibold bg-[#1f1f1a] text-[#ece3d0] border border-[#3a3530]">
             Aventureiro
           </span>
         );
@@ -93,17 +93,17 @@ export const CampaignList: React.FC<CampaignListProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 select-none text-[#ebe7de]">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 select-none text-[#ece3d0] bg-[#131211]">
       {/* Cabeçalho Editorial com Linha Fina de Separação */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#343b37]">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#3a3530]">
         <div>
-          <span className="text-xs font-mono uppercase tracking-widest text-[#c86d51] block mb-1">
+          <span className="text-xs font-mono uppercase tracking-widest text-[#c9a04e] block mb-1">
             Índice Geral de Campanhas
           </span>
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-[#ebe7de]">
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-[#ece3d0]">
             Crônicas Registradas
           </h1>
-          <p className="text-xs text-[#9b9689] mt-1 max-w-xl">
+          <p className="text-xs text-[#8a8578] mt-1 max-w-xl">
             Selecione uma mesa ativa para entrar no ambiente tático ou forje novas crônicas com regras isoladas.
           </p>
         </div>
@@ -111,15 +111,15 @@ export const CampaignList: React.FC<CampaignListProps> = ({
         <div className="flex items-center space-x-2.5 shrink-0">
           <button
             onClick={() => setShowJoinModal(true)}
-            className="px-3.5 py-2 bg-[#1c201e] hover:bg-[#252a27] text-[#ebe7de] border border-[#343b37] rounded-lg text-xs font-medium flex items-center space-x-1.5 transition-all active:scale-95"
+            className="px-3.5 py-2 bg-[#1a1816] hover:bg-[#2c2825] text-[#ece3d0] border border-[#3a3530] rounded-xl text-xs font-medium flex items-center space-x-1.5 transition-all duration-300 active:scale-95"
           >
-            <Key className="w-3.5 h-3.5 text-[#9b9689]" />
+            <Key className="w-3.5 h-3.5 text-[#8a8578]" />
             <span>Código de Convite</span>
           </button>
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs flex items-center space-x-1.5 transition-all active:scale-95"
+            className="px-4 py-2 bg-[#c9a04e] hover:bg-[#d4ad5e] text-[#131211] font-bold rounded-xl text-xs flex items-center space-x-1.5 transition-all duration-300 active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>Forjar Nova Mesa</span>
@@ -127,66 +127,66 @@ export const CampaignList: React.FC<CampaignListProps> = ({
         </div>
       </div>
 
-      {/* Lista Editorial em Formato Dossiê / Ledger (Sem Grid Engessado de Cards) */}
+      {/* Lista Editorial em Formato Dossiê / Ledger */}
       <div className="mt-8">
         {isLoading ? (
           <div className="py-20 text-center space-y-3">
-            <div className="w-8 h-8 border-2 border-[#252a27] border-t-[#c86d51] rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-mono text-[#9b9689]">Consultando arquivos de campanha...</p>
+            <div className="w-8 h-8 border-2 border-[#2c2825] border-t-[#c9a04e] rounded-full animate-spin mx-auto" />
+            <p className="text-xs font-mono text-[#8a8578]">Consultando arquivos de campanha...</p>
           </div>
         ) : campaigns.length === 0 ? (
-          <div className="py-20 text-center border border-dashed border-[#343b37] rounded-xl p-8 bg-[#181c1a]/50 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-[#1c201e] border border-[#343b37] flex items-center justify-center text-[#c86d51] mx-auto">
+          <div className="py-20 text-center border border-dashed border-[#3a3530] rounded-xl p-8 bg-[#1a1816]/50 space-y-4">
+            <div className="w-12 h-12 rounded-full bg-[#1a1816] border border-[#3a3530] flex items-center justify-center text-[#c9a04e] mx-auto">
               <BookOpen className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-serif text-xl font-bold text-[#ebe7de]">Nenhuma mesa aberta</h3>
-              <p className="text-xs text-[#9b9689] max-w-md mx-auto">
+              <h3 className="font-serif text-xl font-bold text-[#ece3d0]">Nenhuma mesa aberta</h3>
+              <p className="text-xs text-[#8a8578] max-w-md mx-auto">
                 Você ainda não está registrado em nenhuma campanha. Forje uma nova mesa ou solicite o código de acesso ao seu Mestre.
               </p>
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-5 py-2.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs transition-all active:scale-95 inline-flex items-center space-x-2"
+              className="px-5 py-2.5 bg-[#c9a04e] hover:bg-[#d4ad5e] text-[#131211] font-bold rounded-xl text-xs transition-all duration-300 active:scale-95 inline-flex items-center space-x-2"
             >
               <Feather className="w-4 h-4" />
               <span>Forjar Primeira Campanha</span>
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-[#343b37]/60 border-t border-b border-[#343b37]/60">
+          <div className="divide-y divide-[#3a3530]/60 border-t border-b border-[#3a3530]/60">
             {campaigns.map((camp) => (
               <div
                 key={camp.id}
                 onClick={() => onSelectCampaign(camp)}
-                className="group py-5 px-3 sm:px-4 hover:bg-[#1c201e]/60 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="group py-5 px-3 sm:px-4 hover:bg-[#1a1816]/60 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center space-x-2.5">
                     {getRoleBadge(camp.role)}
-                    <span className="text-[11px] font-mono text-[#6d9775] px-2 py-0.5 rounded bg-[#1c201e] border border-[#343b37]">
+                    <span className="text-[11px] font-mono text-[#5a7a5a] px-2 py-0.5 rounded bg-[#1a1816] border border-[#3a3530]">
                       {camp.active_ruleset_name || 'Sistema Customizado'}
                     </span>
-                    <span className="text-[11px] font-mono text-[#9b9689] flex items-center space-x-1">
-                      <Users className="w-3 h-3 text-[#9b9689]" />
+                    <span className="text-[11px] font-mono text-[#8a8578] flex items-center space-x-1">
+                      <Users className="w-3 h-3 text-[#8a8578]" />
                       <span>{camp.member_count} {camp.member_count === 1 ? 'membro' : 'membros'}</span>
                     </span>
                   </div>
 
-                  <h2 className="font-serif text-2xl font-bold text-[#ebe7de] group-hover:text-[#c86d51] transition-colors leading-tight">
+                  <h2 className="font-serif text-2xl font-bold text-[#ece3d0] group-hover:text-[#c9a04e] transition-colors leading-tight">
                     {camp.name}
                   </h2>
 
-                  <p className="text-xs text-[#9b9689] line-clamp-2 max-w-2xl leading-relaxed">
+                  <p className="text-xs text-[#8a8578] line-clamp-2 max-w-2xl leading-relaxed">
                     {camp.description || 'Nenhuma descrição detalhada anexada a esta crônica.'}
                   </p>
                 </div>
 
                 <div className="flex items-center space-x-3 shrink-0 self-end md:self-center">
-                  <span className="text-xs font-mono text-[#c86d51] group-hover:translate-x-0.5 transition-transform hidden sm:inline">
+                  <span className="text-xs font-mono text-[#c9a04e] group-hover:translate-x-0.5 transition-transform hidden sm:inline">
                     Abrir Crônica
                   </span>
-                  <div className="w-8 h-8 rounded-lg bg-[#1c201e] border border-[#343b37] group-hover:border-[#c86d51] group-hover:bg-[#c86d51] flex items-center justify-center text-[#9b9689] group-hover:text-[#141716] transition-all">
+                  <div className="w-8 h-8 rounded-xl bg-[#1a1816] border border-[#3a3530] group-hover:border-[#c9a04e] group-hover:bg-[#c9a04e] flex items-center justify-center text-[#8a8578] group-hover:text-[#131211] transition-all duration-300">
                     <ChevronRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -198,32 +198,32 @@ export const CampaignList: React.FC<CampaignListProps> = ({
 
       {/* Modal Criar Campanha */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-[#1c201e] border border-[#343b37] rounded-xl p-6 sm:p-8 relative text-[#ebe7de] shadow-2xl">
-            <div className="flex items-center justify-between pb-3.5 border-b border-[#343b37] mb-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-lg bg-[#1a1816] border border-[#3a3530] rounded-2xl p-6 sm:p-8 relative text-[#ece3d0] shadow-2xl shadow-black/60">
+            <div className="flex items-center justify-between pb-3.5 border-b border-[#3a3530] mb-5">
               <div>
-                <h2 className="text-2xl font-serif font-bold text-[#ebe7de]">Forjar Nova Mesa</h2>
-                <p className="text-xs text-[#9b9689] mt-0.5">
+                <h2 className="text-2xl font-serif font-bold text-[#ece3d0]">Forjar Nova Mesa</h2>
+                <p className="text-xs text-[#8a8578] mt-0.5">
                   Defina o título da campanha e selecione as diretrizes mecânicas.
                 </p>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="w-7 h-7 rounded-lg bg-[#141716] text-[#9b9689] hover:text-[#ebe7de] border border-[#343b37] flex items-center justify-center text-xs transition-colors"
+                className="w-7 h-7 rounded-xl bg-[#131211] text-[#8a8578] hover:text-[#ece3d0] border border-[#3a3530] flex items-center justify-center text-xs transition-colors"
               >
                 ✕
               </button>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-[#241a1a] border border-[#b84a48]/60 text-[#e8b5b5] text-xs rounded-lg">
+              <div className="mb-4 p-3 bg-[#1f1517] border border-[#b24a52]/60 text-[#e8b5b5] text-xs rounded-lg">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleCreateCampaign} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#9b9689] uppercase tracking-wider">
+                <label className="block text-xs font-mono text-[#8a8578] uppercase tracking-wider">
                   Denominação da Campanha
                 </label>
                 <input
@@ -232,12 +232,12 @@ export const CampaignList: React.FC<CampaignListProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: As Sombras de Eldoria"
-                  className="w-full px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] placeholder-[#959085] focus:outline-none transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-xl text-sm text-[#ece3d0] placeholder-[#8a8578] focus:outline-none transition-colors"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#9b9689] uppercase tracking-wider">
+                <label className="block text-xs font-mono text-[#8a8578] uppercase tracking-wider">
                   Premissa / Descrição
                 </label>
                 <textarea
@@ -245,37 +245,37 @@ export const CampaignList: React.FC<CampaignListProps> = ({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Descreva a ambientação, perigos e mistérios deste mundo..."
-                  className="w-full px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] placeholder-[#959085] focus:outline-none transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-xl text-sm text-[#ece3d0] placeholder-[#8a8578] focus:outline-none transition-colors"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#9b9689] uppercase tracking-wider">
+                <label className="block text-xs font-mono text-[#8a8578] uppercase tracking-wider">
                   Fundação de Regras (Preset)
                 </label>
                 <select
                   value={preset}
                   onChange={(e) => setPreset(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] focus:outline-none transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-xl text-sm text-[#ece3d0] focus:outline-none transition-colors"
                 >
-                  <option value="investigacao">Investigação Sobrenatural (D100 / Sanidade & Perícias)</option>
-                  <option value="cyberpunk">Cyberpunk Distópico (D10 / Sobrecarga & Carga)</option>
-                  <option value="fantasia_d20">Fantasia Heroica (D20 Clássico / Atributos & PV)</option>
+                  <option value="investigacao">Investigação Sobrenatural (D100 / Sanidade &amp; Perícias)</option>
+                  <option value="cyberpunk">Cyberpunk Distópico (D10 / Sobrecarga &amp; Carga)</option>
+                  <option value="fantasia_d20">Fantasia Heroica (D20 Clássico / Atributos &amp; PV)</option>
                 </select>
               </div>
 
-              <div className="pt-2 flex items-center justify-end space-x-3 border-t border-[#343b37]">
+              <div className="pt-2 flex items-center justify-end space-x-3 border-t border-[#3a3530]">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] rounded-lg text-xs font-medium border border-[#343b37] transition-colors"
+                  className="px-4 py-2 bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] rounded-xl text-xs font-medium border border-[#3a3530] transition-all duration-300"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs transition-all active:scale-95 disabled:opacity-50"
+                  className="px-5 py-2 bg-[#c9a04e] hover:bg-[#d4ad5e] text-[#131211] font-bold rounded-xl text-xs transition-all duration-300 active:scale-95 disabled:opacity-50"
                 >
                   {loading ? 'Instanciando...' : 'Criar Mesa'}
                 </button>
@@ -287,27 +287,27 @@ export const CampaignList: React.FC<CampaignListProps> = ({
 
       {/* Modal Ingressar via Código */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-[#1c201e] border border-[#343b37] rounded-xl p-6 relative text-[#ebe7de] shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#343b37] mb-4">
-              <h2 className="text-xl font-serif font-bold text-[#ebe7de]">Ingressar em Mesa</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-md bg-[#1a1816] border border-[#3a3530] rounded-2xl p-6 relative text-[#ece3d0] shadow-2xl shadow-black/60">
+            <div className="flex items-center justify-between pb-3 border-b border-[#3a3530] mb-4">
+              <h2 className="text-xl font-serif font-bold text-[#ece3d0]">Ingressar em Mesa</h2>
               <button
                 onClick={() => setShowJoinModal(false)}
-                className="w-7 h-7 rounded-lg bg-[#141716] text-[#9b9689] hover:text-[#ebe7de] border border-[#343b37] flex items-center justify-center text-xs transition-colors"
+                className="w-7 h-7 rounded-xl bg-[#131211] text-[#8a8578] hover:text-[#ece3d0] border border-[#3a3530] flex items-center justify-center text-xs transition-colors"
               >
                 ✕
               </button>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-[#241a1a] border border-[#b84a48]/60 text-[#e8b5b5] text-xs rounded-lg">
+              <div className="mb-4 p-3 bg-[#1f1517] border border-[#b24a52]/60 text-[#e8b5b5] text-xs rounded-lg">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleJoinCampaign} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#9b9689] uppercase tracking-wider">
+                <label className="block text-xs font-mono text-[#8a8578] uppercase tracking-wider">
                   Código de Convite
                 </label>
                 <input
@@ -316,22 +316,22 @@ export const CampaignList: React.FC<CampaignListProps> = ({
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value)}
                   placeholder="Ex: ARCANUM-78A92F"
-                  className="w-full px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] placeholder-[#959085] focus:outline-none transition-colors font-mono uppercase"
+                  className="w-full px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-xl text-sm text-[#ece3d0] placeholder-[#8a8578] focus:outline-none transition-colors font-mono uppercase"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end space-x-3 border-t border-[#343b37]">
+              <div className="pt-2 flex items-center justify-end space-x-3 border-t border-[#3a3530]">
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(false)}
-                  className="px-4 py-2 bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] rounded-lg text-xs font-medium border border-[#343b37] transition-colors"
+                  className="px-4 py-2 bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] rounded-xl text-xs font-medium border border-[#3a3530] transition-all duration-300"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs transition-all active:scale-95 disabled:opacity-50"
+                  className="px-5 py-2 bg-[#c9a04e] hover:bg-[#d4ad5e] text-[#131211] font-bold rounded-xl text-xs transition-all duration-300 active:scale-95 disabled:opacity-50"
                 >
                   {loading ? 'Consultando...' : 'Entrar na Mesa'}
                 </button>

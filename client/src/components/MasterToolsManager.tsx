@@ -316,21 +316,21 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
   };
 
   return (
-    <div className="flex-1 bg-[#141716] text-[#ebe7de] flex flex-col h-full overflow-hidden">
+    <div className="flex-1 bg-[#131211] text-[#ece3d0] flex flex-col h-full overflow-hidden">
       {/* TopBar do Painel do Mestre */}
-      <div className="p-4 bg-[#1c201e] border-b border-[#252a27] flex items-center justify-between shrink-0">
+      <div className="p-4 bg-[#1a1816] border-b border-[#2c2825] flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-[#c86d51]/10 border border-[#c86d51]/30 flex items-center justify-center text-[#c86d51]">
+          <div className="w-10 h-10 rounded-xl bg-[#c9a04e]/10 border border-[#c9a04e]/30 flex items-center justify-center text-[#c9a04e]">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-serif text-xl font-bold text-[#ebe7de] flex items-center space-x-2">
+            <h2 className="font-serif text-xl font-bold text-[#ece3d0] flex items-center space-x-2">
               <span>Ferramentas do Mestre</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#c86d51]/20 text-[#c86d51] border border-[#c86d51]/40 uppercase">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#c9a04e]/20 text-[#c9a04e] border border-[#c9a04e]/40 uppercase">
                 Fase 5
               </span>
             </h2>
-            <p className="text-xs text-[#9b9689] font-mono">
+            <p className="text-xs text-[#8a8578] font-mono">
               Condições ambientais, agendamento de eventos, notas secretas e matriz de revelação
             </p>
           </div>
@@ -339,7 +339,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
         <button
           onClick={loadData}
           disabled={isLoading}
-          className="p-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] rounded-lg transition-colors flex items-center space-x-1.5 text-xs font-mono"
+          className="p-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] rounded-lg transition-colors flex items-center space-x-1.5 text-xs font-mono"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
           <span>Atualizar</span>
@@ -347,18 +347,18 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
       </div>
 
       {/* Navegação Secundária da Fase 5 */}
-      <div className="flex border-b border-[#252a27] bg-[#1c201e]/60 px-4 shrink-0 text-xs font-mono">
+      <div className="flex border-b border-[#2c2825] bg-[#1a1816]/60 px-4 shrink-0 text-xs font-mono">
         <button
           onClick={() => setSubTab('environmental')}
           className={`py-3 px-4 font-bold border-b-2 transition-all flex items-center space-x-2 ${
             subTab === 'environmental'
-              ? 'border-[#c86d51] text-[#c86d51] bg-[#252a27]/40'
-              : 'border-transparent text-[#9b9689] hover:text-[#ebe7de]'
+              ? 'border-[#c9a04e] text-[#c9a04e] bg-[#2c2825]/40'
+              : 'border-transparent text-[#8a8578] hover:text-[#ece3d0]'
           }`}
         >
           <CloudRain className="w-4 h-4" />
           <span>Condições Ambientais</span>
-          <span className="text-[10px] bg-[#252a27] px-1.5 py-0.2 rounded text-[#c86d51]">
+          <span className="text-[10px] bg-[#2c2825] px-1.5 py-0.2 rounded text-[#c9a04e]">
             {conditions.length}
           </span>
         </button>
@@ -367,13 +367,13 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
           onClick={() => setSubTab('events')}
           className={`py-3 px-4 font-bold border-b-2 transition-all flex items-center space-x-2 ${
             subTab === 'events'
-              ? 'border-[#c86d51] text-[#c86d51] bg-[#252a27]/40'
-              : 'border-transparent text-[#9b9689] hover:text-[#ebe7de]'
+              ? 'border-[#c9a04e] text-[#c9a04e] bg-[#2c2825]/40'
+              : 'border-transparent text-[#8a8578] hover:text-[#ece3d0]'
           }`}
         >
           <Zap className="w-4 h-4" />
           <span>Eventos de Cena</span>
-          <span className="text-[10px] bg-[#252a27] px-1.5 py-0.2 rounded text-[#c86d51]">
+          <span className="text-[10px] bg-[#2c2825] px-1.5 py-0.2 rounded text-[#c9a04e]">
             {events.length}
           </span>
         </button>
@@ -382,13 +382,13 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
           onClick={() => setSubTab('notes')}
           className={`py-3 px-4 font-bold border-b-2 transition-all flex items-center space-x-2 ${
             subTab === 'notes'
-              ? 'border-[#c86d51] text-[#c86d51] bg-[#252a27]/40'
-              : 'border-transparent text-[#9b9689] hover:text-[#ebe7de]'
+              ? 'border-[#c9a04e] text-[#c9a04e] bg-[#2c2825]/40'
+              : 'border-transparent text-[#8a8578] hover:text-[#ece3d0]'
           }`}
         >
           <Lock className="w-4 h-4" />
           <span>Notas Secretas</span>
-          <span className="text-[10px] bg-[#252a27] px-1.5 py-0.2 rounded text-[#c86d51]">
+          <span className="text-[10px] bg-[#2c2825] px-1.5 py-0.2 rounded text-[#c9a04e]">
             {notes.length}
           </span>
         </button>
@@ -398,13 +398,13 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
             onClick={() => setSubTab('revelations')}
             className={`py-3 px-4 font-bold border-b-2 transition-all flex items-center space-x-2 ${
               subTab === 'revelations'
-                ? 'border-[#c86d51] text-[#c86d51] bg-[#252a27]/40'
-                : 'border-transparent text-[#9b9689] hover:text-[#ebe7de]'
+                ? 'border-[#c9a04e] text-[#c9a04e] bg-[#2c2825]/40'
+                : 'border-transparent text-[#8a8578] hover:text-[#ece3d0]'
             }`}
           >
             <Eye className="w-4 h-4" />
             <span>Matriz de Revelação</span>
-            <span className="text-[10px] bg-[#252a27] px-1.5 py-0.2 rounded text-[#c86d51]">
+            <span className="text-[10px] bg-[#2c2825] px-1.5 py-0.2 rounded text-[#c9a04e]">
               {revelations.length}
             </span>
           </button>
@@ -418,15 +418,15 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
           <div className="space-y-4 max-w-5xl mx-auto">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-serif text-lg text-[#ebe7de] font-bold">Condições Ativas no Cenário</h3>
-                <p className="text-xs text-[#9b9689] font-mono">
+                <h3 className="font-serif text-lg text-[#ece3d0] font-bold">Condições Ativas no Cenário</h3>
+                <p className="text-xs text-[#8a8578] font-mono">
                   Clima, iluminação, terrenos mágicos ou venenos da cena
                 </p>
               </div>
               {isMaster && (
                 <button
                   onClick={() => setShowConditionModal(true)}
-                  className="px-3 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
+                  className="px-3 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Nova Condição</span>
@@ -435,7 +435,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
             </div>
 
             {conditions.length === 0 ? (
-              <div className="p-8 text-center bg-[#1c201e] rounded-xl border border-[#252a27] text-[#9b9689] text-xs">
+              <div className="p-8 text-center bg-[#1a1816] rounded-xl border border-[#2c2825] text-[#8a8578] text-xs">
                 Nenhuma condição ambiental ativa ou registrada neste cenário.
               </div>
             ) : (
@@ -447,26 +447,26 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                       key={c.id}
                       className={`p-4 rounded-xl border transition-all ${
                         c.is_active
-                          ? 'bg-[#1c201e] border-[#c86d51]/40 shadow-lg'
-                          : 'bg-[#141716] border-[#252a27] opacity-60'
+                          ? 'bg-[#1a1816] border-[#c9a04e]/40 shadow-lg'
+                          : 'bg-[#131211] border-[#2c2825] opacity-60'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center space-x-2">
-                            <span className="font-serif text-base font-bold text-[#ebe7de]">
+                            <span className="font-serif text-base font-bold text-[#ece3d0]">
                               {c.name}
                             </span>
                             <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
                               isMechanical
-                                ? 'bg-[#b84a48]/20 text-[#b84a48] border-[#b84a48]/40'
-                                : 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
+                                ? 'bg-[#b24a52]/20 text-[#b24a52] border-[#b24a52]/40'
+                                : 'bg-[#5a7a5a]/20 text-[#5a7a5a] border-[#5a7a5a]/40'
                             }`}>
                               {isMechanical ? 'Mecânica' : 'Narrativa'}
                             </span>
                           </div>
                           {c.description && (
-                            <p className="text-xs text-[#9b9689] mt-1 leading-relaxed">{c.description}</p>
+                            <p className="text-xs text-[#8a8578] mt-1 leading-relaxed">{c.description}</p>
                           )}
                         </div>
 
@@ -476,15 +476,15 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                               onClick={() => handleToggleCondition(c.id, c.is_active)}
                               className={`px-2.5 py-1 rounded text-xs font-mono font-bold transition-all ${
                                 c.is_active
-                                  ? 'bg-[#6d9775] text-[#141716]'
-                                  : 'bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de]'
+                                  ? 'bg-[#5a7a5a] text-[#131211]'
+                                  : 'bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0]'
                               }`}
                             >
                               {c.is_active ? 'Ativa' : 'Inativa'}
                             </button>
                             <button
                               onClick={() => handleDeleteCondition(c.id, c.name)}
-                              className="p-1.5 text-[#9b9689] hover:text-[#b84a48] hover:bg-[#b84a48]/10 rounded transition-colors"
+                              className="p-1.5 text-[#8a8578] hover:text-[#b24a52] hover:bg-[#b24a52]/10 rounded transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -492,19 +492,19 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                         )}
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-[#252a27] flex items-center justify-between text-[11px] font-mono text-[#9b9689]">
+                      <div className="mt-3 pt-3 border-t border-[#2c2825] flex items-center justify-between text-[11px] font-mono text-[#8a8578]">
                         <span className="flex items-center space-x-1">
                           {c.is_visible_to_players ? (
-                            <><Eye className="w-3 h-3 text-[#6d9775]" /><span>Visível a jogadores</span></>
+                            <><Eye className="w-3 h-3 text-[#5a7a5a]" /><span>Visível a jogadores</span></>
                           ) : (
-                            <><EyeOff className="w-3 h-3 text-[#b84a48]" /><span>Oculto do grupo</span></>
+                            <><EyeOff className="w-3 h-3 text-[#b24a52]" /><span>Oculto do grupo</span></>
                           )}
                         </span>
                         {c.duration_rounds && (
                           <span>Duração: {c.duration_rounds} rodadas</span>
                         )}
                         {c.effect_payload?.formula && (
-                          <span className="text-[#c86d51]">Fórmula: {c.effect_payload.formula}</span>
+                          <span className="text-[#c9a04e]">Fórmula: {c.effect_payload.formula}</span>
                         )}
                       </div>
                     </div>
@@ -520,15 +520,15 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
           <div className="space-y-4 max-w-5xl mx-auto">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-serif text-lg text-[#ebe7de] font-bold">Eventos e Gatilhos de Campanha</h3>
-                <p className="text-xs text-[#9b9689] font-mono">
+                <h3 className="font-serif text-lg text-[#ece3d0] font-bold">Eventos e Gatilhos de Campanha</h3>
+                <p className="text-xs text-[#8a8578] font-mono">
                   Gatilhos automáticos, armadilhas, desabamentos e revelações
                 </p>
               </div>
               {isMaster && (
                 <button
                   onClick={() => setShowEventModal(true)}
-                  className="px-3 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
+                  className="px-3 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Novo Evento</span>
@@ -537,7 +537,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
             </div>
 
             {events.length === 0 ? (
-              <div className="p-8 text-center bg-[#1c201e] rounded-xl border border-[#252a27] text-[#9b9689] text-xs">
+              <div className="p-8 text-center bg-[#1a1816] rounded-xl border border-[#2c2825] text-[#8a8578] text-xs">
                 Nenhum evento registrado nesta campanha.
               </div>
             ) : (
@@ -547,28 +547,28 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                   return (
                     <div
                       key={ev.id}
-                      className="p-4 bg-[#1c201e] border border-[#252a27] rounded-xl hover:border-[#343b37] transition-all flex items-center justify-between gap-4"
+                      className="p-4 bg-[#1a1816] border border-[#2c2825] rounded-xl hover:border-[#3a3530] transition-all flex items-center justify-between gap-4"
                     >
                       <div className="space-y-1 min-w-0">
                         <div className="flex items-center space-x-2">
-                          <h4 className="font-serif text-base font-bold text-[#c86d51] truncate">{ev.title}</h4>
+                          <h4 className="font-serif text-base font-bold text-[#c9a04e] truncate">{ev.title}</h4>
                           <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
                             ev.status === 'triggered'
-                              ? 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
-                              : 'bg-[#9b9689]/20 text-[#9b9689] border-[#9b9689]/40'
+                              ? 'bg-[#5a7a5a]/20 text-[#5a7a5a] border-[#5a7a5a]/40'
+                              : 'bg-[#8a8578]/20 text-[#8a8578] border-[#8a8578]/40'
                           }`}>
                             {ev.status === 'triggered' ? 'Disparado' : 'Pendente'}
                           </span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#252a27] text-[#ebe7de]">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#2c2825] text-[#ece3d0]">
                             {ev.visibility === 'master_only' ? 'Somente Mestre' : ev.visibility === 'public' ? 'Público' : 'Direcionado'}
                           </span>
                         </div>
                         {ev.description && (
-                          <p className="text-xs text-[#9b9689] leading-relaxed truncate">{ev.description}</p>
+                          <p className="text-xs text-[#8a8578] leading-relaxed truncate">{ev.description}</p>
                         )}
                         {ev.scheduled_at && (
-                          <div className="flex items-center space-x-1 text-[11px] font-mono text-[#9b9689]">
-                            <Calendar className="w-3 h-3 text-[#c86d51]" />
+                          <div className="flex items-center space-x-1 text-[11px] font-mono text-[#8a8578]">
+                            <Calendar className="w-3 h-3 text-[#c9a04e]" />
                             <span>Agendado para: {new Date(ev.scheduled_at).toLocaleString()}</span>
                           </div>
                         )}
@@ -579,7 +579,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                           {isPending && (
                             <button
                               onClick={() => handleTriggerEvent(ev.id, ev.title)}
-                              className="px-3 py-1.5 bg-[#b84a48] hover:bg-[#b84a48]/90 text-[#ebe7de] rounded-lg text-xs font-mono font-bold transition-all flex items-center space-x-1.5 shadow-sm"
+                              className="px-3 py-1.5 bg-[#b24a52] hover:bg-[#b24a52]/90 text-[#ece3d0] rounded-lg text-xs font-mono font-bold transition-all flex items-center space-x-1.5 shadow-sm"
                             >
                               <Play className="w-3 h-3 fill-current" />
                               <span>Disparar</span>
@@ -600,14 +600,14 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
           <div className="space-y-4 max-w-5xl mx-auto">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-serif text-lg text-[#ebe7de] font-bold">Anotações e Revelações do Enredo</h3>
-                <p className="text-xs text-[#9b9689] font-mono">
+                <h3 className="font-serif text-lg text-[#ece3d0] font-bold">Anotações e Revelações do Enredo</h3>
+                <p className="text-xs text-[#8a8578] font-mono">
                   Pistas, reviravoltas secretas e notas compartilháveis
                 </p>
               </div>
               <button
                 onClick={() => setShowNoteModal(true)}
-                className="px-3 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
+                className="px-3 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Nova Nota</span>
@@ -615,18 +615,18 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
             </div>
 
             {notes.length === 0 ? (
-              <div className="p-8 text-center bg-[#1c201e] rounded-xl border border-[#252a27] text-[#9b9689] text-xs">
+              <div className="p-8 text-center bg-[#1a1816] rounded-xl border border-[#2c2825] text-[#8a8578] text-xs">
                 Nenhuma nota confidencial disponível.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {notes.map(n => {
                   return (
-                    <div key={n.id} className="p-4 bg-[#1c201e] border border-[#252a27] hover:border-[#343b37] rounded-xl transition-all space-y-3">
+                    <div key={n.id} className="p-4 bg-[#1a1816] border border-[#2c2825] hover:border-[#3a3530] rounded-xl transition-all space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-serif text-base font-bold text-[#c86d51]">{n.title}</h4>
-                          <span className="text-[10px] font-mono uppercase text-[#9b9689] block mt-0.5">
+                          <h4 className="font-serif text-base font-bold text-[#c9a04e]">{n.title}</h4>
+                          <span className="text-[10px] font-mono uppercase text-[#8a8578] block mt-0.5">
                             Categoria: {n.category}
                           </span>
                         </div>
@@ -634,8 +634,8 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                         <div className="flex items-center space-x-1">
                           <span className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center space-x-1 ${
                             n.is_private
-                              ? 'bg-[#b84a48]/20 text-[#b84a48] border-[#b84a48]/40'
-                              : 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
+                              ? 'bg-[#b24a52]/20 text-[#b24a52] border-[#b24a52]/40'
+                              : 'bg-[#5a7a5a]/20 text-[#5a7a5a] border-[#5a7a5a]/40'
                           }`}>
                             {n.is_private ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
                             <span>{n.is_private ? 'Privada' : 'Pública'}</span>
@@ -645,7 +645,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                             <button
                               onClick={() => handleOpenShareModal(n)}
                               title="Compartilhar com jogadores"
-                              className="p-1.5 text-[#9b9689] hover:text-[#c86d51] hover:bg-[#c86d51]/10 rounded transition-colors"
+                              className="p-1.5 text-[#8a8578] hover:text-[#c9a04e] hover:bg-[#c9a04e]/10 rounded transition-colors"
                             >
                               <Share2 className="w-3.5 h-3.5" />
                             </button>
@@ -653,14 +653,14 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                         </div>
                       </div>
 
-                      <p className="text-xs text-[#ebe7de] font-sans leading-relaxed whitespace-pre-line bg-[#141716] p-3 rounded-lg border border-[#252a27]">
+                      <p className="text-xs text-[#ece3d0] font-sans leading-relaxed whitespace-pre-line bg-[#131211] p-3 rounded-lg border border-[#2c2825]">
                         {n.content}
                       </p>
 
                       {n.tags && n.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {n.tags.map((t, i) => (
-                            <span key={i} className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#252a27] text-[#9b9689]">
+                            <span key={i} className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#2c2825] text-[#8a8578]">
                               #{t}
                             </span>
                           ))}
@@ -668,7 +668,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                       )}
 
                       {n.shared_with_user_ids && n.shared_with_user_ids.length > 0 && (
-                        <div className="text-[11px] font-mono text-[#c86d51] pt-2 border-t border-[#252a27]">
+                        <div className="text-[11px] font-mono text-[#c9a04e] pt-2 border-t border-[#2c2825]">
                           Compartilhada com {n.shared_with_user_ids.length} jogador(es) específico(s)
                         </div>
                       )}
@@ -685,14 +685,14 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
           <div className="space-y-4 max-w-5xl mx-auto">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-serif text-lg text-[#ebe7de] font-bold">Matriz de Acesso e Revelação Granular</h3>
-                <p className="text-xs text-[#9b9689] font-mono">
+                <h3 className="font-serif text-lg text-[#ece3d0] font-bold">Matriz de Acesso e Revelação Granular</h3>
+                <p className="text-xs text-[#8a8578] font-mono">
                   Controle exatamente quais campos (nome, ficha, fraquezas) cada jogador pode ver
                 </p>
               </div>
               <button
                 onClick={() => setShowRevelationModal(true)}
-                className="px-3 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
+                className="px-3 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 shadow-md"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Nova Revelação</span>
@@ -700,7 +700,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
             </div>
 
             {revelations.length === 0 ? (
-              <div className="p-8 text-center bg-[#1c201e] rounded-xl border border-[#252a27] text-[#9b9689] text-xs">
+              <div className="p-8 text-center bg-[#1a1816] rounded-xl border border-[#2c2825] text-[#8a8578] text-xs">
                 Nenhuma revelação granular configurada. Entidades seguem o padrão público ou oculto.
               </div>
             ) : (
@@ -711,24 +711,24 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                   return (
                     <div
                       key={rev.id}
-                      className="p-4 bg-[#1c201e] border border-[#252a27] rounded-xl flex items-center justify-between gap-4"
+                      className="p-4 bg-[#1a1816] border border-[#2c2825] rounded-xl flex items-center justify-between gap-4"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
-                          <span className="font-serif text-base font-bold text-[#c86d51]">
+                          <span className="font-serif text-base font-bold text-[#c9a04e]">
                             {creature ? creature.name : `Entidade ${rev.entity_id.slice(0, 8)}`}
                           </span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#252a27] text-[#ebe7de] uppercase">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#2c2825] text-[#ece3d0] uppercase">
                             {rev.entity_type}
                           </span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#c86d51]/40 text-[#c86d51]">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#c9a04e]/40 text-[#c9a04e]">
                             {targetUser ? `Para: ${targetUser.username}` : 'Público para todos'}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-1 text-[11px] font-mono text-[#9b9689] pt-1">
+                        <div className="flex flex-wrap gap-1 text-[11px] font-mono text-[#8a8578] pt-1">
                           <span>Campos revelados:</span>
                           {rev.revealed_fields.map((f, i) => (
-                            <span key={i} className="px-1.5 py-0.2 rounded bg-[#252a27] text-[#6d9775] font-bold">
+                            <span key={i} className="px-1.5 py-0.2 rounded bg-[#2c2825] text-[#5a7a5a] font-bold">
                               {f}
                             </span>
                           ))}
@@ -737,7 +737,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
 
                       <button
                         onClick={() => handleRevokeRevelation(rev.entity_type, rev.entity_id, rev.revealed_to_user_id)}
-                        className="px-2.5 py-1.5 bg-[#b84a48]/20 hover:bg-[#b84a48] text-[#b84a48] hover:text-[#ebe7de] border border-[#b84a48]/40 rounded-lg text-xs font-mono transition-all"
+                        className="px-2.5 py-1.5 bg-[#b24a52]/20 hover:bg-[#b24a52] text-[#b24a52] hover:text-[#ece3d0] border border-[#b24a52]/40 rounded-lg text-xs font-mono transition-all"
                       >
                         Revogar
                       </button>
@@ -753,60 +753,60 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
       {/* MODAL: NOVA CONDIÇÃO */}
       {showConditionModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={handleCreateCondition} className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h3 className="font-serif text-lg font-bold text-[#c86d51]">Criar Condição Ambiental</h3>
+          <form onSubmit={handleCreateCondition} className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h3 className="font-serif text-lg font-bold text-[#c9a04e]">Criar Condição Ambiental</h3>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Nome da Condição</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Nome da Condição</label>
               <input
                 type="text"
                 required
                 value={conditionForm.name}
                 onChange={e => setConditionForm({ ...conditionForm, name: e.target.value })}
                 placeholder="Ex: Chuva Ácida, Terreno Difícil"
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] focus:border-[#c86d51] outline-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] focus:border-[#c9a04e] outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Descrição</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Descrição</label>
               <textarea
                 value={conditionForm.description}
                 onChange={e => setConditionForm({ ...conditionForm, description: e.target.value })}
                 placeholder="Efeitos sensoriais ou narrativos..."
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] focus:border-[#c86d51] outline-none h-20 resize-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] focus:border-[#c9a04e] outline-none h-20 resize-none"
               />
             </div>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Fórmula Mecânica (opcional)</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Fórmula Mecânica (opcional)</label>
               <input
                 type="text"
                 value={conditionForm.formula}
                 onChange={e => setConditionForm({ ...conditionForm, formula: e.target.value })}
                 placeholder="Ex: 1d6 + 2 ou 4"
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] focus:border-[#c86d51] outline-none font-mono"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] focus:border-[#c9a04e] outline-none font-mono"
               />
             </div>
             <div className="flex items-center space-x-4 pt-2">
-              <label className="flex items-center space-x-2 text-xs font-mono text-[#ebe7de] cursor-pointer">
+              <label className="flex items-center space-x-2 text-xs font-mono text-[#ece3d0] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={conditionForm.is_visible_to_players}
                   onChange={e => setConditionForm({ ...conditionForm, is_visible_to_players: e.target.checked })}
-                  className="rounded accent-[#c86d51]"
+                  className="rounded accent-[#c9a04e]"
                 />
                 <span>Visível aos jogadores</span>
               </label>
             </div>
-            <div className="flex justify-end space-x-2 pt-4 border-t border-[#252a27]">
+            <div className="flex justify-end space-x-2 pt-4 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={() => setShowConditionModal(false)}
-                className="px-4 py-2 bg-[#252a27] text-[#9b9689] rounded-xl text-xs font-mono hover:text-[#ebe7de]"
+                className="px-4 py-2 bg-[#2c2825] text-[#8a8578] rounded-xl text-xs font-mono hover:text-[#ece3d0]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#c86d51] text-[#141716] rounded-xl text-xs font-serif font-bold hover:bg-[#c86d51]/90"
+                className="px-4 py-2 bg-[#c9a04e] text-[#131211] rounded-xl text-xs font-serif font-bold hover:bg-[#c9a04e]/90"
               >
                 Criar Condição
               </button>
@@ -818,35 +818,35 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
       {/* MODAL: NOVO EVENTO */}
       {showEventModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={handleCreateEvent} className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h3 className="font-serif text-lg font-bold text-[#c86d51]">Criar Evento de Cena</h3>
+          <form onSubmit={handleCreateEvent} className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h3 className="font-serif text-lg font-bold text-[#c9a04e]">Criar Evento de Cena</h3>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Título do Evento</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Título do Evento</label>
               <input
                 type="text"
                 required
                 value={eventForm.title}
                 onChange={e => setEventForm({ ...eventForm, title: e.target.value })}
                 placeholder="Ex: Emboscada dos Orcs, Alarme Soando"
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] focus:border-[#c86d51] outline-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] focus:border-[#c9a04e] outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Descrição</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Descrição</label>
               <textarea
                 value={eventForm.description}
                 onChange={e => setEventForm({ ...eventForm, description: e.target.value })}
                 placeholder="O que acontece quando o evento for disparado..."
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] focus:border-[#c86d51] outline-none h-16 resize-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] focus:border-[#c9a04e] outline-none h-16 resize-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-mono text-[#9b9689] block mb-1">Tipo</label>
+                <label className="text-xs font-mono text-[#8a8578] block mb-1">Tipo</label>
                 <select
                   value={eventForm.event_type}
                   onChange={e => setEventForm({ ...eventForm, event_type: e.target.value as any })}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
                 >
                   <option value="manual">Manual</option>
                   <option value="scheduled">Agendado</option>
@@ -854,11 +854,11 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                 </select>
               </div>
               <div>
-                <label className="text-xs font-mono text-[#9b9689] block mb-1">Visibilidade</label>
+                <label className="text-xs font-mono text-[#8a8578] block mb-1">Visibilidade</label>
                 <select
                   value={eventForm.visibility}
                   onChange={e => setEventForm({ ...eventForm, visibility: e.target.value as any })}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
                 >
                   <option value="master_only">Somente Mestre</option>
                   <option value="public">Público</option>
@@ -869,22 +869,22 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
 
             {eventForm.event_type === 'scheduled' && (
               <div>
-                <label className="text-xs font-mono text-[#9b9689] block mb-1">Data/Hora Agendada</label>
+                <label className="text-xs font-mono text-[#8a8578] block mb-1">Data/Hora Agendada</label>
                 <input
                   type="datetime-local"
                   value={eventForm.scheduled_at}
                   onChange={e => setEventForm({ ...eventForm, scheduled_at: e.target.value })}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
                 />
               </div>
             )}
 
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Ação Conectada</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Ação Conectada</label>
               <select
                 value={eventForm.action_type}
                 onChange={e => setEventForm({ ...eventForm, action_type: e.target.value })}
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
               >
                 <option value="none">Nenhuma</option>
                 <option value="chat">Mensagem no Chat do Sistema</option>
@@ -894,28 +894,28 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
 
             {eventForm.action_type !== 'none' && (
               <div>
-                <label className="text-xs font-mono text-[#9b9689] block mb-1">Mensagem do Chat ao Disparar</label>
+                <label className="text-xs font-mono text-[#8a8578] block mb-1">Mensagem do Chat ao Disparar</label>
                 <input
                   type="text"
                   value={eventForm.action_message}
                   onChange={e => setEventForm({ ...eventForm, action_message: e.target.value })}
                   placeholder="Ex: O chão desaba em um estrondo ensurdecedor!"
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
                 />
               </div>
             )}
 
-            <div className="flex justify-end space-x-2 pt-4 border-t border-[#252a27]">
+            <div className="flex justify-end space-x-2 pt-4 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={() => setShowEventModal(false)}
-                className="px-4 py-2 bg-[#252a27] text-[#9b9689] rounded-xl text-xs font-mono hover:text-[#ebe7de]"
+                className="px-4 py-2 bg-[#2c2825] text-[#8a8578] rounded-xl text-xs font-mono hover:text-[#ece3d0]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#c86d51] text-[#141716] rounded-xl text-xs font-serif font-bold hover:bg-[#c86d51]/90"
+                className="px-4 py-2 bg-[#c9a04e] text-[#131211] rounded-xl text-xs font-serif font-bold hover:bg-[#c9a04e]/90"
               >
                 Criar Evento
               </button>
@@ -927,36 +927,36 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
       {/* MODAL: NOVA NOTA */}
       {showNoteModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={handleCreateNote} className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h3 className="font-serif text-lg font-bold text-[#c86d51]">Criar Nota Confidencial</h3>
+          <form onSubmit={handleCreateNote} className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h3 className="font-serif text-lg font-bold text-[#c9a04e]">Criar Nota Confidencial</h3>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Título</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Título</label>
               <input
                 type="text"
                 required
                 value={noteForm.title}
                 onChange={e => setNoteForm({ ...noteForm, title: e.target.value })}
                 placeholder="Ex: Pista do Assassinato, Fraqueza do Vilão"
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] outline-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] outline-none"
               />
             </div>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Conteúdo</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Conteúdo</label>
               <textarea
                 required
                 value={noteForm.content}
                 onChange={e => setNoteForm({ ...noteForm, content: e.target.value })}
                 placeholder="Detalhes confidenciais..."
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-[#ebe7de] outline-none h-28 resize-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-[#ece3d0] outline-none h-28 resize-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-mono text-[#9b9689] block mb-1">Categoria</label>
+                <label className="text-xs font-mono text-[#8a8578] block mb-1">Categoria</label>
                 <select
                   value={noteForm.category}
                   onChange={e => setNoteForm({ ...noteForm, category: e.target.value })}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
                 >
                   <option value="enredo">Enredo</option>
                   <option value="npcs">NPCs</option>
@@ -966,13 +966,13 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                 </select>
               </div>
               <div>
-                <label className="text-xs font-mono text-[#9b9689] block mb-1">Tags (separadas por vírgula)</label>
+                <label className="text-xs font-mono text-[#8a8578] block mb-1">Tags (separadas por vírgula)</label>
                 <input
                   type="text"
                   value={noteForm.tags}
                   onChange={e => setNoteForm({ ...noteForm, tags: e.target.value })}
                   placeholder="segredo, pista, boss"
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
                 />
               </div>
             </div>
@@ -982,23 +982,23 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                 id="isPrivateCheck"
                 checked={noteForm.is_private}
                 onChange={e => setNoteForm({ ...noteForm, is_private: e.target.checked })}
-                className="rounded accent-[#c86d51]"
+                className="rounded accent-[#c9a04e]"
               />
-              <label htmlFor="isPrivateCheck" className="text-xs font-mono text-[#ebe7de] cursor-pointer">
+              <label htmlFor="isPrivateCheck" className="text-xs font-mono text-[#ece3d0] cursor-pointer">
                 Nota estritamente privada (invisível aos jogadores)
               </label>
             </div>
-            <div className="flex justify-end space-x-2 pt-4 border-t border-[#252a27]">
+            <div className="flex justify-end space-x-2 pt-4 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={() => setShowNoteModal(false)}
-                className="px-4 py-2 bg-[#252a27] text-[#9b9689] rounded-xl text-xs font-mono hover:text-[#ebe7de]"
+                className="px-4 py-2 bg-[#2c2825] text-[#8a8578] rounded-xl text-xs font-mono hover:text-[#ece3d0]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#c86d51] text-[#141716] rounded-xl text-xs font-serif font-bold hover:bg-[#c86d51]/90"
+                className="px-4 py-2 bg-[#c9a04e] text-[#131211] rounded-xl text-xs font-serif font-bold hover:bg-[#c9a04e]/90"
               >
                 Salvar Nota
               </button>
@@ -1010,9 +1010,9 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
       {/* MODAL: COMPARTILHAR NOTA */}
       {showShareModal && selectedNote && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h3 className="font-serif text-lg font-bold text-[#c86d51]">Compartilhar Nota com Jogadores</h3>
-            <p className="text-xs text-[#9b9689] font-mono">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h3 className="font-serif text-lg font-bold text-[#c9a04e]">Compartilhar Nota com Jogadores</h3>
+            <p className="text-xs text-[#8a8578] font-mono">
               Selecione os jogadores que terão permissão para visualizar "{selectedNote.title}"
             </p>
 
@@ -1021,7 +1021,7 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                 const memId = m.userId || m.user_id || m.id;
                 const isChecked = sharedUsersList.includes(memId);
                 return (
-                  <label key={memId} className="flex items-center space-x-3 p-2 bg-[#141716] rounded-lg border border-[#252a27] cursor-pointer hover:border-[#c86d51]/50">
+                  <label key={memId} className="flex items-center space-x-3 p-2 bg-[#131211] rounded-lg border border-[#2c2825] cursor-pointer hover:border-[#c9a04e]/50">
                     <input
                       type="checkbox"
                       checked={isChecked}
@@ -1029,26 +1029,26 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
                         if (e.target.checked) setSharedUsersList([...sharedUsersList, memId]);
                         else setSharedUsersList(sharedUsersList.filter(id => id !== memId));
                       }}
-                      className="rounded accent-[#c86d51]"
+                      className="rounded accent-[#c9a04e]"
                     />
-                    <span className="text-xs font-serif text-[#ebe7de] font-bold">{m.username || 'Jogador'}</span>
+                    <span className="text-xs font-serif text-[#ece3d0] font-bold">{m.username || 'Jogador'}</span>
                   </label>
                 );
               })}
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4 border-t border-[#252a27]">
+            <div className="flex justify-end space-x-2 pt-4 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={() => setShowShareModal(false)}
-                className="px-4 py-2 bg-[#252a27] text-[#9b9689] rounded-xl text-xs font-mono hover:text-[#ebe7de]"
+                className="px-4 py-2 bg-[#2c2825] text-[#8a8578] rounded-xl text-xs font-mono hover:text-[#ece3d0]"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleSaveShare}
-                className="px-4 py-2 bg-[#c86d51] text-[#141716] rounded-xl text-xs font-serif font-bold hover:bg-[#c86d51]/90"
+                className="px-4 py-2 bg-[#c9a04e] text-[#131211] rounded-xl text-xs font-serif font-bold hover:bg-[#c9a04e]/90"
               >
                 Confirmar Compartilhamento
               </button>
@@ -1060,15 +1060,15 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
       {/* MODAL: NOVA REVELAÇÃO GRANULAR */}
       {showRevelationModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={handleSaveRevelation} className="bg-[#1c201e] border border-[#252a27] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
-            <h3 className="font-serif text-lg font-bold text-[#c86d51]">Revelação Granular de Entidade</h3>
+          <form onSubmit={handleSaveRevelation} className="bg-[#1a1816] border border-[#2c2825] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-sm">
+            <h3 className="font-serif text-lg font-bold text-[#c9a04e]">Revelação Granular de Entidade</h3>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Criatura / Entidade</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Criatura / Entidade</label>
               <select
                 required
                 value={revForm.entity_id}
                 onChange={e => setRevForm({ ...revForm, entity_id: e.target.value })}
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
               >
                 <option value="">Selecione a Criatura</option>
                 {creatures.map(c => (
@@ -1077,11 +1077,11 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
               </select>
             </div>
             <div>
-              <label className="text-xs font-mono text-[#9b9689] block mb-1">Destinatário</label>
+              <label className="text-xs font-mono text-[#8a8578] block mb-1">Destinatário</label>
               <select
                 value={revForm.target_user_id}
                 onChange={e => setRevForm({ ...revForm, target_user_id: e.target.value })}
-                className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-xs text-[#ebe7de] outline-none"
+                className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-xs text-[#ece3d0] outline-none"
               >
                 <option value="">Público para todos os jogadores</option>
                 {members.map(m => {
@@ -1092,56 +1092,56 @@ export const MasterToolsManager: React.FC<MasterToolsManagerProps> = ({
             </div>
 
             <div className="space-y-2 pt-2">
-              <label className="text-xs font-mono text-[#9b9689] block">Campos Revelados</label>
-              <label className="flex items-center space-x-2 text-xs font-mono text-[#ebe7de] cursor-pointer">
+              <label className="text-xs font-mono text-[#8a8578] block">Campos Revelados</label>
+              <label className="flex items-center space-x-2 text-xs font-mono text-[#ece3d0] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={revForm.fields.true_name}
                   onChange={e => setRevForm({ ...revForm, fields: { ...revForm.fields, true_name: e.target.checked } })}
-                  className="rounded accent-[#c86d51]"
+                  className="rounded accent-[#c9a04e]"
                 />
                 <span>Nome Verdadeiro (vs Vulto Desconhecido)</span>
               </label>
-              <label className="flex items-center space-x-2 text-xs font-mono text-[#ebe7de] cursor-pointer">
+              <label className="flex items-center space-x-2 text-xs font-mono text-[#ece3d0] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={revForm.fields.stats}
                   onChange={e => setRevForm({ ...revForm, fields: { ...revForm.fields, stats: e.target.checked } })}
-                  className="rounded accent-[#c86d51]"
+                  className="rounded accent-[#c9a04e]"
                 />
                 <span>Ficha e Atributos Numéricos</span>
               </label>
-              <label className="flex items-center space-x-2 text-xs font-mono text-[#ebe7de] cursor-pointer">
+              <label className="flex items-center space-x-2 text-xs font-mono text-[#ece3d0] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={revForm.fields.weakness}
                   onChange={e => setRevForm({ ...revForm, fields: { ...revForm.fields, weakness: e.target.checked } })}
-                  className="rounded accent-[#c86d51]"
+                  className="rounded accent-[#c9a04e]"
                 />
                 <span>Fraquezas e Imunidades</span>
               </label>
-              <label className="flex items-center space-x-2 text-xs font-mono text-[#ebe7de] cursor-pointer">
+              <label className="flex items-center space-x-2 text-xs font-mono text-[#ece3d0] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={revForm.fields.description}
                   onChange={e => setRevForm({ ...revForm, fields: { ...revForm.fields, description: e.target.checked } })}
-                  className="rounded accent-[#c86d51]"
+                  className="rounded accent-[#c9a04e]"
                 />
                 <span>Descrição Completa</span>
               </label>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4 border-t border-[#252a27]">
+            <div className="flex justify-end space-x-2 pt-4 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={() => setShowRevelationModal(false)}
-                className="px-4 py-2 bg-[#252a27] text-[#9b9689] rounded-xl text-xs font-mono hover:text-[#ebe7de]"
+                className="px-4 py-2 bg-[#2c2825] text-[#8a8578] rounded-xl text-xs font-mono hover:text-[#ece3d0]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#c86d51] text-[#141716] rounded-xl text-xs font-serif font-bold hover:bg-[#c86d51]/90"
+                className="px-4 py-2 bg-[#c9a04e] text-[#131211] rounded-xl text-xs font-serif font-bold hover:bg-[#c9a04e]/90"
               >
                 Salvar Revelação
               </button>

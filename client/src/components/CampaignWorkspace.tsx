@@ -865,41 +865,41 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#141716] text-[#ebe7de] select-none">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-[#131211] text-[#ece3d0] select-none">
       {/* 
         NOVA ARQUITETURA EDITORIAL: BARRA SUPERIOR DE CONTEXTO DE 1 LINHA
         Substitui integralmente a barra lateral de 11 ícones, liberando 90-100% da tela para o conteúdo.
       */}
-      <header className="border-b border-[#343b37]/70 bg-[#181c1a] px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shrink-0 z-40">
+      <header className="border-b border-[#3a3530]/70 bg-[#1a1816] px-4 sm:px-6 py-2 flex items-center justify-between gap-3 shrink-0 z-40">
         {/* Esquerda: Identificação e Voltar */}
         <div className="flex items-center space-x-3 min-w-0">
           <button
             onClick={onBack}
             title="Voltar ao Arquivo de Campanhas"
-            className="p-1.5 rounded-lg bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] border border-[#343b37] transition-colors flex items-center space-x-1"
+            className="p-1.5 rounded-lg bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] border border-[#3a3530] transition-colors flex items-center space-x-1"
           >
-            <ChevronLeft className="w-4 h-4 text-[#c86d51]" />
+            <ChevronLeft className="w-4 h-4 text-[#c9a04e]" />
             <span className="hidden md:inline font-mono text-[11px]">Mesas</span>
           </button>
 
           <div className="flex items-center space-x-2 truncate">
-            <h1 className="font-serif font-bold text-lg text-[#ebe7de] truncate leading-none">
+            <h1 className="font-serif font-bold text-lg text-[#ece3d0] truncate leading-none">
               {campaign.name}
             </h1>
-            <span className="hidden sm:inline text-[10px] font-mono px-2 py-0.5 rounded bg-[#141716] text-[#6d9775] border border-[#343b37]">
+            <span className="hidden sm:inline text-[10px] font-mono px-2 py-0.5 rounded bg-[#131211] text-[#5a7a5a] border border-[#3a3530]">
               {ruleset?.config.systemName || 'D20'}
             </span>
           </div>
         </div>
 
         {/* Centro: Navegação Primária Editorial + Compêndio Sob Demanda */}
-        <nav className="flex items-center space-x-1 bg-[#141716] border border-[#343b37] rounded-lg p-1">
+        <nav className="flex items-center space-x-1 bg-[#131211] border border-[#3a3530] rounded-lg p-1">
           <button
             onClick={() => setActiveTab('vtt')}
             className={`px-3 py-1 rounded text-xs font-serif font-medium transition-all ${
               activeTab === 'vtt'
-                ? 'bg-[#c86d51] text-[#141716] font-bold shadow-sm'
-                : 'text-[#9b9689] hover:text-[#ebe7de]'
+                ? 'bg-[#c9a04e] text-[#131211] font-bold shadow-sm'
+                : 'text-[#8a8578] hover:text-[#ece3d0]'
             }`}
           >
             Mesa Virtual
@@ -909,8 +909,8 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
             onClick={() => setActiveTab('sheets')}
             className={`px-3 py-1 rounded text-xs font-serif font-medium transition-all ${
               activeTab === 'sheets'
-                ? 'bg-[#c86d51] text-[#141716] font-bold shadow-sm'
-                : 'text-[#9b9689] hover:text-[#ebe7de]'
+                ? 'bg-[#c9a04e] text-[#131211] font-bold shadow-sm'
+                : 'text-[#8a8578] hover:text-[#ece3d0]'
             }`}
           >
             Ficha
@@ -920,8 +920,8 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
             onClick={() => setActiveTab('chat')}
             className={`px-3 py-1 rounded text-xs font-serif font-medium transition-all ${
               activeTab === 'chat'
-                ? 'bg-[#c86d51] text-[#141716] font-bold shadow-sm'
-                : 'text-[#9b9689] hover:text-[#ebe7de]'
+                ? 'bg-[#c9a04e] text-[#131211] font-bold shadow-sm'
+                : 'text-[#8a8578] hover:text-[#ece3d0]'
             }`}
           >
             Chat
@@ -933,8 +933,8 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
               onClick={() => setShowCompendiumMenu(!showCompendiumMenu)}
               className={`px-2.5 py-1 rounded text-xs font-serif font-medium transition-all flex items-center space-x-1 ${
                 isSecondaryTab
-                  ? 'bg-[#252a27] text-[#c86d51] border border-[#c86d51]/50 font-bold'
-                  : 'text-[#9b9689] hover:text-[#ebe7de]'
+                  ? 'bg-[#2c2825] text-[#c9a04e] border border-[#c9a04e]/50 font-bold'
+                  : 'text-[#8a8578] hover:text-[#ece3d0]'
               }`}
             >
               <span>{isSecondaryTab ? secondaryTabNames[activeTab] || 'Compêndio' : 'Compêndio'}</span>
@@ -942,60 +942,60 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
             </button>
 
             {showCompendiumMenu && (
-              <div className="absolute top-full right-0 mt-1.5 w-56 bg-[#1c201e] border border-[#343b37] rounded-xl shadow-2xl py-1 z-50 animate-fade-in text-xs font-serif divide-y divide-[#343b37]/50">
+              <div className="absolute top-full right-0 mt-1.5 w-56 bg-[#1a1816] border border-[#3a3530] rounded-xl shadow-2xl py-1 z-50 animate-fade-in text-xs font-serif divide-y divide-[#3a3530]/50">
                 <div className="p-1">
                   <button
                     onClick={() => { setActiveTab('inventory'); setShowCompendiumMenu(false); }}
-                    className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#ebe7de] rounded-lg flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#ece3d0] rounded-lg flex items-center justify-between"
                   >
                     <span>Mochila / Inventário</span>
-                    <Package className="w-3.5 h-3.5 text-[#9b9689]" />
+                    <Package className="w-3.5 h-3.5 text-[#8a8578]" />
                   </button>
                   <button
                     onClick={() => { setActiveTab('catalog'); setShowCompendiumMenu(false); }}
-                    className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#ebe7de] rounded-lg flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#ece3d0] rounded-lg flex items-center justify-between"
                   >
                     <span>Catálogo de Itens</span>
-                    <Sparkles className="w-3.5 h-3.5 text-[#9b9689]" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#8a8578]" />
                   </button>
                   <button
                     onClick={() => { setActiveTab('bestiary'); setShowCompendiumMenu(false); }}
-                    className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#ebe7de] rounded-lg flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#ece3d0] rounded-lg flex items-center justify-between"
                   >
                     <span>Bestiário & Ameaças</span>
-                    <Skull className="w-3.5 h-3.5 text-[#9b9689]" />
+                    <Skull className="w-3.5 h-3.5 text-[#8a8578]" />
                   </button>
                   <button
                     onClick={() => { setActiveTab('templates'); setShowCompendiumMenu(false); }}
-                    className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#ebe7de] rounded-lg flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#ece3d0] rounded-lg flex items-center justify-between"
                   >
                     <span>Modelos de Ficha</span>
-                    <LayoutTemplate className="w-3.5 h-3.5 text-[#9b9689]" />
+                    <LayoutTemplate className="w-3.5 h-3.5 text-[#8a8578]" />
                   </button>
                   <button
                     onClick={() => { setActiveTab('rules'); setShowCompendiumMenu(false); }}
-                    className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#ebe7de] rounded-lg flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#ece3d0] rounded-lg flex items-center justify-between"
                   >
                     <span>Motor de Regras</span>
-                    <Terminal className="w-3.5 h-3.5 text-[#9b9689]" />
+                    <Terminal className="w-3.5 h-3.5 text-[#8a8578]" />
                   </button>
                   <button
                     onClick={() => { setActiveTab('roller'); setShowCompendiumMenu(false); }}
-                    className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#ebe7de] rounded-lg flex items-center justify-between"
+                    className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#ece3d0] rounded-lg flex items-center justify-between"
                   >
                     <span>Rolador de Dados</span>
-                    <Dices className="w-3.5 h-3.5 text-[#9b9689]" />
+                    <Dices className="w-3.5 h-3.5 text-[#8a8578]" />
                   </button>
                 </div>
 
                 {isMaster && (
-                  <div className="p-1 bg-[#141716]/60">
+                  <div className="p-1 bg-[#131211]/60">
                     <button
                       onClick={() => { setActiveTab('masterTools'); setShowCompendiumMenu(false); }}
-                      className="w-full px-3 py-2 text-left hover:bg-[#252a27] text-[#c86d51] font-bold rounded-lg flex items-center justify-between"
+                      className="w-full px-3 py-2 text-left hover:bg-[#2c2825] text-[#c9a04e] font-bold rounded-lg flex items-center justify-between"
                     >
                       <span>Ferramentas do Mestre</span>
-                      <Crown className="w-3.5 h-3.5 text-[#c86d51]" />
+                      <Crown className="w-3.5 h-3.5 text-[#c9a04e]" />
                     </button>
                   </div>
                 )}
@@ -1009,7 +1009,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           <button
             onClick={() => setShowAudioDrawer(true)}
             title="Trilha Sonora & Ambientação (YouTube)"
-            className="p-1.5 rounded-lg bg-[#141716] hover:bg-[#252a27] text-[#c86d51] hover:text-[#ebe7de] border border-[#343b37] transition-colors flex items-center gap-1.5"
+            className="p-1.5 rounded-lg bg-[#131211] hover:bg-[#2c2825] text-[#c9a04e] hover:text-[#ece3d0] border border-[#3a3530] transition-colors flex items-center gap-1.5"
           >
             <Music className="w-4 h-4" />
             <span className="text-xs font-serif hidden lg:inline">Áudio</span>
@@ -1018,15 +1018,15 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
           <button
             onClick={() => { setShowMembersModal(true); loadMembers(); }}
             title="Membros da Mesa"
-            className="p-1.5 rounded-lg bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] border border-[#343b37] transition-colors"
+            className="p-1.5 rounded-lg bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] border border-[#3a3530] transition-colors"
           >
             <Users className="w-4 h-4" />
           </button>
 
           {inviteCode ? (
-            <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 bg-[#141716] border border-[#c86d51]/50 rounded-lg text-xs font-mono">
-              <span className="text-[#c86d51] font-bold">{inviteCode}</span>
-              <button onClick={() => copyToClipboard(inviteCode)} className="text-[#9b9689] hover:text-[#ebe7de]">
+            <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 bg-[#131211] border border-[#c9a04e]/50 rounded-lg text-xs font-mono">
+              <span className="text-[#c9a04e] font-bold">{inviteCode}</span>
+              <button onClick={() => copyToClipboard(inviteCode)} className="text-[#8a8578] hover:text-[#ece3d0]">
                 {copiedInvite ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
@@ -1034,7 +1034,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
             <button
               onClick={handleGenerateInvite}
               title="Gerar Convite"
-              className="p-1.5 rounded-lg bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] border border-[#343b37] transition-colors hidden sm:block"
+              className="p-1.5 rounded-lg bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] border border-[#3a3530] transition-colors hidden sm:block"
             >
               <UserPlus className="w-4 h-4" />
             </button>
@@ -1042,7 +1042,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
           <button
             onClick={() => setShowCreateCharModal(true)}
-            className="px-3 py-1.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs flex items-center space-x-1.5 transition-all active:scale-95"
+            className="px-3 py-1.5 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs flex items-center space-x-1.5 transition-all active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Personagem</span>
@@ -1052,9 +1052,9 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
             <button
               onClick={onLogout}
               title="Encerrar Sessão"
-              className="p-1.5 rounded-lg bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#b84a48] border border-[#343b37] transition-colors ml-1"
+              className="p-1.5 rounded-lg bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#b24a52] border border-[#3a3530] transition-colors ml-1"
             >
-              <LogOut className="w-4 h-4 text-[#b84a48]" />
+              <LogOut className="w-4 h-4 text-[#b24a52]" />
             </button>
           )}
         </div>
@@ -1095,8 +1095,8 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                 <div className="flex-1 min-w-0 space-y-6 w-full">
                   {/* Seletor Rápido de Personagens (Strip Superior Elegante) */}
                   {characters.length > 1 && (
-                    <div className="flex items-center space-x-2 pb-3 border-b border-[#343b37]/50 overflow-x-auto">
-                      <span className="text-[10px] font-mono text-[#9b9689] uppercase tracking-wider shrink-0 mr-1">
+                    <div className="flex items-center space-x-2 pb-3 border-b border-[#3a3530]/50 overflow-x-auto">
+                      <span className="text-[10px] font-mono text-[#8a8578] uppercase tracking-wider shrink-0 mr-1">
                         Dossiê:
                       </span>
                       {characters.map((c) => {
@@ -1110,12 +1110,12 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                             }}
                             className={`px-3 py-1 rounded-md text-xs font-serif transition-colors whitespace-nowrap flex items-center space-x-1.5 ${
                               isCur
-                                ? 'bg-[#252a27] text-[#c86d51] border border-[#c86d51]/50 font-bold'
-                                : 'text-[#9b9689] hover:text-[#ebe7de]'
+                                ? 'bg-[#2c2825] text-[#c9a04e] border border-[#c9a04e]/50 font-bold'
+                                : 'text-[#8a8578] hover:text-[#ece3d0]'
                             }`}
                           >
                             <span>{c.name}</span>
-                            {c.user_id === user.id && <span className="w-1.5 h-1.5 rounded-full bg-[#6d9775]" />}
+                            {c.user_id === user.id && <span className="w-1.5 h-1.5 rounded-full bg-[#5a7a5a]" />}
                           </button>
                         );
                       })}
@@ -1124,8 +1124,8 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
                   {/* Painel de Solicitações Pendentes (se houver) */}
                   {characterRequests.filter(r => r.status === 'pending').length > 0 && (
-                    <div className="p-3 bg-[#1c201e] border border-[#c86d51]/50 rounded-lg flex items-center justify-between text-xs">
-                      <span className="font-serif font-bold text-[#c86d51]">
+                    <div className="p-3 bg-[#1a1816] border border-[#c9a04e]/50 rounded-lg flex items-center justify-between text-xs">
+                      <span className="font-serif font-bold text-[#c9a04e]">
                         Solicitações de Personagens Pendentes ({characterRequests.filter(r => r.status === 'pending').length})
                       </span>
                       {isMaster && (
@@ -1143,7 +1143,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                               }
                             }
                           }}
-                          className="px-2.5 py-1 bg-[#6d9775] hover:bg-[#6d9775]/90 text-[#141716] font-bold rounded text-xs"
+                          className="px-2.5 py-1 bg-[#5a7a5a] hover:bg-[#5a7a5a]/90 text-[#131211] font-bold rounded text-xs"
                         >
                           Aprovar Pendência
                         </button>
@@ -1154,20 +1154,20 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                   {/* Cabeçalho do Dossiê */}
                   <div className="space-y-1.5">
                     <div className="flex items-center space-x-2.5">
-                      <span className="text-xs font-mono uppercase tracking-widest text-[#c86d51]">
+                      <span className="text-xs font-mono uppercase tracking-widest text-[#c9a04e]">
                         {selectedCharacter.raw_data?.classe || (selectedCharacter as any).class || 'Aventureiro'}
                       </span>
-                      <span className="text-[#343b37]">•</span>
-                      <span className="text-xs font-mono text-[#9b9689]">
-                        Jogador: <strong className="text-[#ebe7de] font-normal">{selectedCharacter.owner_username || user.username}</strong>
+                      <span className="text-[#3a3530]">•</span>
+                      <span className="text-xs font-mono text-[#8a8578]">
+                        Jogador: <strong className="text-[#ece3d0] font-normal">{selectedCharacter.owner_username || user.username}</strong>
                       </span>
                     </div>
 
-                    <h1 className="text-4xl sm:text-5xl font-serif font-bold text-[#ebe7de] tracking-tight leading-none">
+                    <h1 className="text-4xl sm:text-5xl font-serif font-bold text-[#ece3d0] tracking-tight leading-none">
                       {selectedCharacter.name}
                     </h1>
 
-                    <p className="text-xs text-[#9b9689] leading-relaxed pt-1">
+                    <p className="text-xs text-[#8a8578] leading-relaxed pt-1">
                       {characterBackground.origin !== '—' ? `${characterBackground.origin} • ` : ''}
                       {characterBackground.profession !== '—' ? `${characterBackground.profession} • ` : ''}
                       Idiomas: {characterBackground.languages}
@@ -1175,71 +1175,71 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                   </div>
 
                   {/* Barras Finas de Precisão (Vida, Mana, Carga) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-y border-[#343b37]/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-y border-[#3a3530]/70">
                     {/* Vida */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-baseline text-xs font-mono">
-                        <span className="text-[#b84a48] font-semibold flex items-center space-x-1">
+                        <span className="text-[#b24a52] font-semibold flex items-center space-x-1">
                           <Heart className="w-3.5 h-3.5" />
                           <span>Pontos de Vida</span>
                         </span>
-                        <span className="text-[#ebe7de] font-bold">
-                          {characterResources.currentHp} <span className="text-[#9b9689] font-normal">/ {characterResources.maxHp}</span>
+                        <span className="text-[#ece3d0] font-bold">
+                          {characterResources.currentHp} <span className="text-[#8a8578] font-normal">/ {characterResources.maxHp}</span>
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-[#1c201e] rounded-full overflow-hidden border border-[#343b37]/60">
+                      <div className="w-full h-1.5 bg-[#1a1816] rounded-full overflow-hidden border border-[#3a3530]/60">
                         <div
-                          className="h-full bg-[#b84a48] transition-all duration-300"
+                          className="h-full bg-[#b24a52] transition-all duration-300"
                           style={{ width: `${characterResources.hpPercent}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-[#9b9689] block">{characterResources.hpFormulaLabel}</span>
+                      <span className="text-[10px] font-mono text-[#8a8578] block">{characterResources.hpFormulaLabel}</span>
                     </div>
 
                     {/* Mana / Recurso Secundário */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-baseline text-xs font-mono">
-                        <span className="text-[#5b8299] font-semibold flex items-center space-x-1">
+                        <span className="text-[#4a7a8a] font-semibold flex items-center space-x-1">
                           <Zap className="w-3.5 h-3.5" />
                           <span>{characterResources.manaLabel}</span>
                         </span>
-                        <span className="text-[#ebe7de] font-bold">
-                          {characterResources.currentMana} <span className="text-[#9b9689] font-normal">/ {characterResources.maxMana}</span>
+                        <span className="text-[#ece3d0] font-bold">
+                          {characterResources.currentMana} <span className="text-[#8a8578] font-normal">/ {characterResources.maxMana}</span>
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-[#1c201e] rounded-full overflow-hidden border border-[#343b37]/60">
+                      <div className="w-full h-1.5 bg-[#1a1816] rounded-full overflow-hidden border border-[#3a3530]/60">
                         <div
-                          className="h-full bg-[#5b8299] transition-all duration-300"
+                          className="h-full bg-[#4a7a8a] transition-all duration-300"
                           style={{ width: `${characterResources.manaPercent}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-[#9b9689] block">{characterResources.manaFormulaLabel}</span>
+                      <span className="text-[10px] font-mono text-[#8a8578] block">{characterResources.manaFormulaLabel}</span>
                     </div>
 
                     {/* Carga */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-baseline text-xs font-mono">
-                        <span className="text-[#c86d51] font-semibold flex items-center space-x-1">
+                        <span className="text-[#c9a04e] font-semibold flex items-center space-x-1">
                           <Weight className="w-3.5 h-3.5" />
                           <span>Capacidade de Carga</span>
                         </span>
-                        <span className="text-[#ebe7de] font-bold">
-                          {characterResources.currentWeight} <span className="text-[#9b9689] font-normal">/ {characterResources.maxWeight} kg</span>
+                        <span className="text-[#ece3d0] font-bold">
+                          {characterResources.currentWeight} <span className="text-[#8a8578] font-normal">/ {characterResources.maxWeight} kg</span>
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-[#1c201e] rounded-full overflow-hidden border border-[#343b37]/60">
+                      <div className="w-full h-1.5 bg-[#1a1816] rounded-full overflow-hidden border border-[#3a3530]/60">
                         <div
-                          className="h-full bg-[#c86d51] transition-all duration-300"
+                          className="h-full bg-[#c9a04e] transition-all duration-300"
                           style={{ width: `${characterResources.weightPercent}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-mono text-[#9b9689] block">Atomicamente calculada</span>
+                      <span className="text-[10px] font-mono text-[#8a8578] block">Atomicamente calculada</span>
                     </div>
                   </div>
 
                   {/* Faixa Horizontal Limpa de Atributos (Sem Caixas Repetitivas) */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#9b9689] block">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#8a8578] block">
                       Matriz de Atributos (Clique para rolar teste)
                     </span>
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -1258,17 +1258,17 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                               if (!canRoll) return;
                               handleAttributeRoll(attr.name);
                             }}
-                            className={`p-3 bg-[#1c201e] border border-[#343b37] rounded-lg text-center transition-all ${
-                              canRoll ? 'hover:border-[#c86d51] cursor-pointer active:scale-95' : 'opacity-60'
+                            className={`p-3 bg-[#1a1816] border border-[#3a3530] rounded-lg text-center transition-all ${
+                              canRoll ? 'hover:border-[#c9a04e] cursor-pointer active:scale-95' : 'opacity-60'
                             }`}
                           >
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-[#9b9689] block truncate">
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-[#8a8578] block truncate">
                               {attr.abbr || attr.name.slice(0, 3)}
                             </span>
-                            <span className="font-serif text-2xl font-bold text-[#ebe7de] my-0.5 block">
+                            <span className="font-serif text-2xl font-bold text-[#ece3d0] my-0.5 block">
                               {val}
                             </span>
-                            <span className="text-[10px] font-mono text-[#c86d51] font-semibold">
+                            <span className="text-[10px] font-mono text-[#c9a04e] font-semibold">
                               {modStr}
                             </span>
                           </div>
@@ -1279,22 +1279,22 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
                   {/* Abas Internas da Ficha (Habilidades, Equipamento, Antecedentes) */}
                   <div className="pt-4">
-                    <div className="flex border-b border-[#343b37] text-xs font-serif mb-4">
+                    <div className="flex border-b border-[#3a3530] text-xs font-serif mb-4">
                       <button
                         type="button"
                         onClick={() => setSheetInnerTab('abilities')}
                         className={`pb-2.5 px-4 font-bold transition-colors relative ${
                           sheetInnerTab === 'abilities'
-                            ? 'text-[#c86d51]'
-                            : 'text-[#9b9689] hover:text-[#ebe7de]'
+                            ? 'text-[#c9a04e]'
+                            : 'text-[#8a8578] hover:text-[#ece3d0]'
                         }`}
                       >
                         <span>Habilidades</span>
-                        <span className="ml-1.5 font-mono text-[10px] text-[#9b9689] font-normal">
+                        <span className="ml-1.5 font-mono text-[10px] text-[#8a8578] font-normal">
                           ({characterSkills.length}/{maxSkills})
                         </span>
                         {sheetInnerTab === 'abilities' && (
-                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c9a04e]" />
                         )}
                       </button>
 
@@ -1303,16 +1303,16 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                         onClick={() => setSheetInnerTab('equipment')}
                         className={`pb-2.5 px-4 font-bold transition-colors relative ${
                           sheetInnerTab === 'equipment'
-                            ? 'text-[#c86d51]'
-                            : 'text-[#9b9689] hover:text-[#ebe7de]'
+                            ? 'text-[#c9a04e]'
+                            : 'text-[#8a8578] hover:text-[#ece3d0]'
                         }`}
                       >
                         <span>Equipamento Empunhado</span>
-                        <span className="ml-1.5 font-mono text-[10px] text-[#9b9689] font-normal">
+                        <span className="ml-1.5 font-mono text-[10px] text-[#8a8578] font-normal">
                           ({equippedItems.length})
                         </span>
                         {sheetInnerTab === 'equipment' && (
-                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c9a04e]" />
                         )}
                       </button>
 
@@ -1321,8 +1321,8 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                         onClick={() => setSheetInnerTab('lore')}
                         className={`pb-2.5 px-4 font-bold transition-colors relative ${
                           sheetInnerTab === 'lore'
-                            ? 'text-[#c86d51]'
-                            : 'text-[#9b9689] hover:text-[#ebe7de]'
+                            ? 'text-[#c9a04e]'
+                            : 'text-[#8a8578] hover:text-[#ece3d0]'
                         }`}
                       >
                         <span className="flex items-center gap-1.5">
@@ -1330,7 +1330,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                           <span>Lore & Crônicas</span>
                         </span>
                         {sheetInnerTab === 'lore' && (
-                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c9a04e]" />
                         )}
                       </button>
 
@@ -1339,13 +1339,13 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                         onClick={() => setSheetInnerTab('background')}
                         className={`pb-2.5 px-4 font-bold transition-colors relative ${
                           sheetInnerTab === 'background'
-                            ? 'text-[#c86d51]'
-                            : 'text-[#9b9689] hover:text-[#ebe7de]'
+                            ? 'text-[#c9a04e]'
+                            : 'text-[#8a8578] hover:text-[#ece3d0]'
                         }`}
                       >
                         <span>Crônica & Notas</span>
                         {sheetInnerTab === 'background' && (
-                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c9a04e]" />
                         )}
                       </button>
                     </div>
@@ -1354,7 +1354,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                     {sheetInnerTab === 'abilities' && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between pb-2">
-                          <span className="text-xs text-[#9b9689]">
+                          <span className="text-xs text-[#8a8578]">
                             Habilidades ativas e capacidades mágicas ou técnicas.
                           </span>
                           {canManageSkills && (
@@ -1362,7 +1362,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                               type="button"
                               disabled={characterSkills.length >= maxSkills}
                               onClick={() => setShowAddSkillModal(true)}
-                              className="px-3 py-1 bg-[#1c201e] hover:bg-[#252a27] text-[#c86d51] border border-[#343b37] hover:border-[#c86d51] rounded-lg text-xs font-serif font-bold transition-all flex items-center space-x-1"
+                              className="px-3 py-1 bg-[#1a1816] hover:bg-[#2c2825] text-[#c9a04e] border border-[#3a3530] hover:border-[#c9a04e] rounded-lg text-xs font-serif font-bold transition-all flex items-center space-x-1"
                             >
                               <Plus className="w-3 h-3" />
                               <span>Nova Habilidade</span>
@@ -1371,34 +1371,34 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                         </div>
 
                         {characterSkills.length === 0 ? (
-                          <div className="py-8 text-center text-xs text-[#9b9689] border border-dashed border-[#343b37] rounded-lg">
+                          <div className="py-8 text-center text-xs text-[#8a8578] border border-dashed border-[#3a3530] rounded-lg">
                             Nenhuma habilidade cadastrada nesta ficha.
                           </div>
                         ) : (
-                          <div className="divide-y divide-[#343b37]/50 border-t border-b border-[#343b37]/50">
+                          <div className="divide-y divide-[#3a3530]/50 border-t border-b border-[#3a3530]/50">
                             {characterSkills.map((ab: any, idx: number) => (
                               <div key={ab.id || idx} className="py-3 flex items-start justify-between gap-4">
                                 <div className="space-y-1 min-w-0">
                                   <div className="flex items-center space-x-2">
-                                    <h4 className="font-serif font-bold text-base text-[#ebe7de]">
+                                    <h4 className="font-serif font-bold text-base text-[#ece3d0]">
                                       {ab.name}
                                     </h4>
-                                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#1c201e] text-[#6d9775] border border-[#343b37]">
+                                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#1a1816] text-[#5a7a5a] border border-[#3a3530]">
                                       {ab.type || 'Ação'}
                                     </span>
                                     {ab.resource_cost && (
-                                      <span className="text-[11px] font-mono text-[#5b8299]">
+                                      <span className="text-[11px] font-mono text-[#4a7a8a]">
                                         Custo: {ab.resource_cost.amount} {ab.resource_cost.name}
                                       </span>
                                     )}
                                   </div>
                                   {ab.description && (
-                                    <p className="text-xs text-[#9b9689] leading-relaxed">
+                                    <p className="text-xs text-[#8a8578] leading-relaxed">
                                       {ab.description}
                                     </p>
                                   )}
                                   {(ab.attack_formula || ab.damage_formula) && (
-                                    <div className="text-[11px] font-mono text-[#c86d51]">
+                                    <div className="text-[11px] font-mono text-[#c9a04e]">
                                       {ab.attack_formula ? `Ataque: ${ab.attack_formula} ` : ''}
                                       {ab.damage_formula ? `• Dano: ${ab.damage_formula}` : ''}
                                     </div>
@@ -1412,7 +1412,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                                       const formula = ab.attack_formula || ab.damage_formula || '1d20';
                                       handleQuickRoll(formula);
                                     }}
-                                    className="px-3 py-1 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded text-xs transition-all active:scale-95"
+                                    className="px-3 py-1 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded text-xs transition-all active:scale-95"
                                   >
                                     Executar
                                   </button>
@@ -1420,7 +1420,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteSkill(ab.id, ab.name)}
-                                      className="p-1 text-[#9b9689] hover:text-[#b84a48] transition-colors"
+                                      className="p-1 text-[#8a8578] hover:text-[#b24a52] transition-colors"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -1437,30 +1437,30 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                     {sheetInnerTab === 'equipment' && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between pb-2">
-                          <span className="text-xs text-[#9b9689]">
+                          <span className="text-xs text-[#8a8578]">
                             Armas e proteções em uso imediato pelo personagem.
                           </span>
                           <button
                             onClick={() => setActiveTab('inventory')}
-                            className="text-xs text-[#c86d51] hover:underline font-mono"
+                            className="text-xs text-[#c9a04e] hover:underline font-mono"
                           >
                             Abrir Mochila Completa →
                           </button>
                         </div>
 
                         {equippedItems.length === 0 ? (
-                          <div className="py-8 text-center text-xs text-[#9b9689] border border-dashed border-[#343b37] rounded-lg">
+                          <div className="py-8 text-center text-xs text-[#8a8578] border border-dashed border-[#3a3530] rounded-lg">
                             Nenhum item empunhado no momento.
                           </div>
                         ) : (
-                          <div className="divide-y divide-[#343b37]/50 border-t border-b border-[#343b37]/50">
+                          <div className="divide-y divide-[#3a3530]/50 border-t border-b border-[#3a3530]/50">
                             {equippedItems.map((item: any) => (
                               <div key={item.id} className="py-2.5 flex items-center justify-between">
                                 <div>
-                                  <span className="text-[#ebe7de] font-serif font-bold text-sm block">{item.item_name}</span>
-                                  <span className="text-[10px] text-[#9b9689] font-mono">{item.category} • {item.weight}kg</span>
+                                  <span className="text-[#ece3d0] font-serif font-bold text-sm block">{item.item_name}</span>
+                                  <span className="text-[10px] text-[#8a8578] font-mono">{item.category} • {item.weight}kg</span>
                                 </div>
-                                <span className="font-mono text-xs text-[#c86d51] font-semibold">
+                                <span className="font-mono text-xs text-[#c9a04e] font-semibold">
                                   {item.properties?.dano || item.properties?.damage_formula || item.properties?.defesa ? `+ ${item.properties?.defesa || item.properties?.dano}` : 'Equipado'}
                                 </span>
                               </div>
@@ -1482,10 +1482,10 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
                     {/* Conteúdo Aba Antecedentes */}
                     {sheetInnerTab === 'background' && (
-                      <div className="space-y-4 text-xs leading-relaxed text-[#ebe7de]">
-                        <div className="p-4 bg-[#1c201e] border border-[#343b37] rounded-lg space-y-2">
-                          <h4 className="font-serif font-bold text-sm text-[#c86d51]">Origem & Histórico</h4>
-                          <p className="text-[#9b9689]">
+                      <div className="space-y-4 text-xs leading-relaxed text-[#ece3d0]">
+                        <div className="p-4 bg-[#1a1816] border border-[#3a3530] rounded-lg space-y-2">
+                          <h4 className="font-serif font-bold text-sm text-[#c9a04e]">Origem & Histórico</h4>
+                          <p className="text-[#8a8578]">
                             {selectedCharacter.raw_data?.history || selectedCharacter.raw_data?.origem || 'Nenhum histórico pregresso registrado no dossiê.'}
                           </p>
                         </div>
@@ -1497,78 +1497,78 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                 {/* ZONA 2: COLUNA LATERAL ESTREITA E DISCRETA (AÇÕES RÁPIDAS & ROLAGENS) */}
                 <div className="w-full lg:w-72 shrink-0 space-y-6 pt-2">
                   {/* Bloco de Defesas Passivas */}
-                  <div className="p-4 bg-[#1c201e] border border-[#343b37] rounded-lg space-y-3">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#9b9689] block">
+                  <div className="p-4 bg-[#1a1816] border border-[#3a3530] rounded-lg space-y-3">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#8a8578] block">
                       Prontidão de Combate
                     </span>
                     <div className="space-y-2 text-xs font-mono">
-                      <div className="flex justify-between items-center py-1 border-b border-[#343b37]/60">
-                        <span className="text-[#9b9689]">Classe de Armadura:</span>
-                        <span className="font-bold text-[#c86d51] text-base">{derivedStats.defense}</span>
+                      <div className="flex justify-between items-center py-1 border-b border-[#3a3530]/60">
+                        <span className="text-[#8a8578]">Classe de Armadura:</span>
+                        <span className="font-bold text-[#c9a04e] text-base">{derivedStats.defense}</span>
                       </div>
-                      <div className="flex justify-between items-center py-1 border-b border-[#343b37]/60">
-                        <span className="text-[#9b9689]">Iniciativa Tática:</span>
-                        <span className="font-bold text-[#ebe7de] text-base">
+                      <div className="flex justify-between items-center py-1 border-b border-[#3a3530]/60">
+                        <span className="text-[#8a8578]">Iniciativa Tática:</span>
+                        <span className="font-bold text-[#ece3d0] text-base">
                           {derivedStats.initiative >= 0 ? `+${derivedStats.initiative}` : derivedStats.initiative}
                         </span>
                       </div>
                       <div className="flex justify-between items-center py-1">
-                        <span className="text-[#9b9689]">Redução de Dano (RD):</span>
-                        <span className="font-bold text-[#ebe7de] text-base">{derivedStats.damageReduction}</span>
+                        <span className="text-[#8a8578]">Redução de Dano (RD):</span>
+                        <span className="font-bold text-[#ece3d0] text-base">{derivedStats.damageReduction}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Ações Rápidas de Teste */}
-                  <div className="p-4 bg-[#1c201e] border border-[#343b37] rounded-lg space-y-2.5">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#9b9689] block">
+                  <div className="p-4 bg-[#1a1816] border border-[#3a3530] rounded-lg space-y-2.5">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#8a8578] block">
                       Ações Imediatas
                     </span>
                     <div className="space-y-1.5">
                       <button
                         onClick={() => handleQuickRoll('1d20 + floor((Forca - 10) / 2)')}
-                        className="w-full py-2 px-3 bg-[#141716] hover:bg-[#252a27] border border-[#343b37] hover:border-[#c86d51] text-left rounded text-xs font-serif flex items-center justify-between transition-colors"
+                        className="w-full py-2 px-3 bg-[#131211] hover:bg-[#2c2825] border border-[#3a3530] hover:border-[#c9a04e] text-left rounded text-xs font-serif flex items-center justify-between transition-colors"
                       >
                         <span>Ataque Corpo a Corpo</span>
-                        <span className="font-mono text-[10px] text-[#9b9689]">1d20+FOR</span>
+                        <span className="font-mono text-[10px] text-[#8a8578]">1d20+FOR</span>
                       </button>
                       <button
                         onClick={() => handleQuickRoll('1d20 + floor((Destreza - 10) / 2)')}
-                        className="w-full py-2 px-3 bg-[#141716] hover:bg-[#252a27] border border-[#343b37] hover:border-[#c86d51] text-left rounded text-xs font-serif flex items-center justify-between transition-colors"
+                        className="w-full py-2 px-3 bg-[#131211] hover:bg-[#2c2825] border border-[#3a3530] hover:border-[#c9a04e] text-left rounded text-xs font-serif flex items-center justify-between transition-colors"
                       >
                         <span>Esquiva Tática</span>
-                        <span className="font-mono text-[10px] text-[#9b9689]">1d20+DES</span>
+                        <span className="font-mono text-[10px] text-[#8a8578]">1d20+DES</span>
                       </button>
                       <button
                         onClick={() => handleQuickRoll('1d20')}
-                        className="w-full py-2 px-3 bg-[#141716] hover:bg-[#252a27] border border-[#343b37] hover:border-[#c86d51] text-left rounded text-xs font-serif flex items-center justify-between transition-colors"
+                        className="w-full py-2 px-3 bg-[#131211] hover:bg-[#2c2825] border border-[#3a3530] hover:border-[#c9a04e] text-left rounded text-xs font-serif flex items-center justify-between transition-colors"
                       >
                         <span>Teste Puro de D20</span>
-                        <span className="font-mono text-[10px] text-[#9b9689]">1d20</span>
+                        <span className="font-mono text-[10px] text-[#8a8578]">1d20</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Histórico Recente de Dados */}
-                  <div className="p-4 bg-[#1c201e] border border-[#343b37] rounded-lg space-y-2.5">
+                  <div className="p-4 bg-[#1a1816] border border-[#3a3530] rounded-lg space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-[#9b9689]">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-[#8a8578]">
                         Rolagens Recentes
                       </span>
-                      <Dices className="w-3.5 h-3.5 text-[#c86d51]" />
+                      <Dices className="w-3.5 h-3.5 text-[#c9a04e]" />
                     </div>
 
                     <div className="space-y-2 text-xs font-mono max-h-56 overflow-y-auto">
                       {rollHistory.length === 0 ? (
-                        <p className="text-[#9b9689] italic py-2">Sem rolagens recentes.</p>
+                        <p className="text-[#8a8578] italic py-2">Sem rolagens recentes.</p>
                       ) : (
                         rollHistory.slice(0, 5).map((roll, i) => (
-                          <div key={roll.id || i} className="py-1.5 border-b border-[#343b37]/50 last:border-b-0 flex items-center justify-between">
+                          <div key={roll.id || i} className="py-1.5 border-b border-[#3a3530]/50 last:border-b-0 flex items-center justify-between">
                             <div>
-                              <span className="text-[#ebe7de] block truncate text-[11px]">{roll.expression}</span>
-                              <span className="text-[9px] text-[#9b9689]">{roll.characterName || roll.username}</span>
+                              <span className="text-[#ece3d0] block truncate text-[11px]">{roll.expression}</span>
+                              <span className="text-[9px] text-[#8a8578]">{roll.characterName || roll.username}</span>
                             </div>
-                            <span className="text-[#c86d51] font-bold text-sm">{roll.total}</span>
+                            <span className="text-[#c9a04e] font-bold text-sm">{roll.total}</span>
                           </div>
                         ))
                       )}
@@ -1578,18 +1578,18 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
               </div>
             ) : (
               <div className="py-20 text-center space-y-4">
-                <div className="w-12 h-12 rounded-full bg-[#1c201e] border border-[#343b37] flex items-center justify-center text-[#c86d51] mx-auto">
+                <div className="w-12 h-12 rounded-full bg-[#1a1816] border border-[#3a3530] flex items-center justify-center text-[#c9a04e] mx-auto">
                   <Shield className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-serif text-xl font-bold text-[#ebe7de]">Nenhum personagem selecionado</h3>
-                  <p className="text-xs text-[#9b9689] max-w-sm mx-auto">
+                  <h3 className="font-serif text-xl font-bold text-[#ece3d0]">Nenhum personagem selecionado</h3>
+                  <p className="text-xs text-[#8a8578] max-w-sm mx-auto">
                     Crie um novo personagem para ingressar na crônica ou selecione uma ficha existente.
                   </p>
                 </div>
                 <button
                   onClick={() => setShowCreateCharModal(true)}
-                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs"
                 >
                   + Forjar Personagem
                 </button>
@@ -1657,19 +1657,19 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
         {activeTab === 'rules' && ruleset && (
           <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 w-full space-y-6">
-            <div className="border-b border-[#343b37] pb-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-[#c86d51]">Motor de Regras</span>
-              <h2 className="text-3xl font-serif font-bold text-[#ebe7de] mt-1">
+            <div className="border-b border-[#3a3530] pb-4">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#c9a04e]">Motor de Regras</span>
+              <h2 className="text-3xl font-serif font-bold text-[#ece3d0] mt-1">
                 {ruleset.config.systemName}
               </h2>
-              <p className="text-xs text-[#9b9689] mt-0.5">
-                Dado base: <span className="font-mono text-[#c86d51]">{ruleset.config.defaultDice}</span> · Versão {ruleset.version}
+              <p className="text-xs text-[#8a8578] mt-0.5">
+                Dado base: <span className="font-mono text-[#c9a04e]">{ruleset.config.defaultDice}</span> · Versão {ruleset.version}
               </p>
             </div>
 
             {/* Testador de Fórmulas */}
-            <div className="p-5 bg-[#1c201e] border border-[#343b37] rounded-xl space-y-3">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#ebe7de] block">
+            <div className="p-5 bg-[#1a1816] border border-[#3a3530] rounded-xl space-y-3">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#ece3d0] block">
                 Sandbox de Fórmulas Aritméticas (Sem eval)
               </span>
               <div className="flex gap-2">
@@ -1678,21 +1678,21 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                   value={testFormula}
                   onChange={(e) => handleValidateFormula(e.target.value)}
                   placeholder="Ex: 1d20 + Forca, max(0, Dano - Armadura)"
-                  className="flex-1 px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] font-mono focus:outline-none"
+                  className="flex-1 px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-lg text-sm text-[#ece3d0] font-mono focus:outline-none"
                 />
                 <button
                   onClick={handleExecuteTestRoll}
                   disabled={Boolean(validationResult && !validationResult.isValid)}
-                  className="px-4 py-2.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs"
+                  className="px-4 py-2.5 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs"
                 >
                   Executar
                 </button>
               </div>
 
               {testRollResult && (
-                <div className="p-3 bg-[#141716] border border-[#343b37] rounded-lg flex items-center justify-between text-xs font-mono">
-                  <span className="text-[#9b9689]">Resultado: <strong className="text-[#ebe7de]">{testRollResult.breakdown?.expression}</strong></span>
-                  <span className="text-2xl font-bold text-[#c86d51]">{testRollResult.total}</span>
+                <div className="p-3 bg-[#131211] border border-[#3a3530] rounded-lg flex items-center justify-between text-xs font-mono">
+                  <span className="text-[#8a8578]">Resultado: <strong className="text-[#ece3d0]">{testRollResult.breakdown?.expression}</strong></span>
+                  <span className="text-2xl font-bold text-[#c9a04e]">{testRollResult.total}</span>
                 </div>
               )}
             </div>
@@ -1701,35 +1701,35 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
 
         {activeTab === 'roller' && (
           <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 w-full space-y-6">
-            <div className="border-b border-[#343b37] pb-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-[#c86d51]">Arquivo de Dados</span>
-              <h2 className="text-3xl font-serif font-bold text-[#ebe7de] mt-1">Rolador & Histórico</h2>
+            <div className="border-b border-[#3a3530] pb-4">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#c9a04e]">Arquivo de Dados</span>
+              <h2 className="text-3xl font-serif font-bold text-[#ece3d0] mt-1">Rolador & Histórico</h2>
             </div>
 
-            <div className="p-5 bg-[#1c201e] border border-[#343b37] rounded-xl space-y-4">
+            <div className="p-5 bg-[#1a1816] border border-[#3a3530] rounded-xl space-y-4">
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={diceExpr}
                   onChange={(e) => setDiceExpr(e.target.value)}
                   placeholder="1d20 + 3, 2d6, 1d100..."
-                  className="flex-1 px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] font-mono focus:outline-none"
+                  className="flex-1 px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-lg text-sm text-[#ece3d0] font-mono focus:outline-none"
                 />
                 <button
                   onClick={() => handleQuickRoll(diceExpr)}
-                  className="px-5 py-2.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs"
+                  className="px-5 py-2.5 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs"
                 >
                   Rolar
                 </button>
               </div>
 
-              <div className="flex items-center space-x-2 text-xs font-mono text-[#9b9689]">
+              <div className="flex items-center space-x-2 text-xs font-mono text-[#8a8578]">
                 <input
                   type="checkbox"
                   id="secretRoll"
                   checked={isSecretRoll}
                   onChange={(e) => setIsSecretRoll(e.target.checked)}
-                  className="rounded border-[#343b37]"
+                  className="rounded border-[#3a3530]"
                 />
                 <label htmlFor="secretRoll" className="cursor-pointer">
                   Rolagem Secreta (Somente Mestre vê)
@@ -1737,15 +1737,15 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
               </div>
             </div>
 
-            <div className="divide-y divide-[#343b37]/50 border-t border-b border-[#343b37]/50">
+            <div className="divide-y divide-[#3a3530]/50 border-t border-b border-[#3a3530]/50">
               {rollHistory.map((r, i) => (
                 <div key={r.id || i} className="py-3 flex items-center justify-between text-xs font-mono">
                   <div>
-                    <span className="text-[#ebe7de] font-bold">{r.username || 'Jogador'}</span>
-                    {r.characterName && <span className="text-[#9b9689] ml-1.5">({r.characterName})</span>}
-                    <span className="text-[#9b9689] ml-2">{r.expression}</span>
+                    <span className="text-[#ece3d0] font-bold">{r.username || 'Jogador'}</span>
+                    {r.characterName && <span className="text-[#8a8578] ml-1.5">({r.characterName})</span>}
+                    <span className="text-[#8a8578] ml-2">{r.expression}</span>
                   </div>
-                  <span className="text-xl font-bold text-[#c86d51]">{r.total}</span>
+                  <span className="text-xl font-bold text-[#c9a04e]">{r.total}</span>
                 </div>
               ))}
             </div>
@@ -1755,18 +1755,18 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
         {activeTab === 'chat' && (
           <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8 w-full h-full flex flex-col justify-between">
             <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
-              <div className="text-xs font-mono text-[#9b9689] text-center py-2 border-b border-[#343b37]/60">
+              <div className="text-xs font-mono text-[#8a8578] text-center py-2 border-b border-[#3a3530]/60">
                 Crônica ao vivo via WebSockets da campanha
               </div>
               {messages.map((m, i) => (
-                <div key={m.id || i} className="p-3 bg-[#1c201e] border border-[#343b37] rounded-lg space-y-1">
+                <div key={m.id || i} className="p-3 bg-[#1a1816] border border-[#3a3530] rounded-lg space-y-1">
                   <div className="flex justify-between items-center text-xs font-mono">
-                    <span className="text-[#c86d51] font-bold">{m.sender}</span>
-                    <span className="text-[#9b9689] text-[10px]">
+                    <span className="text-[#c9a04e] font-bold">{m.sender}</span>
+                    <span className="text-[#8a8578] text-[10px]">
                       {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <p className="text-sm text-[#ebe7de] leading-relaxed">{m.text}</p>
+                  <p className="text-sm text-[#ece3d0] leading-relaxed">{m.text}</p>
                 </div>
               ))}
             </div>
@@ -1777,11 +1777,11 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Enviar mensagem para os aventureiros..."
-                className="flex-1 px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] focus:outline-none"
+                className="flex-1 px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-lg text-sm text-[#ece3d0] focus:outline-none"
               />
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs flex items-center space-x-1.5"
+                className="px-4 py-2.5 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs flex items-center space-x-1.5"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Enviar</span>
@@ -1804,31 +1804,31 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
       {/* MODAIS (CRIAR PERSONAGEM, MEMBROS, HABILIDADE) */}
       {showCreateCharModal && ruleset && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-[#1c201e] border border-[#343b37] rounded-xl p-6 sm:p-8 relative text-[#ebe7de] shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#343b37] mb-4">
-              <h2 className="text-xl font-serif font-bold text-[#ebe7de]">Forjar Personagem</h2>
-              <button onClick={() => setShowCreateCharModal(false)} className="text-[#9b9689] hover:text-[#ebe7de]">✕</button>
+          <div className="w-full max-w-lg bg-[#1a1816] border border-[#3a3530] rounded-xl p-6 sm:p-8 relative text-[#ece3d0] shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#3a3530] mb-4">
+              <h2 className="text-xl font-serif font-bold text-[#ece3d0]">Forjar Personagem</h2>
+              <button onClick={() => setShowCreateCharModal(false)} className="text-[#8a8578] hover:text-[#ece3d0]">✕</button>
             </div>
             <form onSubmit={handleCreateCharacter} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#9b9689] uppercase">Nome</label>
+                <label className="block text-xs font-mono text-[#8a8578] uppercase">Nome</label>
                 <input
                   type="text"
                   required
                   value={newCharName}
                   onChange={(e) => setNewCharName(e.target.value)}
                   placeholder="Ex: Kaelen, Lyra..."
-                  className="w-full px-3.5 py-2.5 bg-[#141716] border border-[#343b37] focus:border-[#c86d51] rounded-lg text-sm text-[#ebe7de] focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-[#131211] border border-[#3a3530] focus:border-[#c9a04e] rounded-lg text-sm text-[#ece3d0] focus:outline-none"
                 />
               </div>
 
               {templates.length > 0 && (
                 <div className="space-y-1">
-                  <label className="block text-xs font-mono text-[#9b9689] uppercase">Modelo de Ficha</label>
+                  <label className="block text-xs font-mono text-[#8a8578] uppercase">Modelo de Ficha</label>
                   <select
                     value={selectedTemplateId}
                     onChange={(e) => setSelectedTemplateId(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-[#141716] border border-[#343b37] rounded-lg text-sm text-[#ebe7de]"
+                    className="w-full px-3.5 py-2 bg-[#131211] border border-[#3a3530] rounded-lg text-sm text-[#ece3d0]"
                   >
                     <option value="">Ficha Padrão da Campanha</option>
                     {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -1837,35 +1837,35 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
               )}
 
               <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#9b9689] uppercase">Atributos Iniciais</label>
+                <label className="block text-xs font-mono text-[#8a8578] uppercase">Atributos Iniciais</label>
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                   {ruleset.config.attributes.filter(a => !a.isDerived).map((attr) => (
-                    <div key={attr.id} className="p-2 bg-[#141716] border border-[#343b37] rounded flex items-center justify-between">
-                      <span className="text-xs font-mono text-[#9b9689]">{attr.name}</span>
+                    <div key={attr.id} className="p-2 bg-[#131211] border border-[#3a3530] rounded flex items-center justify-between">
+                      <span className="text-xs font-mono text-[#8a8578]">{attr.name}</span>
                       <input
                         type="number"
                         min={attr.min ?? 0}
                         max={attr.max ?? 100}
                         value={newCharAttributes[attr.name] ?? attr.defaultValue}
                         onChange={(e) => setNewCharAttributes({ ...newCharAttributes, [attr.name]: parseInt(e.target.value, 10) || 0 })}
-                        className="w-16 px-2 py-1 bg-[#1c201e] border border-[#343b37] rounded text-right text-xs font-mono text-[#ebe7de]"
+                        className="w-16 px-2 py-1 bg-[#1a1816] border border-[#3a3530] rounded text-right text-xs font-mono text-[#ece3d0]"
                       />
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#343b37]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#3a3530]">
                 <button
                   type="button"
                   onClick={() => setShowCreateCharModal(false)}
-                  className="px-4 py-2 bg-[#141716] text-[#9b9689] hover:text-[#ebe7de] rounded-lg text-xs"
+                  className="px-4 py-2 bg-[#131211] text-[#8a8578] hover:text-[#ece3d0] rounded-lg text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs"
+                  className="px-5 py-2 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs"
                 >
                   Salvar
                 </button>
@@ -1878,13 +1878,13 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
       {/* Modal de Membros */}
       {showMembersModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-[#1c201e] border border-[#343b37] rounded-xl p-6 relative text-[#ebe7de] shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#343b37] mb-4">
+          <div className="w-full max-w-lg bg-[#1a1816] border border-[#3a3530] rounded-xl p-6 relative text-[#ece3d0] shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#3a3530] mb-4">
               <h3 className="font-serif text-xl font-bold">Membros da Campanha</h3>
-              <button onClick={() => setShowMembersModal(false)} className="text-[#9b9689] hover:text-[#ebe7de]">✕</button>
+              <button onClick={() => setShowMembersModal(false)} className="text-[#8a8578] hover:text-[#ece3d0]">✕</button>
             </div>
             {loadingMembers ? (
-              <div className="py-8 text-center text-xs text-[#9b9689]">Carregando membros...</div>
+              <div className="py-8 text-center text-xs text-[#8a8578]">Carregando membros...</div>
             ) : (
               <div className="space-y-2 max-h-72 overflow-y-auto">
                 {campaignMembers.map((m) => {
@@ -1892,23 +1892,23 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                   const canKick = isMaster && m.role !== 'owner' && memberId !== user.id;
                   const isPending = memberToRemove === memberId;
                   return (
-                    <div key={memberId} className="p-3 bg-[#141716] border border-[#343b37] rounded-lg flex items-center justify-between">
+                    <div key={memberId} className="p-3 bg-[#131211] border border-[#3a3530] rounded-lg flex items-center justify-between">
                       <div>
                         <span className="font-serif font-bold text-sm block">{m.username}</span>
-                        <span className="text-[10px] font-mono text-[#9b9689]">{m.role}</span>
+                        <span className="text-[10px] font-mono text-[#8a8578]">{m.role}</span>
                       </div>
                       {canKick && (
                         isPending ? (
                           <div className="flex items-center space-x-1">
                             <button
                               onClick={() => handleKickMember(memberId, m.username)}
-                              className="px-2 py-1 bg-[#b84a48] text-white rounded text-xs font-bold"
+                              className="px-2 py-1 bg-[#b24a52] text-white rounded text-xs font-bold"
                             >
                               Confirmar
                             </button>
                             <button
                               onClick={() => setMemberToRemove(null)}
-                              className="px-2 py-1 bg-[#252a27] text-[#ebe7de] rounded text-xs"
+                              className="px-2 py-1 bg-[#2c2825] text-[#ece3d0] rounded text-xs"
                             >
                               Cancelar
                             </button>
@@ -1916,7 +1916,7 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
                         ) : (
                           <button
                             onClick={() => setMemberToRemove(memberId)}
-                            className="px-3 py-1 bg-[#b84a48]/20 hover:bg-[#b84a48] text-[#b84a48] hover:text-white border border-[#b84a48]/40 rounded text-xs transition-colors"
+                            className="px-3 py-1 bg-[#b24a52]/20 hover:bg-[#b24a52] text-[#b24a52] hover:text-white border border-[#b24a52]/40 rounded text-xs transition-colors"
                           >
                             Remover
                           </button>
@@ -1934,70 +1934,70 @@ export const CampaignWorkspace: React.FC<CampaignWorkspaceProps> = ({
       {/* Modal de Adicionar Habilidade */}
       {showAddSkillModal && selectedCharacter && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-[#1c201e] border border-[#343b37] rounded-xl p-6 relative text-[#ebe7de] shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#343b37] mb-4">
+          <div className="w-full max-w-lg bg-[#1a1816] border border-[#3a3530] rounded-xl p-6 relative text-[#ece3d0] shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#3a3530] mb-4">
               <h3 className="font-serif text-xl font-bold">Nova Habilidade</h3>
-              <button onClick={() => setShowAddSkillModal(false)} className="text-[#9b9689] hover:text-[#ebe7de]">✕</button>
+              <button onClick={() => setShowAddSkillModal(false)} className="text-[#8a8578] hover:text-[#ece3d0]">✕</button>
             </div>
             <form onSubmit={handleAddSkill} className="space-y-3">
               <div>
-                <label className="block text-xs font-mono text-[#9b9689] uppercase mb-1">Nome da Habilidade</label>
+                <label className="block text-xs font-mono text-[#8a8578] uppercase mb-1">Nome da Habilidade</label>
                 <input
                   type="text"
                   required
                   value={skillForm.name}
                   onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })}
                   placeholder="Ex: Golpe Flamejante, Rajada Mística..."
-                  className="w-full px-3 py-2 bg-[#141716] border border-[#343b37] rounded-lg text-sm text-[#ebe7de] focus:outline-none focus:border-[#c86d51]"
+                  className="w-full px-3 py-2 bg-[#131211] border border-[#3a3530] rounded-lg text-sm text-[#ece3d0] focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-mono text-[#9b9689] uppercase mb-1">Fórmula de Ataque</label>
+                  <label className="block text-xs font-mono text-[#8a8578] uppercase mb-1">Fórmula de Ataque</label>
                   <input
                     type="text"
                     value={skillForm.attack_formula}
                     onChange={(e) => setSkillForm({ ...skillForm, attack_formula: e.target.value })}
                     placeholder="1d20 + 4"
-                    className="w-full px-3 py-2 bg-[#141716] border border-[#343b37] rounded-lg text-sm text-[#ebe7de] font-mono focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#131211] border border-[#3a3530] rounded-lg text-sm text-[#ece3d0] font-mono focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-[#9b9689] uppercase mb-1">Fórmula de Dano</label>
+                  <label className="block text-xs font-mono text-[#8a8578] uppercase mb-1">Fórmula de Dano</label>
                   <input
                     type="text"
                     value={skillForm.damage_formula}
                     onChange={(e) => setSkillForm({ ...skillForm, damage_formula: e.target.value })}
                     placeholder="2d6 + 3"
-                    className="w-full px-3 py-2 bg-[#141716] border border-[#343b37] rounded-lg text-sm text-[#ebe7de] font-mono focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#131211] border border-[#3a3530] rounded-lg text-sm text-[#ece3d0] font-mono focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#9b9689] uppercase mb-1">Descrição</label>
+                <label className="block text-xs font-mono text-[#8a8578] uppercase mb-1">Descrição</label>
                 <textarea
                   rows={2}
                   value={skillForm.description}
                   onChange={(e) => setSkillForm({ ...skillForm, description: e.target.value })}
                   placeholder="Efeitos, alcance, condições..."
-                  className="w-full px-3 py-2 bg-[#141716] border border-[#343b37] rounded-lg text-sm text-[#ebe7de] focus:outline-none"
+                  className="w-full px-3 py-2 bg-[#131211] border border-[#3a3530] rounded-lg text-sm text-[#ece3d0] focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#343b37]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#3a3530]">
                 <button
                   type="button"
                   onClick={() => setShowAddSkillModal(false)}
-                  className="px-4 py-2 bg-[#141716] text-[#9b9689] hover:text-[#ebe7de] rounded-lg text-xs"
+                  className="px-4 py-2 bg-[#131211] text-[#8a8578] hover:text-[#ece3d0] rounded-lg text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingSkill}
-                  className="px-5 py-2 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs"
+                  className="px-5 py-2 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs"
                 >
                   {isSubmittingSkill ? 'Gravando...' : 'Adicionar'}
                 </button>

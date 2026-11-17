@@ -142,13 +142,13 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
                 setSelectedContactId(contacts[0].user_id);
               }
             }}
-            className="flex items-center gap-2 px-3.5 py-2.5 bg-[#1c201e]/90 hover:bg-[#252a27] text-[#ebe7de] border border-[#343b37] rounded-full shadow-lg backdrop-blur-md transition-all hover:scale-105 group"
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-[#1a1816]/90 hover:bg-[#2c2825] text-[#ece3d0] border border-[#3a3530] rounded-full shadow-lg backdrop-blur-md transition-all hover:scale-105 group"
             title="Sussurro Privado com o Mestre"
           >
             <div className="relative">
-              <MessageSquare className="w-4 h-4 text-[#c86d51] group-hover:text-[#6d9775] transition-colors" />
+              <MessageSquare className="w-4 h-4 text-[#c9a04e] group-hover:text-[#5a7a5a] transition-colors" />
               {totalUnread > 0 && (
-                <span className="absolute -top-1.5 -right-2 px-1.5 py-0.2 min-w-[16px] h-4 text-[10px] font-mono font-bold bg-[#b84a48] text-white rounded-full flex items-center justify-center animate-pulse">
+                <span className="absolute -top-1.5 -right-2 px-1.5 py-0.2 min-w-[16px] h-4 text-[10px] font-mono font-bold bg-[#b24a52] text-white rounded-full flex items-center justify-center animate-pulse">
                   {totalUnread}
                 </span>
               )}
@@ -162,18 +162,18 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
 
       {/* Popover Compacto de Chat Privado */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 z-50 w-80 sm:w-96 h-[480px] bg-[#1c201e] border border-[#343b37] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-4 right-4 z-50 w-80 sm:w-96 h-[480px] bg-[#1a1816] border border-[#3a3530] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#141716] border-b border-[#343b37]">
+          <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#131211] border-b border-[#3a3530]">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#252a27] flex items-center justify-center text-[#c86d51] border border-[#343b37]">
+              <div className="w-6 h-6 rounded-full bg-[#2c2825] flex items-center justify-center text-[#c9a04e] border border-[#3a3530]">
                 <Lock className="w-3.5 h-3.5" />
               </div>
               <div>
-                <h3 className="text-xs font-serif font-bold text-[#ebe7de] tracking-wide">
+                <h3 className="text-xs font-serif font-bold text-[#ece3d0] tracking-wide">
                   {isMaster ? 'Sussurros do Mestre' : 'Canal Secreto com o Mestre'}
                 </h3>
-                <p className="text-[10px] font-mono text-[#9b9689]">
+                <p className="text-[10px] font-mono text-[#8a8578]">
                   {isMaster
                     ? (selectedContact ? `Com: ${selectedContact.username}` : 'Selecione um jogador')
                     : 'Apenas você e o Mestre veem esta conversa'}
@@ -183,7 +183,7 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
 
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 text-[#9b9689] hover:text-[#ebe7de] hover:bg-[#252a27] rounded transition-colors"
+              className="p-1 text-[#8a8578] hover:text-[#ece3d0] hover:bg-[#2c2825] rounded transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -191,9 +191,9 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
 
           {/* Abas de Contatos para o Mestre */}
           {isMaster && (
-            <div className="flex items-center gap-1 px-2 py-1.5 bg-[#141716]/60 border-b border-[#343b37] overflow-x-auto">
+            <div className="flex items-center gap-1 px-2 py-1.5 bg-[#131211]/60 border-b border-[#3a3530] overflow-x-auto">
               {contacts.length === 0 ? (
-                <span className="text-[11px] text-[#9b9689] italic px-2 py-1">Nenhum jogador na campanha</span>
+                <span className="text-[11px] text-[#8a8578] italic px-2 py-1">Nenhum jogador na campanha</span>
               ) : (
                 contacts.map(c => {
                   const isSelected = selectedContactId === c.user_id;
@@ -203,14 +203,14 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
                       onClick={() => setSelectedContactId(c.user_id)}
                       className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-sans transition-all whitespace-nowrap ${
                         isSelected
-                          ? 'bg-[#c86d51] text-[#141716] font-semibold'
-                          : 'bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] hover:bg-[#343b37]'
+                          ? 'bg-[#c9a04e] text-[#131211] font-semibold'
+                          : 'bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] hover:bg-[#3a3530]'
                       }`}
                     >
                       <UserIcon className="w-3 h-3" />
                       <span>{c.username}</span>
                       {c.unread_count > 0 && (
-                        <span className="px-1 text-[9px] font-mono font-bold bg-[#b84a48] text-white rounded-full">
+                        <span className="px-1 text-[9px] font-mono font-bold bg-[#b24a52] text-white rounded-full">
                           {c.unread_count}
                         </span>
                       )}
@@ -222,12 +222,12 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
           )}
 
           {/* Área de Mensagens */}
-          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 bg-[#141716]/40 text-xs">
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 bg-[#131211]/40 text-xs">
             {whispers.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center text-[#9b9689] px-4">
-                <Shield className="w-8 h-8 text-[#343b37] mb-2" />
-                <p className="font-serif text-[#ebe7de] text-xs">Canal Criptografado de Sussurro</p>
-                <p className="text-[11px] mt-1 text-[#9b9689]">
+              <div className="h-full flex flex-col items-center justify-center text-center text-[#8a8578] px-4">
+                <Shield className="w-8 h-8 text-[#3a3530] mb-2" />
+                <p className="font-serif text-[#ece3d0] text-xs">Canal Criptografado de Sussurro</p>
+                <p className="text-[11px] mt-1 text-[#8a8578]">
                   {isMaster
                     ? 'Inicie um diálogo privado com este jogador. Nenhum outro jogador na mesa terá acesso a estas mensagens.'
                     : 'Envie perguntas confidenciais, intenções de traição ou ações secretas diretamente para o Mestre.'}
@@ -241,7 +241,7 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
                     key={w.id}
                     className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
                   >
-                    <div className="flex items-center gap-1 text-[10px] text-[#9b9689] mb-0.5 px-1">
+                    <div className="flex items-center gap-1 text-[10px] text-[#8a8578] mb-0.5 px-1">
                       <span className="font-serif">{isMine ? 'Você' : w.sender_username}</span>
                       <span>•</span>
                       <span className="font-mono">
@@ -251,8 +251,8 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
                     <div
                       className={`max-w-[85%] px-3 py-2 rounded-lg text-xs leading-relaxed ${
                         isMine
-                          ? 'bg-[#c86d51]/20 text-[#ebe7de] border border-[#c86d51]/40 rounded-br-none'
-                          : 'bg-[#252a27] text-[#ebe7de] border border-[#343b37] rounded-bl-none'
+                          ? 'bg-[#c9a04e]/20 text-[#ece3d0] border border-[#c9a04e]/40 rounded-br-none'
+                          : 'bg-[#2c2825] text-[#ece3d0] border border-[#3a3530] rounded-bl-none'
                       }`}
                     >
                       {w.content}
@@ -267,7 +267,7 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
           {/* Formulário de Envio */}
           <form
             onSubmit={handleSend}
-            className="p-2 bg-[#141716] border-t border-[#343b37] flex items-center gap-1.5"
+            className="p-2 bg-[#131211] border-t border-[#3a3530] flex items-center gap-1.5"
           >
             <input
               type="text"
@@ -279,12 +279,12 @@ export const WhisperDock: React.FC<WhisperDockProps> = ({
                   : 'Sussurrar para o Mestre...'
               }
               disabled={isMaster && !selectedContactId}
-              className="flex-1 bg-[#1c201e] text-[#ebe7de] text-xs px-3 py-2 rounded-lg border border-[#343b37] focus:outline-none focus:border-[#c86d51] disabled:opacity-50"
+              className="flex-1 bg-[#1a1816] text-[#ece3d0] text-xs px-3 py-2 rounded-lg border border-[#3a3530] focus:outline-none focus:border-[#c9a04e] disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={!messageText.trim() || loading || (isMaster && !selectedContactId)}
-              className="p-2 bg-[#c86d51] hover:bg-[#b0583e] disabled:opacity-50 text-[#141716] font-bold rounded-lg transition-colors flex items-center justify-center"
+              className="p-2 bg-[#c9a04e] hover:bg-[#b0583e] disabled:opacity-50 text-[#131211] font-bold rounded-lg transition-colors flex items-center justify-center"
               title="Enviar sussurro"
             >
               <Send className="w-3.5 h-3.5" />

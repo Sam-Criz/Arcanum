@@ -118,25 +118,25 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
           const isWarning = n.type === 'warning';
 
           const borderColor = isError
-            ? 'border-[#b84a48]'
+            ? 'border-[#b24a52]'
             : isSuccess
-            ? 'border-[#6d9775]'
+            ? 'border-[#5a7a5a]'
             : isWarning
-            ? 'border-[#c86d51]'
-            : 'border-[#343b37]';
+            ? 'border-[#c9a04e]'
+            : 'border-[#3a3530]';
 
           const iconColor = isError
-            ? 'text-[#b84a48]'
+            ? 'text-[#b24a52]'
             : isSuccess
-            ? 'text-[#6d9775]'
+            ? 'text-[#5a7a5a]'
             : isWarning
-            ? 'text-[#c86d51]'
-            : 'text-[#9b9689]';
+            ? 'text-[#c9a04e]'
+            : 'text-[#8a8578]';
 
           return (
             <div
               key={n.id}
-              className={`pointer-events-auto bg-[#1c201e]/95 border ${borderColor} rounded-xl p-3.5 shadow-sm backdrop-blur-md flex items-start space-x-3 transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-top-2`}
+              className={`pointer-events-auto bg-[#1a1816]/95 border ${borderColor} rounded-2xl p-3.5 shadow-sm backdrop-blur-md flex items-start space-x-3 transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-top-2`}
             >
               <div className={`mt-0.5 shrink-0 ${iconColor}`}>
                 {isError && <AlertCircle className="w-5 h-5" />}
@@ -146,15 +146,15 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
               </div>
 
               <div className="flex-1 min-w-0">
-                <h4 className="font-serif font-bold text-sm text-[#c86d51] leading-snug">
+                <h4 className="font-serif font-bold text-sm text-[#c9a04e] leading-snug">
                   {n.title}
                 </h4>
                 {n.message && (
-                  <p className="text-xs text-[#ebe7de] font-sans mt-0.5 leading-relaxed break-words">
+                  <p className="text-xs text-[#ece3d0] font-sans mt-0.5 leading-relaxed break-words">
                     {n.message}
                   </p>
                 )}
-                <div className="text-[9px] font-mono text-[#9b9689] mt-1 select-none">
+                <div className="text-[9px] font-mono text-[#8a8578] mt-1 select-none">
                   [IIII]
                 </div>
               </div>
@@ -162,7 +162,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
               <button
                 type="button"
                 onClick={() => dismiss(n.id)}
-                className="text-[#9b9689] hover:text-[#ebe7de] p-1 shrink-0 transition-colors"
+                className="text-[#8a8578] hover:text-[#ece3d0] p-1 shrink-0 transition-all duration-300 ease-in-out"
                 title="Fechar notificação"
               >
                 <X className="w-4 h-4" />
@@ -172,28 +172,28 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         })}
       </div>
 
-      {/* Modal de Confirmação In-App Estilo Tinta e Latão */}
+      {/* Modal de Confirmação In-App — Tinta, Papel e Latão */}
       {confirmDialog && (
         <div className="fixed inset-0 z-[10000] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl max-w-md w-full p-6 shadow-sm space-y-4">
-            <div className="flex items-center space-x-3 border-b border-[#252a27] pb-3">
-              <div className="p-2 bg-[#252a27] rounded-lg text-[#c86d51]">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-2xl max-w-md w-full p-6 shadow-sm space-y-4">
+            <div className="flex items-center space-x-3 border-b border-[#2c2825] pb-3">
+              <div className="p-2 bg-[#2c2825] rounded-lg text-[#c9a04e]">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h3 className="font-serif font-bold text-lg text-[#c86d51]">
+              <h3 className="font-serif font-bold text-lg text-[#c9a04e]">
                 {confirmDialog.title || 'Atenção'}
               </h3>
             </div>
 
-            <p className="text-sm text-[#ebe7de] font-sans leading-relaxed">
+            <p className="text-sm text-[#ece3d0] font-sans leading-relaxed">
               {confirmDialog.message}
             </p>
 
-            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#252a27]">
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#2c2825]">
               <button
                 type="button"
                 onClick={confirmDialog.onCancel}
-                className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] rounded-xl text-xs font-serif font-semibold transition-colors"
+                className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] rounded-2xl text-xs font-serif font-semibold transition-all duration-300 ease-in-out"
               >
                 {confirmDialog.cancelLabel || 'Cancelar'}
               </button>
@@ -201,10 +201,10 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
               <button
                 type="button"
                 onClick={confirmDialog.onConfirm}
-                className={`px-4 py-2 rounded-xl text-xs font-serif font-bold transition-all shadow-md ${
+                className={`px-4 py-2 rounded-2xl text-xs font-serif font-bold transition-all duration-300 ease-in-out shadow-md ${
                   confirmDialog.isDestructive
-                    ? 'bg-[#b84a48] hover:bg-[#b84a48] text-[#ebe7de]'
-                    : 'bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716]'
+                    ? 'bg-[#b24a52] hover:bg-[#b24a52]/80 text-[#ece3d0]'
+                    : 'bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211]'
                 }`}
               >
                 {confirmDialog.confirmLabel || 'Confirmar'}

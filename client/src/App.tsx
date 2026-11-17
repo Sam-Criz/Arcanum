@@ -84,17 +84,17 @@ export const AppContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#141716] text-[#c86d51]">
+      <div className="min-h-screen flex items-center justify-center bg-[#131211] text-[#c9a04e]">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-9 h-9 border-2 border-[#252a27] border-t-[#c86d51] rounded-full animate-spin" />
-          <p className="text-xs font-mono uppercase tracking-widest text-[#9b9689]">Iniciando Arquivo Arcanum...</p>
+          <div className="w-9 h-9 border-2 border-[#2c2825] border-t-[#c9a04e] rounded-full animate-spin" />
+          <p className="text-xs font-mono uppercase tracking-widest text-[#8a8578]">Iniciando Arquivo Arcanum...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#141716] text-[#ebe7de] flex flex-col font-sans selection:bg-[#c86d51] selection:text-[#141716]">
+    <div className="min-h-screen bg-[#131211] text-[#ece3d0] flex flex-col font-sans selection:bg-[#c9a04e]/30 selection:text-[#ece3d0]">
       {!selectedCampaign && (
         <Navbar
           user={user}

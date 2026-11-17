@@ -14,40 +14,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        archive: {
-          slate: '#141716',     // Fundo principal ardósia profunda
-          moss: '#1c201e',      // Superfície secundária musgo escuro
-          parchment: '#252a27', // Cards e painéis papel envelhecido
-          hairline: '#343b37',  // Linha divisória fina pedra úmida
-          flax: '#ebe7de',      // Texto principal linho natural
-          warmgray: '#9b9689',  // Texto secundário cinza cálido
-          terracotta: '#c86d51',// Destaque primário cobre oxidado
-          sage: '#6d9775',      // Destaque secundário verde sálvia
-          rust: '#b84a48',      // Vida / perigo vermelho ferrugem
-          deepblue: '#5b8299',  // Recursos / mana azul ardósia
-        },
         arcanum: {
-          tinta: '#141716',
-          papel: '#1c201e',
-          couro: '#252a27',
-          osso: '#ebe7de',
-          latao: '#c86d51',
-          vinho: '#b84a48',
-          vida: '#b84a48',
-          mana: '#5b8299',
-          cura: '#6d9775',
-          condicao: '#8b7ca8',
-          apoio: '#9b9689',
-          borda: '#343b37'
-        },
-        rpg: {
-          dark: '#141716',
-          panel: '#1c201e',
-          border: '#343b37',
-          accent: '#c86d51',
-          crimson: '#b84a48',
-          gold: '#c86d51',
-          parchment: '#ebe7de'
+          tinta:  '#131211',
+          papel:  '#1a1816',
+          couro:  '#2c2825',
+          latao:  '#c9a04e',
+          osso:   '#ece3d0',
+          vinho:  '#b24a52',
+          mana:   '#4a7a8a',
+          cura:   '#5a7a5a',
+          apoio:  '#8a8578',
+          borda:  '#3a3530',
         }
       },
       fontFamily: {

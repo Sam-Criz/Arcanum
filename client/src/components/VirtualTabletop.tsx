@@ -131,7 +131,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const [tokenFormName, setTokenFormName] = useState('');
   const [tokenFormAvatar, setTokenFormAvatar] = useState('');
   const [tokenFormSize, setTokenFormSize] = useState<number>(1);
-  const [tokenFormColor, setTokenFormColor] = useState('#c86d51');
+  const [tokenFormColor, setTokenFormColor] = useState('#c9a04e');
   const [tokenNpcDefense, setTokenNpcDefense] = useState<number>(10);
   const [tokenNpcDR, setTokenNpcDR] = useState<number>(0);
   const [tokenNpcResistances, setTokenNpcResistances] = useState('');
@@ -159,7 +159,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
     id: '',
     name: '',
     size: 1,
-    color: '#c86d51',
+    color: '#c9a04e',
     current_hp: 20,
     max_hp: 20,
     defense: 10,
@@ -420,14 +420,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
   const renderConditionIcon = (iconName?: string | null) => {
     const norm = (iconName || '').toLowerCase();
-    if (norm.includes('rain') || norm.includes('chuva')) return <CloudRain className="w-3.5 h-3.5 text-blue-400" />;
+    if (norm.includes('rain') || norm.includes('chuva')) return <CloudRain className="w-3.5 h-3.5 text-[#4a7a8a]" />;
     if (norm.includes('skull') || norm.includes('gas') || norm.includes('veneno')) return <Skull className="w-3.5 h-3.5 text-emerald-400" />;
     if (norm.includes('zap') || norm.includes('raio') || norm.includes('tempestade')) return <Zap className="w-3.5 h-3.5 text-amber-400" />;
     if (norm.includes('fog') || norm.includes('nevoa') || norm.includes('wind') || norm.includes('vento')) return <Wind className="w-3.5 h-3.5 text-slate-300" />;
     if (norm.includes('fire') || norm.includes('fogo') || norm.includes('flame') || norm.includes('calor')) return <Flame className="w-3.5 h-3.5 text-orange-400" />;
     if (norm.includes('sun') || norm.includes('sol') || norm.includes('luz')) return <Sun className="w-3.5 h-3.5 text-yellow-400" />;
-    if (norm.includes('moon') || norm.includes('lua') || norm.includes('escuridao') || norm.includes('noite')) return <Moon className="w-3.5 h-3.5 text-[#ebe7de]" />;
-    return <Sparkles className="w-3.5 h-3.5 text-[#c86d51]" />;
+    if (norm.includes('moon') || norm.includes('lua') || norm.includes('escuridao') || norm.includes('noite')) return <Moon className="w-3.5 h-3.5 text-[#ece3d0]" />;
+    return <Sparkles className="w-3.5 h-3.5 text-[#c9a04e]" />;
   };
 
   useEffect(() => {
@@ -834,7 +834,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       id: token.id,
       name: token.name,
       size: token.size,
-      color: token.color || '#c86d51',
+      color: token.color || '#c9a04e',
       current_hp: token.current_hp ?? npc.current_hp ?? 20,
       max_hp: token.max_hp ?? npc.max_hp ?? 20,
       defense: npc.defense ?? 10,
@@ -936,7 +936,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
   const mapHeight = activeScene?.height || 2000;
 
   return (
-    <div className="relative w-full h-full min-h-0 bg-[#141716] overflow-hidden select-none">
+    <div className="relative w-full h-[100dvh] min-h-0 bg-[#131211] overflow-hidden select-none">
       {/* 
         NOVA ARQUITETURA EDITORIAL DO VTT: MAPA EM 100% DA JANELA
         Ilhas flutuantes retráteis (backdrop-blur-md) sem barras fixas ocupando espaço.
@@ -953,21 +953,21 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           const delta = e.deltaY > 0 ? -0.1 : 0.1;
           handleZoom(delta);
         }}
-        className={`absolute inset-0 w-full h-full overflow-hidden bg-[#141716] ${
+        className={`absolute inset-0 w-full h-full overflow-hidden bg-[#131211] ${
           fogMode !== 'view' ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
         }`}
       >
         {/* ======================================================== */}
         {/* ILHA 1 FLUTUANTE: CENAS & VISUALIZAÇÃO (TOP-LEFT)        */}
         {/* ======================================================== */}
-        <div className="absolute top-3 left-3 z-40 pointer-events-auto flex items-center space-x-1.5 bg-[#181c1a]/90 backdrop-blur-md border border-[#343b37] rounded-xl p-1.5 shadow-xl text-xs">
+        <div className="absolute top-3 left-3 z-40 pointer-events-auto flex items-center space-x-1.5 bg-[#1a1816]/90 backdrop-blur-md border border-[#3a3530] rounded-xl p-1.5 shadow-xl text-xs">
           {isSceneIslandCollapsed ? (
             <button
               onClick={() => setIsSceneIslandCollapsed(false)}
               title="Expandir visualização do mapa"
-              className="p-1.5 text-[#c86d51] hover:text-[#ebe7de] transition-colors flex items-center space-x-1.5"
+              className="p-1.5 text-[#c9a04e] hover:text-[#ece3d0] transition-colors flex items-center space-x-1.5"
             >
-              <MapIcon className="w-4 h-4 text-[#c86d51]" />
+              <MapIcon className="w-4 h-4 text-[#c9a04e]" />
               <span className="font-serif font-bold text-xs truncate max-w-[120px]">{activeScene?.name || 'Cena'}</span>
             </button>
           ) : (
@@ -975,13 +975,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               <button
                 onClick={() => setIsSceneIslandCollapsed(true)}
                 title="Minimizar barra"
-                className="p-1 text-[#9b9689] hover:text-[#ebe7de] rounded"
+                className="p-1 text-[#8a8578] hover:text-[#ece3d0] rounded"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
 
-              <div className="flex items-center space-x-1.5 pr-2 border-r border-[#343b37]">
-                <span className="font-serif font-bold text-xs text-[#ebe7de] max-w-[120px] truncate">
+              <div className="flex items-center space-x-1.5 pr-2 border-r border-[#3a3530]">
+                <span className="font-serif font-bold text-xs text-[#ece3d0] max-w-[120px] truncate">
                   {activeScene?.name || 'Mesa Principal'}
                 </span>
                 {isMaster && (
@@ -996,7 +996,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                             localStorage.setItem(`arcanum_active_scene_${campaign.id}`, match.id);
                           }
                         }}
-                        className="bg-[#141716] border border-[#343b37] rounded px-1.5 py-0.5 text-[11px] font-mono text-[#ebe7de]"
+                        className="bg-[#131211] border border-[#3a3530] rounded px-1.5 py-0.5 text-[11px] font-mono text-[#ece3d0]"
                       >
                         {scenes.map(s => (
                           <option key={s.id} value={s.id}>{s.name}</option>
@@ -1006,7 +1006,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     <button
                       onClick={handleOpenCreateScene}
                       title="Nova Cena"
-                      className="p-1 text-[#c86d51] hover:bg-[#252a27] rounded"
+                      className="p-1 text-[#c9a04e] hover:bg-[#2c2825] rounded"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -1015,7 +1015,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         <button
                           onClick={() => handleOpenEditScene(activeScene)}
                           title="Configurar Cena"
-                          className="p-1 text-[#9b9689] hover:text-[#ebe7de] rounded"
+                          className="p-1 text-[#8a8578] hover:text-[#ece3d0] rounded"
                         >
                           <Settings className="w-3.5 h-3.5" />
                         </button>
@@ -1023,7 +1023,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                           <button
                             onClick={() => handleActivateScene(activeScene.id)}
                             title="Ativar para Jogadores"
-                            className="px-1.5 py-0.5 text-[10px] font-mono text-[#6d9775] hover:bg-[#252a27] rounded"
+                            className="px-1.5 py-0.5 text-[10px] font-mono text-[#5a7a5a] hover:bg-[#2c2825] rounded"
                           >
                             Ativar
                           </button>
@@ -1032,7 +1032,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                           <button
                             onClick={() => handleDeleteScene(activeScene.id)}
                             title="Excluir Cena"
-                            className="p-1 text-[#b84a48] hover:bg-[#252a27] rounded"
+                            className="p-1 text-[#b24a52] hover:bg-[#2c2825] rounded"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1048,38 +1048,38 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <button
                   onClick={() => setShowGrid(!showGrid)}
                   title="Alternar Grade"
-                  className={`p-1 rounded ${showGrid ? 'text-[#c86d51]' : 'text-[#9b9689]'}`}
+                  className={`p-1 rounded ${showGrid ? 'text-[#c9a04e]' : 'text-[#8a8578]'}`}
                 >
                   <Grid className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handleZoom(-0.1)}
                   title="Diminuir Zoom"
-                  className="p-1 text-[#9b9689] hover:text-[#ebe7de]"
+                  className="p-1 text-[#8a8578] hover:text-[#ece3d0]"
                 >
                   <ZoomOut className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-[10px] font-mono text-[#9b9689] w-7 text-center">
+                <span className="text-[10px] font-mono text-[#8a8578] w-7 text-center">
                   {Math.round(zoom * 100)}%
                 </span>
                 <button
                   onClick={() => handleZoom(0.1)}
                   title="Aumentar Zoom"
-                  className="p-1 text-[#9b9689] hover:text-[#ebe7de]"
+                  className="p-1 text-[#8a8578] hover:text-[#ece3d0]"
                 >
                   <ZoomIn className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={resetView}
                   title="Redefinir Visão (100%)"
-                  className="p-1 text-[#9b9689] hover:text-[#ebe7de]"
+                  className="p-1 text-[#8a8578] hover:text-[#ece3d0]"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={fitToScreen}
                   title="Enquadrar Mapa"
-                  className="p-1 text-[#9b9689] hover:text-[#c86d51]"
+                  className="p-1 text-[#8a8578] hover:text-[#c9a04e]"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                 </button>
@@ -1091,53 +1091,53 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         {/* ======================================================== */}
         {/* ILHA 2 FLUTUANTE: FERRAMENTAS & COMBATE (TOP-RIGHT)      */}
         {/* ======================================================== */}
-        <div className="absolute top-3 right-3 z-40 pointer-events-auto flex items-center space-x-1.5 bg-[#181c1a]/90 backdrop-blur-md border border-[#343b37] rounded-xl p-1.5 shadow-xl text-xs">
+        <div className="absolute top-3 right-3 z-40 pointer-events-auto flex items-center space-x-1.5 bg-[#1a1816]/90 backdrop-blur-md border border-[#3a3530] rounded-xl p-1.5 shadow-xl text-xs">
           {isToolsIslandCollapsed ? (
             <button
               onClick={() => setIsToolsIslandCollapsed(false)}
               title="Expandir Ferramentas"
-              className="p-1.5 text-[#c86d51] hover:text-[#ebe7de] transition-colors"
+              className="p-1.5 text-[#c9a04e] hover:text-[#ece3d0] transition-colors"
             >
-              <Swords className="w-4 h-4 text-[#c86d51]" />
+              <Swords className="w-4 h-4 text-[#c9a04e]" />
             </button>
           ) : (
             <>
               {isMaster && activeScene && (
-                <div className="flex items-center space-x-1 pr-2 border-r border-[#343b37]">
+                <div className="flex items-center space-x-1 pr-2 border-r border-[#3a3530]">
                   <button
                     onClick={() => setFogMode('view')}
-                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'view' ? 'bg-[#252a27] text-white font-bold' : 'text-[#9b9689]'}`}
+                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'view' ? 'bg-[#2c2825] text-white font-bold' : 'text-[#8a8578]'}`}
                   >
                     Mover
                   </button>
                   <button
                     onClick={() => setFogMode('hide')}
-                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'hide' ? 'bg-[#b84a48] text-white font-bold' : 'text-[#9b9689]'}`}
+                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'hide' ? 'bg-[#b24a52] text-white font-bold' : 'text-[#8a8578]'}`}
                   >
                     Ocultar
                   </button>
                   <button
                     onClick={() => setFogMode('reveal')}
-                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold' : 'text-[#9b9689]'}`}
+                    className={`px-2 py-0.5 rounded text-[11px] ${fogMode === 'reveal' ? 'bg-emerald-600 text-white font-bold' : 'text-[#8a8578]'}`}
                   >
                     Revelar
                   </button>
                   <button
                     onClick={handleFogHideAll}
                     title="Ocultar todo o mapa"
-                    className="px-1 text-[10px] text-[#9b9689] hover:text-[#b84a48]"
+                    className="px-1 text-[10px] text-[#8a8578] hover:text-[#b24a52]"
                   >
                     Ocultar Tudo
                   </button>
                   <button
                     onClick={handleFogRevealAll}
                     title="Revelar todo o mapa"
-                    className="px-1 text-[10px] text-[#9b9689] hover:text-[#6d9775]"
+                    className="px-1 text-[10px] text-[#8a8578] hover:text-[#5a7a5a]"
                   >
                     Revelar Tudo
                   </button>
                   {activeScene.fog_data && activeScene.fog_data.length > 0 && (
-                    <button onClick={handleFogUndo} title="Desfazer" className="p-1 text-[#9b9689] hover:text-[#c86d51]">
+                    <button onClick={handleFogUndo} title="Desfazer" className="p-1 text-[#8a8578] hover:text-[#c9a04e]">
                       <Undo className="w-3 h-3" />
                     </button>
                   )}
@@ -1154,7 +1154,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     }
                     setShowAddTokenModal(true);
                   }}
-                  className="px-2.5 py-1 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded-lg text-xs flex items-center space-x-1"
+                  className="px-2.5 py-1 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded-lg text-xs flex items-center space-x-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Token</span>
@@ -1165,11 +1165,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 onClick={() => setShowCombatDock(!showCombatDock)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 border ${
                   showCombatDock
-                    ? 'bg-[#c86d51] text-[#141716] font-bold border-transparent'
-                    : 'bg-[#141716] text-[#ebe7de] border-[#343b37] hover:border-[#c86d51]'
+                    ? 'bg-[#c9a04e] text-[#131211] font-bold border-transparent'
+                    : 'bg-[#131211] text-[#ece3d0] border-[#3a3530] hover:border-[#c9a04e]'
                 }`}
               >
-                <Swords className="w-3.5 h-3.5 text-[#c86d51]" />
+                <Swords className="w-3.5 h-3.5 text-[#c9a04e]" />
                 <span>Combate</span>
                 {combatEncounter && combatEncounter.status === 'active' && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
@@ -1179,7 +1179,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               <button
                 onClick={() => setIsToolsIslandCollapsed(true)}
                 title="Minimizar ferramentas"
-                className="p-1 text-[#9b9689] hover:text-[#ebe7de] rounded"
+                className="p-1 text-[#8a8578] hover:text-[#ece3d0] rounded"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -1191,8 +1191,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         {/* ILHA 3 FLUTUANTE: FITA DE INICIATIVA (TOP-CENTER)        */}
         {/* ======================================================== */}
         {combatEncounter && combatEncounter.status === 'active' && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center space-x-2 bg-[#181c1a]/95 backdrop-blur-md border border-[#343b37] rounded-full px-4 py-1.5 shadow-2xl max-w-[90vw] overflow-x-auto">
-            <span className="font-serif font-bold text-xs text-[#c86d51] shrink-0 pr-2 border-r border-[#343b37]">
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center space-x-2 bg-[#1a1816]/95 backdrop-blur-md border border-[#3a3530] rounded-full px-4 py-1.5 shadow-2xl max-w-[90vw] overflow-x-auto">
+            <span className="font-serif font-bold text-xs text-[#c9a04e] shrink-0 pr-2 border-r border-[#3a3530]">
               Rodada {combatEncounter.round}
             </span>
 
@@ -1206,14 +1206,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     onClick={() => setShowCombatDock(true)}
                     className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-full border text-xs cursor-pointer whitespace-nowrap transition-all ${
                       isActive
-                        ? 'bg-[#252a27] border-[#c86d51] text-[#ebe7de] font-bold'
-                        : 'bg-[#141716] border-[#343b37] text-[#9b9689] hover:text-[#ebe7de]'
+                        ? 'bg-[#2c2825] border-[#c9a04e] text-[#ece3d0] font-bold'
+                        : 'bg-[#131211] border-[#3a3530] text-[#8a8578] hover:text-[#ece3d0]'
                     }`}
                   >
-                    <span className="font-mono text-[10px] text-[#c86d51]">{c.initiative}</span>
+                    <span className="font-mono text-[10px] text-[#c9a04e]">{c.initiative}</span>
                     <span className="truncate max-w-[90px]">{c.name}</span>
-                    <div className="w-5 h-1 bg-[#141716] rounded-full overflow-hidden border border-[#343b37]">
-                      <div className="h-full bg-[#b84a48]" style={{ width: `${Math.max(0, Math.min(100, hpPercent))}%` }} />
+                    <div className="w-5 h-1 bg-[#131211] rounded-full overflow-hidden border border-[#3a3530]">
+                      <div className="h-full bg-[#b24a52]" style={{ width: `${Math.max(0, Math.min(100, hpPercent))}%` }} />
                     </div>
                   </div>
                 );
@@ -1234,7 +1234,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         console.error('Erro ao passar turno:', e);
                       }
                     }}
-                    className="px-2.5 py-0.5 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] rounded-full text-[11px] font-bold shrink-0 ml-1 transition-all active:scale-95"
+                    className="px-2.5 py-0.5 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] rounded-full text-[11px] font-bold shrink-0 ml-1 transition-all active:scale-95"
                   >
                     Passar Turno →
                   </button>
@@ -1257,39 +1257,39 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   key={cond.id}
                   className={`group relative flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border backdrop-blur-md shadow-lg transition-all duration-200 cursor-help ${
                     isActive
-                      ? 'bg-[#141716]/85 border-[#c86d51]/60 hover:border-[#c86d51]'
-                      : 'bg-[#141716]/60 border-[#252a27] opacity-60'
+                      ? 'bg-[#131211]/85 border-[#c9a04e]/60 hover:border-[#c9a04e]'
+                      : 'bg-[#131211]/60 border-[#2c2825] opacity-60'
                   }`}
                 >
                   {renderConditionIcon(cond.icon)}
-                  <span className={`text-xs font-serif font-semibold ${isActive ? 'text-[#ebe7de]' : 'text-[#9b9689]'}`}>
+                  <span className={`text-xs font-serif font-semibold ${isActive ? 'text-[#ece3d0]' : 'text-[#8a8578]'}`}>
                     {cond.name}
                   </span>
 
                   {isMaster && (
-                    <span className="text-[10px] text-[#9b9689]" title={isVisible ? 'Visível para os jogadores' : 'Oculto para os jogadores'}>
-                      {isVisible ? <Eye className="w-3 h-3 text-[#c86d51]" /> : <EyeOff className="w-3 h-3 text-[#b84a48]" />}
+                    <span className="text-[10px] text-[#8a8578]" title={isVisible ? 'Visível para os jogadores' : 'Oculto para os jogadores'}>
+                      {isVisible ? <Eye className="w-3 h-3 text-[#c9a04e]" /> : <EyeOff className="w-3 h-3 text-[#b24a52]" />}
                     </span>
                   )}
 
                   {cond.duration_rounds !== null && cond.duration_rounds !== undefined && (
-                    <span className="text-[10px] font-mono px-1 py-0.2 bg-[#252a27] text-[#c86d51] rounded border border-[#343b37]/50">
+                    <span className="text-[10px] font-mono px-1 py-0.2 bg-[#2c2825] text-[#c9a04e] rounded border border-[#3a3530]/50">
                       {cond.duration_rounds}r
                     </span>
                   )}
 
                   {/* Tooltip Descritivo Flutuante */}
-                  <div className="absolute top-full left-0 mt-2 hidden group-hover:flex flex-col w-64 p-3 bg-[#1c201e]/95 backdrop-blur-md border border-[#c86d51]/40 rounded-lg shadow-sm text-left z-50 pointer-events-none transition-all">
-                    <div className="flex items-center justify-between border-b border-[#252a27] pb-1.5 mb-1.5">
-                      <span className="font-serif font-bold text-xs text-[#c86d51]">{cond.name}</span>
+                  <div className="absolute top-full left-0 mt-2 hidden group-hover:flex flex-col w-64 p-3 bg-[#1a1816]/95 backdrop-blur-md border border-[#c9a04e]/40 rounded-lg shadow-sm text-left z-50 pointer-events-none transition-all">
+                    <div className="flex items-center justify-between border-b border-[#2c2825] pb-1.5 mb-1.5">
+                      <span className="font-serif font-bold text-xs text-[#c9a04e]">{cond.name}</span>
                       <div className="flex items-center space-x-1">
                         {!isActive && (
-                          <span className="text-[9px] font-mono px-1 py-0.2 bg-[#b84a48]/30 text-[#b84a48] rounded">
+                          <span className="text-[9px] font-mono px-1 py-0.2 bg-[#b24a52]/30 text-[#b24a52] rounded">
                             Inativa
                           </span>
                         )}
                         {cond.duration_rounds && (
-                          <span className="text-[10px] font-mono text-[#9b9689]">
+                          <span className="text-[10px] font-mono text-[#8a8578]">
                             {cond.duration_rounds} rodadas
                           </span>
                         )}
@@ -1297,13 +1297,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     </div>
 
                     {cond.description ? (
-                      <p className="text-xs text-[#ebe7de] leading-relaxed mb-1">{cond.description}</p>
+                      <p className="text-xs text-[#ece3d0] leading-relaxed mb-1">{cond.description}</p>
                     ) : (
-                      <p className="text-xs text-[#9b9689] italic mb-1">Sem descrição detalhada.</p>
+                      <p className="text-xs text-[#8a8578] italic mb-1">Sem descrição detalhada.</p>
                     )}
 
                     {cond.effect_payload?.formula && (
-                      <div className="text-[10px] font-mono text-emerald-400 mt-1 pt-1 border-t border-[#252a27] flex items-center justify-between">
+                      <div className="text-[10px] font-mono text-emerald-400 mt-1 pt-1 border-t border-[#2c2825] flex items-center justify-between">
                         <span>Fórmula: {cond.effect_payload.formula}</span>
                         <span>{cond.effect_payload.damage_type || 'efeito'}</span>
                       </div>
@@ -1353,14 +1353,14 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 onError={() => setImageError(true)}
               />
             ) : imageError ? (
-              <div className="w-full h-full bg-[#141716] border-2 border-dashed border-[#343b37] flex flex-col items-center justify-center p-6 text-center pointer-events-none">
-                <Layers className="w-12 h-12 text-[#b84a48]/60 mb-2" />
-                <p className="text-[#ebe7de] font-bold text-sm">Não foi possível carregar a imagem de fundo.</p>
-                <p className="text-[#9b9689] text-xs mt-1">Verifique a URL ou substitua a imagem nas configurações da cena.</p>
+              <div className="w-full h-full bg-[#131211] border-2 border-dashed border-[#3a3530] flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+                <Layers className="w-12 h-12 text-[#b24a52]/60 mb-2" />
+                <p className="text-[#ece3d0] font-bold text-sm">Não foi possível carregar a imagem de fundo.</p>
+                <p className="text-[#8a8578] text-xs mt-1">Verifique a URL ou substitua a imagem nas configurações da cena.</p>
               </div>
             ) : (
-              <div className="w-full h-full bg-[#141716] border-2 border-[#252a27] flex items-center justify-center pointer-events-none">
-                <span className="text-[#343b37] text-sm font-bold tracking-wider uppercase">
+              <div className="w-full h-full bg-[#131211] border-2 border-[#2c2825] flex items-center justify-center pointer-events-none">
+                <span className="text-[#3a3530] text-sm font-bold tracking-wider uppercase">
                   Área do Mapa ({mapWidth}x{mapHeight}px)
                 </span>
               </div>
@@ -1412,13 +1412,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                     height: `${tokenPxSize}px`
                   }}
                   className={`absolute cursor-pointer transition-shadow rounded-full flex flex-col items-center justify-center ${
-                    isSelected ? 'ring-2 ring-[#c86d51] z-20' : isOwner ? 'ring-1 ring-emerald-400/80 z-10' : 'z-10'
+                    isSelected ? 'ring-2 ring-[#c9a04e] z-20' : isOwner ? 'ring-1 ring-emerald-400/80 z-10' : 'z-10'
                   } ${isCombatTurn ? 'ring-4 ring-amber-400 animate-pulse z-20' : ''}`}
                 >
                   {/* Token Body / Ring com proporção 1:1 rigorosa sem distorção */}
                   <div 
-                    style={{ borderColor: token.color || '#c86d51' }}
-                    className={`w-full h-full rounded-full border-2 overflow-hidden shadow-sm relative bg-[#141716] flex items-center justify-center transition-transform ${
+                    style={{ borderColor: token.color || '#c9a04e' }}
+                    className={`w-full h-full rounded-full border-2 overflow-hidden shadow-sm relative bg-[#131211] flex items-center justify-center transition-transform ${
                       !token.is_visible ? 'opacity-50' : 'opacity-100'
                     }`}
                   >
@@ -1432,19 +1432,19 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#141716] font-bold text-white text-xs select-none">
+                      <div className="w-full h-full flex items-center justify-center bg-[#131211] font-bold text-white text-xs select-none">
                         {token.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
 
                     {/* Status icons: Bloqueado / Oculto */}
                     {token.is_locked && (
-                      <div className="absolute top-1 right-1 bg-black/80 p-0.5 rounded-full text-[#c86d51] shadow">
+                      <div className="absolute top-1 right-1 bg-black/80 p-0.5 rounded-full text-[#c9a04e] shadow">
                         <Lock className="w-2.5 h-2.5" />
                       </div>
                     )}
                     {!token.is_visible && (
-                      <div className="absolute bottom-1 right-1 bg-black/80 p-0.5 rounded-full text-[#b84a48] shadow">
+                      <div className="absolute bottom-1 right-1 bg-black/80 p-0.5 rounded-full text-[#b24a52] shadow">
                         <EyeOff className="w-2.5 h-2.5" />
                       </div>
                     )}
@@ -1453,10 +1453,10 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   {/* Barra de Vida Flutuante sobre o Token */}
                   {((token.current_hp !== null && token.max_hp && token.max_hp > 0) || (token.hp_percent !== undefined && token.hp_percent !== null)) && (
                     <div className="absolute -top-3 w-full px-1 pointer-events-none">
-                      <div className="w-full h-1.5 bg-[#141716] rounded-full overflow-hidden border border-[#343b37] shadow">
+                      <div className="w-full h-1.5 bg-[#131211] rounded-full overflow-hidden border border-[#3a3530] shadow">
                         {(() => {
                           const pct = token.hp_percent ?? Math.round(((token.current_hp || 0) / (token.max_hp || 1)) * 100);
-                          const barColor = pct <= 25 ? 'bg-[#b84a48]' : pct <= 50 ? 'bg-amber-500' : 'bg-emerald-500';
+                          const barColor = pct <= 25 ? 'bg-[#b24a52]' : pct <= 50 ? 'bg-amber-500' : 'bg-emerald-500';
                           return (
                             <div 
                               className={`h-full transition-all duration-300 ${barColor}`} 
@@ -1469,7 +1469,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   )}
 
                   {/* Nome do Token abaixo com contraste e legibilidade */}
-                  <div className="absolute -bottom-4 bg-[#141716] text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#252a27] whitespace-nowrap pointer-events-none shadow-md max-w-[120px] truncate">
+                  <div className="absolute -bottom-4 bg-[#131211] text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#2c2825] whitespace-nowrap pointer-events-none shadow-md max-w-[120px] truncate">
                     {token.name}
                   </div>
                 </div>
@@ -1508,7 +1508,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <rect
                   width={mapWidth}
                   height={mapHeight}
-                  fill={isMaster ? 'rgba(20, 23, 22, 0.72)' : '#141716'}
+                  fill={isMaster ? 'rgba(20, 23, 22, 0.72)' : '#131211'}
                   mask={`url(#vtt-fog-mask-${activeScene.id})`}
                 />
 
@@ -1525,7 +1525,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                           width={fog.width}
                           height={fog.height}
                           fill="none"
-                          stroke={isHide ? '#b84a48' : '#6d9775'}
+                          stroke={isHide ? '#b24a52' : '#5a7a5a'}
                           strokeWidth="1.5"
                           strokeDasharray="4 4"
                         />
@@ -1547,20 +1547,20 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 }}
                 className={`absolute border-2 pointer-events-none z-30 ${
                   fogMode === 'hide'
-                    ? 'border-[#b84a48] bg-[#252a27]'
+                    ? 'border-[#b24a52] bg-[#2c2825]'
                     : 'border-emerald-500 bg-emerald-950/40'
                 }`}
               />
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-[#9b9689] text-sm">
+          <div className="flex flex-col items-center justify-center h-full text-[#8a8578] text-sm">
             <Layers className="w-12 h-12 text-slate-700 mb-3" />
-            <p className="font-semibold text-[#9b9689]">Nenhuma cena criada nesta campanha.</p>
+            <p className="font-semibold text-[#8a8578]">Nenhuma cena criada nesta campanha.</p>
             {isMaster && (
               <button
                 onClick={handleOpenCreateScene}
-                className="mt-3 px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-lg"
+                className="mt-3 px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-lg"
               >
                 + Criar Primeira Cena
               </button>
@@ -1570,12 +1570,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
         {/* POPOVER DE TOKEN SELECIONADO COM CONTROLES DE TAMANHO */}
         {selectedToken && (
-          <div className="absolute bottom-4 left-4 z-40 bg-[#1c201e]/90 backdrop-blur-md border border-[#252a27] rounded-2xl p-3 shadow-sm backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
-            <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#252a27] border border-[#343b37] shrink-0 flex items-center justify-center">
+          <div className="absolute bottom-4 left-4 z-40 bg-[#1a1816]/90 backdrop-blur-md border border-[#2c2825] rounded-2xl p-3 shadow-sm backdrop-blur-md flex items-center space-x-3 max-w-md transition-all duration-300">
+            <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#2c2825] border border-[#3a3530] shrink-0 flex items-center justify-center">
               {selectedToken.avatar_url ? (
                 <img src={selectedToken.avatar_url} alt={selectedToken.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white bg-[#141716]">
+                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white bg-[#131211]">
                   {selectedToken.name.slice(0, 2).toUpperCase()}
                 </div>
               )}
@@ -1583,7 +1583,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
             <div className="min-w-0 flex-1">
               <h4 className="text-xs font-bold text-white truncate">{selectedToken.name}</h4>
-              <p className="text-[10px] text-[#9b9689] truncate">
+              <p className="text-[10px] text-[#8a8578] truncate">
                 Pos: ({Math.round(selectedToken.x)}, {Math.round(selectedToken.y)})
                 {selectedToken.current_hp !== null 
                   ? ` • PV: ${selectedToken.current_hp}${selectedToken.max_hp ? `/${selectedToken.max_hp}` : ''}`
@@ -1601,24 +1601,24 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               {/* Controle de Tamanho do Token (Mestre) */}
               {isMaster && (
                 <div className="flex items-center space-x-1.5 mt-1">
-                  <span className="text-[10px] text-[#9b9689] font-semibold">Tamanho:</span>
-                  <div className="flex items-center bg-[#141716] border border-[#343b37] rounded-lg overflow-hidden">
+                  <span className="text-[10px] text-[#8a8578] font-semibold">Tamanho:</span>
+                  <div className="flex items-center bg-[#131211] border border-[#3a3530] rounded-lg overflow-hidden">
                     <button
                       onClick={() => handleResizeToken(selectedToken, -0.5)}
                       disabled={selectedToken.size <= 0.5}
                       title="Diminuir tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-[#ebe7de] hover:text-white hover:bg-[#252a27] disabled:opacity-40 transition-colors"
+                      className="px-1.5 py-0.5 text-xs text-[#ece3d0] hover:text-white hover:bg-[#2c2825] disabled:opacity-40 transition-colors"
                     >
                       -
                     </button>
-                    <span className="px-1.5 text-[11px] font-mono font-bold text-[#c86d51]">
+                    <span className="px-1.5 text-[11px] font-mono font-bold text-[#c9a04e]">
                       {selectedToken.size}x
                     </span>
                     <button
                       onClick={() => handleResizeToken(selectedToken, 0.5)}
                       disabled={selectedToken.size >= 4}
                       title="Aumentar tamanho do token"
-                      className="px-1.5 py-0.5 text-xs text-[#ebe7de] hover:text-white hover:bg-[#252a27] disabled:opacity-40 transition-colors"
+                      className="px-1.5 py-0.5 text-xs text-[#ece3d0] hover:text-white hover:bg-[#2c2825] disabled:opacity-40 transition-colors"
                     >
                       +
                     </button>
@@ -1633,28 +1633,28 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 <button
                   onClick={() => openEditTokenModal(selectedToken)}
                   title="Configurar Atributos e Estatísticas do Token / NPC"
-                  className="p-1.5 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] border border-[#3a3530] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handleToggleTokenVisibility(selectedToken)}
                   title={selectedToken.is_visible ? "Ocultar dos Jogadores" : "Revelar aos Jogadores"}
-                  className="p-1.5 bg-[#252a27]/90 hover:bg-[#343b37]/90 text-[#ebe7de] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#2c2825]/90 hover:bg-[#3a3530]/90 text-[#ece3d0] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
-                  {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-[#b84a48]" />}
+                  {selectedToken.is_visible ? <Eye className="w-3.5 h-3.5 text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-[#b24a52]" />}
                 </button>
                 <button
                   onClick={() => handleToggleTokenLock(selectedToken)}
                   title={selectedToken.is_locked ? "Destravar Movimentação" : "Travar Movimentação"}
-                  className="p-1.5 bg-[#252a27]/90 hover:bg-[#343b37]/90 text-[#ebe7de] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#2c2825]/90 hover:bg-[#3a3530]/90 text-[#ece3d0] rounded-xl text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
-                  {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-[#c86d51]" /> : <Unlock className="w-3.5 h-3.5 text-[#9b9689]" />}
+                  {selectedToken.is_locked ? <Lock className="w-3.5 h-3.5 text-[#c9a04e]" /> : <Unlock className="w-3.5 h-3.5 text-[#8a8578]" />}
                 </button>
                 <button
                   onClick={() => handleDeleteToken(selectedToken.id)}
                   title="Remover do Mapa"
-                  className="p-1.5 bg-[#b84a48]/30 hover:bg-[#b84a48] text-[#ebe7de] border border-[#b84a48] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                  className="p-1.5 bg-[#b24a52]/30 hover:bg-[#b24a52] text-[#ece3d0] border border-[#b24a52] rounded text-xs transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -1662,7 +1662,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
             )}
             <button
               onClick={() => setSelectedToken(null)}
-              className="text-[#9b9689] hover:text-white transition-colors"
+              className="text-[#8a8578] hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -2026,10 +2026,10 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
           };
 
           return (
-            <div className="absolute bottom-2.5 inset-x-0 z-30 flex justify-center px-4 pointer-events-none">
-              <div className="w-full max-w-4xl bg-[#141716]/90 border border-[#343b37]/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden pointer-events-auto transition-all">
+            <div className="absolute bottom-3 inset-x-0 z-30 flex justify-center items-center mx-auto px-4 pointer-events-none">
+              <div className="w-full max-w-4xl bg-[#1a1816]/75 border border-[#3a3530] rounded-2xl shadow-xl shadow-black/50 backdrop-blur-md overflow-hidden pointer-events-auto transition-all duration-300 ease-in-out">
                 {/* Abas Superiores Estilizadas com Contadores Reais */}
-                <div className="flex items-center justify-between border-b border-[#343b37] bg-[#141716]/85 px-4 py-2">
+                <div className="flex items-center justify-between border-b border-[#3a3530] bg-[#131211]/85 px-4 py-2">
                   <div className="flex items-center space-x-1.5">
                     <button
                       type="button"
@@ -2039,13 +2039,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       }}
                       className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'attack'
-                          ? 'bg-[#252a27] text-[#c86d51] border border-[#c86d51]/60 shadow-md'
-                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
+                          ? 'bg-[#2c2825] text-[#c9a04e] border border-[#c9a04e]/60 shadow-md'
+                          : 'text-[#8a8578] hover:text-[#ece3d0] border border-transparent'
                       }`}
                     >
                       <Swords className="w-3.5 h-3.5" />
                       <span>Ataque</span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-[#141716] text-[#c86d51] rounded-md font-mono font-normal border border-[#343b37]">
+                      <span className="text-[10px] px-1.5 py-0.2 bg-[#131211] text-[#c9a04e] rounded-md font-mono font-normal border border-[#3a3530]">
                         {attackActions.length}
                       </span>
                     </button>
@@ -2057,13 +2057,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       }}
                       className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'ability'
-                          ? 'bg-[#252a27] text-[#5b8299] border border-[#5b8299]/60 shadow-md'
-                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
+                          ? 'bg-[#2c2825] text-[#4a7a8a] border border-[#4a7a8a]/60 shadow-md'
+                          : 'text-[#8a8578] hover:text-[#ece3d0] border border-transparent'
                       }`}
                     >
                       <Zap className="w-3.5 h-3.5" />
                       <span>Habilidades</span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-[#141716] text-[#5b8299] rounded-md font-mono font-normal border border-[#343b37]">
+                      <span className="text-[10px] px-1.5 py-0.2 bg-[#131211] text-[#4a7a8a] rounded-md font-mono font-normal border border-[#3a3530]">
                         {hasAbilities ? abilityActions.length : 0}
                       </span>
                     </button>
@@ -2075,13 +2075,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       }}
                       className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'consumable'
-                          ? 'bg-[#252a27] text-[#6d9775] border border-[#6d9775]/60 shadow-md'
-                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
+                          ? 'bg-[#2c2825] text-[#5a7a5a] border border-[#5a7a5a]/60 shadow-md'
+                          : 'text-[#8a8578] hover:text-[#ece3d0] border border-transparent'
                       }`}
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Consumíveis</span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-[#141716] text-[#6d9775] rounded-md font-mono font-normal border border-[#252a27]">
+                      <span className="text-[10px] px-1.5 py-0.2 bg-[#131211] text-[#5a7a5a] rounded-md font-mono font-normal border border-[#2c2825]">
                         {consumableItems.length}
                       </span>
                     </button>
@@ -2093,8 +2093,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       }}
                       className={`px-3 py-1 rounded-xl text-xs font-serif font-bold transition-all flex items-center space-x-1.5 ${
                         quickActionTab === 'defense'
-                          ? 'bg-[#252a27] text-[#c86d51] border border-[#c86d51]/60 shadow-md'
-                          : 'text-[#9b9689] hover:text-[#ebe7de] border border-transparent'
+                          ? 'bg-[#2c2825] text-[#c9a04e] border border-[#c9a04e]/60 shadow-md'
+                          : 'text-[#8a8578] hover:text-[#ece3d0] border border-transparent'
                       }`}
                     >
                       <Shield className="w-3.5 h-3.5" />
@@ -2104,18 +2104,18 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
                   <div className="flex items-center space-x-2">
                     {quickActionFeedback && (
-                      <span className="text-xs font-mono font-bold text-[#c86d51] bg-[#252a27] px-2.5 py-0.5 rounded-lg border border-[#c86d51]/60 animate-pulse">
+                      <span className="text-xs font-mono font-bold text-[#c9a04e] bg-[#2c2825] px-2.5 py-0.5 rounded-lg border border-[#c9a04e]/60 animate-pulse">
                         {quickActionFeedback}
                       </span>
                     )}
-                    <span className="text-[11px] text-[#9b9689] font-mono hidden sm:inline">
-                      Turno: <strong className="text-[#ebe7de]">{currentActor.name}</strong>
+                    <span className="text-[11px] text-[#8a8578] font-mono hidden sm:inline">
+                      Turno: <strong className="text-[#ece3d0]">{currentActor.name}</strong>
                     </span>
                     <button
                       type="button"
                       onClick={() => setShowCombatDock(prev => !prev)}
                       title="Alternar Visão Completa de Combate"
-                      className="text-xs font-serif text-[#c86d51] hover:text-[#c86d51] px-2 py-1 rounded-lg bg-[#252a27] border border-[#343b37] transition-colors"
+                      className="text-xs font-serif text-[#c9a04e] hover:text-[#c9a04e] px-2 py-1 rounded-lg bg-[#2c2825] border border-[#3a3530] transition-colors"
                     >
                       HUD Detalhado
                     </button>
@@ -2135,22 +2135,22 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                           onClick={() => setSelectedQuickActionId(item.id)}
                           className={`p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
                             isSelected
-                              ? 'bg-[#252a27] border-[#c86d51] ring-1 ring-[#c86d51] shadow-sm'
-                              : 'bg-[#141716] border-[#252a27] hover:border-[#343b37]'
+                              ? 'bg-[#2c2825] border-[#c9a04e] ring-1 ring-[#c9a04e] shadow-sm'
+                              : 'bg-[#131211] border-[#2c2825] hover:border-[#3a3530]'
                           } ${isUnavailable ? 'opacity-60' : ''}`}
                         >
                           <div className="min-w-0 flex-1 pr-2">
-                            <h5 className={`font-serif text-xs font-bold truncate ${isSelected ? 'text-[#c86d51]' : 'text-[#ebe7de]'}`}>
+                            <h5 className={`font-serif text-xs font-bold truncate ${isSelected ? 'text-[#c9a04e]' : 'text-[#ece3d0]'}`}>
                               {item.title}
                             </h5>
-                            <span className="text-[10px] text-[#9b9689] font-mono truncate block">
+                            <span className="text-[10px] text-[#8a8578] font-mono truncate block">
                               {item.subtitle}
                             </span>
                           </div>
                           <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono shrink-0 whitespace-nowrap ${
                             isUnavailable
-                              ? 'bg-[#b84a48]/20 text-[#b84a48] border-[#b84a48]/40'
-                              : 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
+                              ? 'bg-[#b24a52]/20 text-[#b24a52] border-[#b24a52]/40'
+                              : 'bg-[#5a7a5a]/20 text-[#5a7a5a] border-[#5a7a5a]/40'
                           }`}>
                             {item.statusLabel}
                           </span>
@@ -2160,13 +2160,13 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                   </div>
 
                   {/* Coluna Direita: Card de Resolução e Confirmação */}
-                  <div className="md:col-span-7 bg-[#141716] border border-[#252a27] rounded-lg p-2.5 flex flex-col justify-between space-y-2">
+                  <div className="md:col-span-7 bg-[#131211] border border-[#2c2825] rounded-lg p-2.5 flex flex-col justify-between space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-serif font-bold text-xs text-[#ebe7de]">
+                        <h4 className="font-serif font-bold text-xs text-[#ece3d0]">
                           {activeAction.title}
                         </h4>
-                        <span className="text-[10px] text-[#9b9689] font-mono">
+                        <span className="text-[10px] text-[#8a8578] font-mono">
                           • {activeAction.reach}
                         </span>
                       </div>
@@ -2196,8 +2196,8 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                               }}
                               className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-colors flex items-center space-x-1 ${
                                 (activeAction as any).isEquipped
-                                  ? 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40 hover:bg-[#6d9775]/30'
-                                  : 'bg-[#c86d51]/20 text-[#c86d51] border-[#c86d51]/40 hover:bg-[#c86d51]/30'
+                                  ? 'bg-[#5a7a5a]/20 text-[#5a7a5a] border-[#5a7a5a]/40 hover:bg-[#5a7a5a]/30'
+                                  : 'bg-[#c9a04e]/20 text-[#c9a04e] border-[#c9a04e]/40 hover:bg-[#c9a04e]/30'
                               }`}
                             >
                               <span>{(activeAction as any).isEquipped ? '✓ Equipada' : '+ Equipar'}</span>
@@ -2209,7 +2209,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                               setSelectedWeaponForImbue((activeAction as any).rawItem);
                               setShowImbueModal(true);
                             }}
-                            className="px-2 py-0.5 rounded bg-[#1c201e] hover:bg-[#c86d51] hover:text-[#141716] text-[#c86d51] border border-[#c86d51]/60 text-[10px] font-mono transition-colors flex items-center space-x-1"
+                            className="px-2 py-0.5 rounded bg-[#1a1816] hover:bg-[#c9a04e] hover:text-[#131211] text-[#c9a04e] border border-[#c9a04e]/60 text-[10px] font-mono transition-colors flex items-center space-x-1"
                           >
                             <Sparkles className="w-2.5 h-2.5" />
                             <span>Imbuir</span>
@@ -2220,60 +2220,60 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
                     {/* Três Métricas em Caixas (Imagem 5) */}
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-[#1c201e] border border-[#252a27] rounded p-1.5 text-center">
-                        <span className="text-[9px] text-[#9b9689] block">Teste de ataque</span>
-                        <span className="font-mono text-xs font-bold text-[#c86d51]">
+                      <div className="bg-[#1a1816] border border-[#2c2825] rounded p-1.5 text-center">
+                        <span className="text-[9px] text-[#8a8578] block">Teste de ataque</span>
+                        <span className="font-mono text-xs font-bold text-[#c9a04e]">
                           {activeAction.attackFormula}
                         </span>
                       </div>
-                      <div className="bg-[#1c201e] border border-[#252a27] rounded p-1.5 text-center">
-                        <span className="text-[9px] text-[#9b9689] block">Dano / Efeito</span>
-                        <span className="font-mono text-xs font-bold text-[#ebe7de] truncate block">
+                      <div className="bg-[#1a1816] border border-[#2c2825] rounded p-1.5 text-center">
+                        <span className="text-[9px] text-[#8a8578] block">Dano / Efeito</span>
+                        <span className="font-mono text-xs font-bold text-[#ece3d0] truncate block">
                           {activeAction.damageFormula}
                         </span>
                       </div>
-                      <div className="bg-[#1c201e] border border-[#252a27] rounded p-1.5 text-center">
-                        <span className="text-[9px] text-[#9b9689] block">Custo da ação</span>
-                        <span className="font-mono text-[10px] text-[#9b9689] truncate block">
+                      <div className="bg-[#1a1816] border border-[#2c2825] rounded p-1.5 text-center">
+                        <span className="text-[9px] text-[#8a8578] block">Custo da ação</span>
+                        <span className="font-mono text-[10px] text-[#8a8578] truncate block">
                           {activeAction.costLabel}
                         </span>
                       </div>
                     </div>
 
                     {/* Linha de Alvo e Botões */}
-                    <div className="flex items-center justify-between pt-1 border-t border-[#252a27] gap-2">
+                    <div className="flex items-center justify-between pt-1 border-t border-[#2c2825] gap-2">
                       {/* Alvo e Validação com Distinção Visual Aliado/Inimigo/Self */}
                       <div className="flex items-center space-x-1.5 min-w-0">
                         {currentTarget ? (
                           <>
                             <div className={`w-2 h-2 rounded-full shrink-0 ${
-                              isCombatantSelf(currentTarget) ? 'bg-[#c86d51]' :
-                              isCombatantAlly(currentTarget) ? 'bg-[#6d9775]' :
-                              'bg-[#b84a48]'
+                              isCombatantSelf(currentTarget) ? 'bg-[#c9a04e]' :
+                              isCombatantAlly(currentTarget) ? 'bg-[#5a7a5a]' :
+                              'bg-[#b24a52]'
                             }`} />
-                            <span className="text-xs font-serif text-[#ebe7de] font-semibold truncate">
+                            <span className="text-xs font-serif text-[#ece3d0] font-semibold truncate">
                               {currentTarget.name}
                             </span>
                             <span className={`text-[9px] font-mono px-1 py-0.2 rounded ${
-                              isCombatantSelf(currentTarget) ? 'text-[#c86d51] bg-[#c86d51]/10' :
-                              isCombatantAlly(currentTarget) ? 'text-[#6d9775] bg-[#6d9775]/10' :
-                              'text-[#b84a48] bg-[#b84a48]/10'
+                              isCombatantSelf(currentTarget) ? 'text-[#c9a04e] bg-[#c9a04e]/10' :
+                              isCombatantAlly(currentTarget) ? 'text-[#5a7a5a] bg-[#5a7a5a]/10' :
+                              'text-[#b24a52] bg-[#b24a52]/10'
                             }`}>
                               {isCombatantSelf(currentTarget) ? 'Você' : isCombatantAlly(currentTarget) ? 'Aliado' : 'Inimigo'}
                             </span>
-                            <span className={`text-[10px] font-mono hidden sm:inline ${isTargetCompatible(currentTarget) ? 'text-[#6d9775]' : 'text-[#b84a48]'}`}>
+                            <span className={`text-[10px] font-mono hidden sm:inline ${isTargetCompatible(currentTarget) ? 'text-[#5a7a5a]' : 'text-[#b24a52]'}`}>
                               {isTargetCompatible(currentTarget) ? '(Alvo válido)' : '(Incompatível)'}
                             </span>
                           </>
                         ) : (
-                          <span className="text-xs text-[#9b9689] font-mono">Nenhum alvo selecionado</span>
+                          <span className="text-xs text-[#8a8578] font-mono">Nenhum alvo selecionado</span>
                         )}
 
                         <div className="flex items-center space-x-1 ml-1 shrink-0">
                           <button
                             type="button"
                             onClick={() => setShowTargetModal(true)}
-                            className="px-2 py-0.5 rounded bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] text-[10px] font-mono border border-[#343b37] transition-colors"
+                            className="px-2 py-0.5 rounded bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] text-[10px] font-mono border border-[#3a3530] transition-colors"
                           >
                             Trocar alvo
                           </button>
@@ -2282,7 +2282,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                               type="button"
                               onClick={handleCycleTarget}
                               title="Ciclar próximo alvo"
-                              className="px-1.5 py-0.5 rounded bg-[#141716] hover:bg-[#252a27] text-[#9b9689] hover:text-[#ebe7de] text-[10px] font-mono border border-[#252a27] transition-colors"
+                              className="px-1.5 py-0.5 rounded bg-[#131211] hover:bg-[#2c2825] text-[#8a8578] hover:text-[#ece3d0] text-[10px] font-mono border border-[#2c2825] transition-colors"
                             >
                               ⟳
                             </button>
@@ -2295,9 +2295,9 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         type="button"
                         onClick={handleExecuteCombatAction}
                         disabled={isExecutingQuickAction || activeAction.status === 'unavailable'}
-                        className="px-4 py-1.5 bg-[#b84a48] hover:bg-[#b84a48] disabled:opacity-50 text-[#ebe7de] rounded text-xs font-serif font-bold transition-all shadow-md flex items-center space-x-1.5 shrink-0"
+                        className="px-4 py-1.5 bg-[#b24a52] hover:bg-[#b24a52] disabled:opacity-50 text-[#ece3d0] rounded text-xs font-serif font-bold transition-all shadow-md flex items-center space-x-1.5 shrink-0"
                       >
-                        <Swords className="w-3.5 h-3.5 text-[#ebe7de]" />
+                        <Swords className="w-3.5 h-3.5 text-[#ece3d0]" />
                         <span>
                           {isExecutingQuickAction 
                             ? 'Executando...' 
@@ -2321,15 +2321,15 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         {/* MODAL: SELETOR DE ALVOS (Aliados, Inimigos e Self) */}
         {showTargetModal && combatEncounter && (
           <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-4 shadow-sm text-[#ebe7de]">
-              <div className="flex items-center justify-between pb-2 border-b border-[#252a27] mb-3">
-                <h3 className="font-serif font-bold text-sm text-[#c86d51]">
+            <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-4 shadow-sm text-[#ece3d0]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#2c2825] mb-3">
+                <h3 className="font-serif font-bold text-sm text-[#c9a04e]">
                   Selecionar Alvo da Ação
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowTargetModal(false)}
-                  className="text-[#9b9689] hover:text-white text-xs font-mono"
+                  className="text-[#8a8578] hover:text-white text-xs font-mono"
                 >
                   ✕ Fechar
                 </button>
@@ -2350,19 +2350,19 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       }}
                       className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
                         isSel
-                          ? 'bg-[#252a27] border-[#c86d51]'
-                          : 'bg-[#141716] border-[#252a27] hover:border-[#343b37]'
+                          ? 'bg-[#2c2825] border-[#c9a04e]'
+                          : 'bg-[#131211] border-[#2c2825] hover:border-[#3a3530]'
                       }`}
                     >
                       <div className="flex items-center space-x-2">
                         <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                          isSelf ? 'bg-[#c86d51]' : isAlly ? 'bg-[#6d9775]' : 'bg-[#b84a48]'
+                          isSelf ? 'bg-[#c9a04e]' : isAlly ? 'bg-[#5a7a5a]' : 'bg-[#b24a52]'
                         }`} />
                         <div>
-                          <div className="font-serif font-bold text-xs text-[#ebe7de] leading-tight">
+                          <div className="font-serif font-bold text-xs text-[#ece3d0] leading-tight">
                             {cb.name}
                           </div>
-                          <div className="text-[10px] text-[#9b9689] font-mono mt-0.5">
+                          <div className="text-[10px] text-[#8a8578] font-mono mt-0.5">
                             PV: {cb.current_hp ?? '—'} / {cb.max_hp ?? '—'}
                           </div>
                         </div>
@@ -2370,10 +2370,10 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                         isSelf
-                          ? 'bg-[#c86d51]/20 text-[#c86d51] border-[#c86d51]/40'
+                          ? 'bg-[#c9a04e]/20 text-[#c9a04e] border-[#c9a04e]/40'
                           : isAlly
-                          ? 'bg-[#6d9775]/20 text-[#6d9775] border-[#6d9775]/40'
-                          : 'bg-[#b84a48]/20 text-[#b84a48] border-[#b84a48]/40'
+                          ? 'bg-[#5a7a5a]/20 text-[#5a7a5a] border-[#5a7a5a]/40'
+                          : 'bg-[#b24a52]/20 text-[#b24a52] border-[#b24a52]/40'
                       }`}>
                         {isSelf ? 'Você' : isAlly ? 'Aliado' : 'Inimigo'}
                       </span>
@@ -2388,29 +2388,29 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
         {/* MODAL: IMBUIR ARMA */}
         {showImbueModal && selectedWeaponForImbue && (
           <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-4 shadow-sm text-[#ebe7de]">
-              <div className="flex items-center justify-between pb-2 border-b border-[#252a27] mb-3">
+            <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-4 shadow-sm text-[#ece3d0]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#2c2825] mb-3">
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-[#c86d51]" />
-                  <h3 className="font-serif font-bold text-sm text-[#c86d51]">
+                  <Sparkles className="w-4 h-4 text-[#c9a04e]" />
+                  <h3 className="font-serif font-bold text-sm text-[#c9a04e]">
                     Encantar / Imbuir Arma
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowImbueModal(false)}
-                  className="text-[#9b9689] hover:text-white text-xs font-mono"
+                  className="text-[#8a8578] hover:text-white text-xs font-mono"
                 >
                   ✕ Fechar
                 </button>
               </div>
 
-              <p className="text-xs text-[#9b9689] mb-3 font-sans">
-                Selecione um óleo ou consumível da sua mochila para encantar <strong className="text-[#ebe7de]">{selectedWeaponForImbue.item_name}</strong>:
+              <p className="text-xs text-[#8a8578] mb-3 font-sans">
+                Selecione um óleo ou consumível da sua mochila para encantar <strong className="text-[#ece3d0]">{selectedWeaponForImbue.item_name}</strong>:
               </p>
 
               {dockInventory.filter(i => (i.category === 'oleo' || !!i.properties?.imbue_properties || (i.item_name && i.item_name.toLowerCase().includes('óleo'))) && i.quantity > 0).length === 0 ? (
-                <div className="p-4 bg-[#141716] rounded-lg border border-[#252a27] text-center text-xs text-[#9b9689]">
+                <div className="p-4 bg-[#131211] rounded-lg border border-[#2c2825] text-center text-xs text-[#8a8578]">
                   Nenhum óleo ou reagente de encantamento disponível nesta ficha.
                 </div>
               ) : (
@@ -2427,19 +2427,19 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                         onClick={() => setSelectedOilForImbue(oil.id)}
                         className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
                           isSelected
-                            ? 'bg-[#252a27] border-[#c86d51] ring-1 ring-[#c86d51]'
-                            : 'bg-[#141716] border-[#252a27] hover:border-[#343b37]'
+                            ? 'bg-[#2c2825] border-[#c9a04e] ring-1 ring-[#c9a04e]'
+                            : 'bg-[#131211] border-[#2c2825] hover:border-[#3a3530]'
                         }`}
                       >
                         <div>
-                          <div className="font-serif font-bold text-xs text-[#c86d51]">
+                          <div className="font-serif font-bold text-xs text-[#c9a04e]">
                             {oil.item_name}
                           </div>
-                          <div className="text-[10px] text-[#9b9689] font-mono mt-0.5">
+                          <div className="text-[10px] text-[#8a8578] font-mono mt-0.5">
                             {p.descricao || `Adiciona dano de ${dmgType} e efeitos aos ataques`}
                           </div>
                         </div>
-                        <span className="text-[10px] font-mono text-[#6d9775] bg-[#6d9775]/10 px-2 py-0.5 rounded border border-[#6d9775]/30">
+                        <span className="text-[10px] font-mono text-[#5a7a5a] bg-[#5a7a5a]/10 px-2 py-0.5 rounded border border-[#5a7a5a]/30">
                           {oil.quantity} disp.
                         </span>
                       </div>
@@ -2448,11 +2448,11 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
               )}
 
-              <div className="flex justify-end space-x-2 pt-2 border-t border-[#252a27]">
+              <div className="flex justify-end space-x-2 pt-2 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowImbueModal(false)}
-                  className="px-3 py-1.5 rounded text-xs font-mono text-[#9b9689] hover:text-white"
+                  className="px-3 py-1.5 rounded text-xs font-mono text-[#8a8578] hover:text-white"
                 >
                   Cancelar
                 </button>
@@ -2484,7 +2484,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setIsExecutingImbue(false);
                     }
                   }}
-                  className="px-4 py-1.5 rounded text-xs font-serif font-bold bg-[#b84a48] hover:bg-[#b84a48] disabled:opacity-50 text-[#ebe7de] transition-colors"
+                  className="px-4 py-1.5 rounded text-xs font-serif font-bold bg-[#b24a52] hover:bg-[#b24a52] disabled:opacity-50 text-[#ece3d0] transition-colors"
                 >
                   {isExecutingImbue ? 'Imbuindo...' : 'Confirmar Encantamento'}
                 </button>
@@ -2524,30 +2524,30 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Criar / Editar Cena */}
       {showSceneModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-lg p-6 shadow-sm backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-lg p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white">
                 {isEditingScene ? 'Configurações da Cena' : 'Nova Cena do Mapa'}
               </h3>
-              <button onClick={() => setShowSceneModal(false)} className="text-[#9b9689] hover:text-white transition-colors">
+              <button onClick={() => setShowSceneModal(false)} className="text-[#8a8578] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveScene} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-[#ebe7de] block mb-1">Nome da Cena</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome da Cena</label>
                 <input
                   type="text"
                   required
                   value={sceneForm.name}
                   onChange={(e) => setSceneForm({ ...sceneForm, name: e.target.value })}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#ebe7de] block mb-1">URL da Imagem de Fundo</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">URL da Imagem de Fundo</label>
                 <div className="flex space-x-2">
                   <input
                     type="url"
@@ -2557,12 +2557,12 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setSceneForm({ ...sceneForm, image_url: e.target.value });
                       detectImageDimensions(e.target.value);
                     }}
-                    className="flex-1 bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="flex-1 bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                   <button
                     type="button"
                     onClick={() => detectImageDimensions(sceneForm.image_url)}
-                    className="px-3 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap"
+                    className="px-3 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap"
                     title="Detectar resolução nativa da imagem"
                   >
                     Detectar
@@ -2572,78 +2572,78 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Tamanho da Grade (px)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho da Grade (px)</label>
                   <input
                     type="number"
                     min="20"
                     max="200"
                     value={sceneForm.grid_size}
                     onChange={(e) => setSceneForm({ ...sceneForm, grid_size: parseInt(e.target.value, 10) || 50 })}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Escala da Grade (m / ft)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Escala da Grade (m / ft)</label>
                   <input
                     type="number"
                     step="0.5"
                     value={sceneForm.grid_scale}
                     onChange={(e) => setSceneForm({ ...sceneForm, grid_scale: parseFloat(e.target.value) || 1.5 })}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Largura do Mapa (px)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Largura do Mapa (px)</label>
                   <input
                     type="number"
                     min="500"
                     max="10000"
                     value={sceneForm.width}
                     onChange={(e) => setSceneForm({ ...sceneForm, width: parseInt(e.target.value, 10) || 2000 })}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Altura do Mapa (px)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Altura do Mapa (px)</label>
                   <input
                     type="number"
                     min="500"
                     max="10000"
                     value={sceneForm.height}
                     onChange={(e) => setSceneForm({ ...sceneForm, height: parseInt(e.target.value, 10) || 2000 })}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
               </div>
 
               <div className="flex items-center space-x-6 pt-1">
-                <label className="flex items-center space-x-2 text-xs text-[#ebe7de] cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-[#ece3d0] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={sceneForm.fog_enabled}
                     onChange={(e) => setSceneForm({ ...sceneForm, fog_enabled: e.target.checked })}
-                    className="rounded bg-[#141716] border-[#343b37] text-[#c86d51] focus:ring-0"
+                    className="rounded bg-[#131211] border-[#3a3530] text-[#c9a04e] focus:ring-0"
                   />
                   <span>Ativar Camada de Fog of War (Áreas Ocultas)</span>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#252a27]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowSceneModal(false)}
-                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] border border-[#3a3530] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isEditingScene ? 'Salvar Alterações' : 'Criar Cena'}
                 </button>
@@ -2656,17 +2656,17 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Adicionar Token no Mapa */}
       {showAddTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-6 shadow-sm backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white">Posicionar Token no Mapa</h3>
-              <button onClick={() => setShowAddTokenModal(false)} className="text-[#9b9689] hover:text-white transition-colors">
+              <button onClick={() => setShowAddTokenModal(false)} className="text-[#8a8578] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddToken} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-[#ebe7de] block mb-1">
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">
                   Vincular a Personagem da Campanha
                 </label>
                 <select
@@ -2679,7 +2679,7 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                       setTokenFormAvatar(match.avatar_url || '');
                     }
                   }}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 >
                   <option value="">Token Avulso (Monstro / NPC)</option>
                   {characters
@@ -2693,35 +2693,35 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#ebe7de] block mb-1">Nome do Token</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Token</label>
                 <input
                   type="text"
                   required
                   value={tokenFormName}
                   onChange={(e) => setTokenFormName(e.target.value)}
                   placeholder="Nome do Token"
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#ebe7de] block mb-1">URL do Avatar / Token (Opcional)</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">URL do Avatar / Token (Opcional)</label>
                 <input
                   type="url"
                   value={tokenFormAvatar}
                   onChange={(e) => setTokenFormAvatar(e.target.value)}
                   placeholder="https://exemplo.com/avatar.png"
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Tamanho (Quadrados)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho (Quadrados)</label>
                   <select
                     value={tokenFormSize}
                     onChange={(e) => setTokenFormSize(parseFloat(e.target.value))}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   >
                     <option value="0.5">0.5x0.5 (Miúdo / 0.5x)</option>
                     <option value="1">1x1 (Médio / Padrão - 1x)</option>
@@ -2733,120 +2733,120 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Cor do Anel</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Cor do Anel</label>
                   <input
                     type="color"
                     value={tokenFormColor}
                     onChange={(e) => setTokenFormColor(e.target.value)}
-                    className="w-full h-10 bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1 cursor-pointer"
+                    className="w-full h-10 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1 cursor-pointer"
                   />
                 </div>
               </div>
 
               {/* Atributos Mecânicos e Defensivos do Token / NPC */}
-              <div className="pt-2 border-t border-[#252a27] space-y-3">
-                <h4 className="text-xs font-bold text-[#c86d51] uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#2c2825] space-y-3">
+                <h4 className="text-xs font-bold text-[#c9a04e] uppercase tracking-wider">
                   Estatísticas de Combate e Defesas
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Defesa (CA)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       value={tokenNpcDefense}
                       onChange={(e) => setTokenNpcDefense(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Redução de Dano (RD)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       value={tokenNpcDR}
                       onChange={(e) => setTokenNpcDR(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Atual</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Atual</label>
                     <input
                       type="number"
                       value={tokenNpcHp}
                       onChange={(e) => setTokenNpcHp(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Máximo</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Máximo</label>
                     <input
                       type="number"
                       value={tokenNpcMaxHp}
                       onChange={(e) => setTokenNpcMaxHp(parseInt(e.target.value, 10) || 0)}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={tokenNpcInitiativeFormula}
                     onChange={(e) => setTokenNpcInitiativeFormula(e.target.value)}
                     placeholder="ex: 1d20+2"
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Resistências (50%)</label>
+                    <label className="text-[11px] font-medium text-[#8a8578] block mb-0.5">Resistências (50%)</label>
                     <input
                       type="text"
                       value={tokenNpcResistances}
                       onChange={(e) => setTokenNpcResistances(e.target.value)}
                       placeholder="fogo, corte"
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Vulnerabilidades (2x)</label>
+                    <label className="text-[11px] font-medium text-[#8a8578] block mb-0.5">Vulnerabilidades (2x)</label>
                     <input
                       type="text"
                       value={tokenNpcVulnerabilities}
                       onChange={(e) => setTokenNpcVulnerabilities(e.target.value)}
                       placeholder="frio"
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Imunidades (0)</label>
+                    <label className="text-[11px] font-medium text-[#8a8578] block mb-0.5">Imunidades (0)</label>
                     <input
                       type="text"
                       value={tokenNpcImmunities}
                       onChange={(e) => setTokenNpcImmunities(e.target.value)}
                       placeholder="veneno"
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#252a27]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowAddTokenModal(false)}
-                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] border border-[#3a3530] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Posicionar no Mapa
                 </button>
@@ -2859,33 +2859,33 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
       {/* MODAL: Configurar / Editar Token & Defesas do NPC */}
       {showEditTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#1c201e] border border-[#252a27] rounded-xl w-full max-w-md p-6 shadow-sm backdrop-blur-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252a27] mb-4">
+          <div className="bg-[#1a1816] border border-[#2c2825] rounded-xl w-full max-w-md p-6 shadow-sm backdrop-blur-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2c2825] mb-4">
               <h3 className="font-bold text-base text-white">Configurar Token / Estatísticas do NPC</h3>
-              <button onClick={() => setShowEditTokenModal(false)} className="text-[#9b9689] hover:text-white transition-colors">
+              <button onClick={() => setShowEditTokenModal(false)} className="text-[#8a8578] hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveEditToken} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-[#ebe7de] block mb-1">Nome do Token</label>
+                <label className="text-xs font-medium text-[#ece3d0] block mb-1">Nome do Token</label>
                 <input
                   type="text"
                   required
                   value={editTokenForm.name}
                   onChange={(e) => setEditTokenForm({ ...editTokenForm, name: e.target.value })}
-                  className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Tamanho (Quadrados)</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Tamanho (Quadrados)</label>
                   <select
                     value={editTokenForm.size}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, size: parseFloat(e.target.value) })}
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   >
                     <option value="0.5">0.5x0.5 (Miúdo / 0.5x)</option>
                     <option value="1">1x1 (Médio / Padrão - 1x)</option>
@@ -2897,119 +2897,119 @@ export const VirtualTabletop: React.FC<VirtualTabletopProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Cor do Anel</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Cor do Anel</label>
                   <input
                     type="color"
                     value={editTokenForm.color}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, color: e.target.value })}
-                    className="w-full h-10 bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1 cursor-pointer"
+                    className="w-full h-10 bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1 cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[#252a27] space-y-3">
-                <h4 className="text-xs font-bold text-[#c86d51] uppercase tracking-wider">
+              <div className="pt-2 border-t border-[#2c2825] space-y-3">
+                <h4 className="text-xs font-bold text-[#c9a04e] uppercase tracking-wider">
                   Estatísticas de Combate e Defesas
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Defesa (CA)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Defesa (CA)</label>
                     <input
                       type="number"
                       value={editTokenForm.defense}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, defense: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">Redução de Dano (RD)</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">Redução de Dano (RD)</label>
                     <input
                       type="number"
                       value={editTokenForm.damage_reduction}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, damage_reduction: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Atual</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Atual</label>
                     <input
                       type="number"
                       value={editTokenForm.current_hp}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, current_hp: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#ebe7de] block mb-1">PV Máximo</label>
+                    <label className="text-xs font-medium text-[#ece3d0] block mb-1">PV Máximo</label>
                     <input
                       type="number"
                       value={editTokenForm.max_hp}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, max_hp: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-[#ebe7de] block mb-1">Fórmula de Iniciativa</label>
+                  <label className="text-xs font-medium text-[#ece3d0] block mb-1">Fórmula de Iniciativa</label>
                   <input
                     type="text"
                     value={editTokenForm.initiative_formula}
                     onChange={(e) => setEditTokenForm({ ...editTokenForm, initiative_formula: e.target.value })}
                     placeholder="ex: 1d20+2"
-                    className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c86d51]"
+                    className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#c9a04e]"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Resistências (50%)</label>
+                    <label className="text-[11px] font-medium text-[#8a8578] block mb-0.5">Resistências (50%)</label>
                     <input
                       type="text"
                       value={editTokenForm.resistances}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, resistances: e.target.value })}
                       placeholder="fogo, corte"
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Vulnerabilidades (2x)</label>
+                    <label className="text-[11px] font-medium text-[#8a8578] block mb-0.5">Vulnerabilidades (2x)</label>
                     <input
                       type="text"
                       value={editTokenForm.vulnerabilities}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, vulnerabilities: e.target.value })}
                       placeholder="frio"
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[#9b9689] block mb-0.5">Imunidades (0)</label>
+                    <label className="text-[11px] font-medium text-[#8a8578] block mb-0.5">Imunidades (0)</label>
                     <input
                       type="text"
                       value={editTokenForm.immunities}
                       onChange={(e) => setEditTokenForm({ ...editTokenForm, immunities: e.target.value })}
                       placeholder="veneno"
-                      className="w-full bg-[#141716] border border-[#252a27] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c86d51]"
+                      className="w-full bg-[#131211] border border-[#2c2825] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a04e]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#252a27]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#2c2825]">
                 <button
                   type="button"
                   onClick={() => setShowEditTokenModal(false)}
-                  className="px-4 py-2 bg-[#252a27] hover:bg-[#343b37] text-[#ebe7de] border border-[#343b37] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#2c2825] hover:bg-[#3a3530] text-[#ece3d0] border border-[#3a3530] rounded text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#c86d51] hover:bg-[#c86d51]/90 text-[#141716] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#c9a04e] hover:bg-[#c9a04e]/90 text-[#131211] font-bold rounded-xl text-xs font-semibold shadow-md shadow-black/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Salvar Alterações
                 </button>

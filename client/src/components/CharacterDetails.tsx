@@ -67,39 +67,39 @@ export default function CharacterDetails({ character, campaignId, onClose, onRol
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 select-none animate-fade-in">
-      <div className="bg-[#1c201e] rounded-xl border border-[#343b37] w-full max-w-3xl text-[#ebe7de] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div className="bg-[#1a1816] rounded-xl border border-[#3a3530] w-full max-w-3xl text-[#ece3d0] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
         {/* Cabeçalho do Dossiê */}
-        <div className="p-6 bg-[#181c1a] border-b border-[#343b37] flex justify-between items-start shrink-0">
+        <div className="p-6 bg-[#1a1816] border-b border-[#3a3530] flex justify-between items-start shrink-0">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#c86d51]">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#c9a04e]">
               Dossiê de Personagem • {character?.class || raw?.classe || 'Aventureiro'}
             </span>
-            <h2 className="text-3xl font-serif text-[#ebe7de] font-bold tracking-tight">
+            <h2 className="text-3xl font-serif text-[#ece3d0] font-bold tracking-tight">
               {character?.name || 'Aventureiro'}
             </h2>
             <div className="flex items-center space-x-6 pt-2 text-xs font-mono">
               <div className="flex items-center space-x-2">
-                <Heart className="w-3.5 h-3.5 text-[#b84a48]" />
-                <span className="text-[#9b9689]">PV:</span>
-                <span className="font-bold text-[#ebe7de]">{currentHp}/{maxHp}</span>
-                <div className="w-16 h-1 bg-[#141716] rounded-full overflow-hidden border border-[#343b37]/60">
-                  <div className="h-full bg-[#b84a48]" style={{ width: `${hpPercent}%` }} />
+                <Heart className="w-3.5 h-3.5 text-[#b24a52]" />
+                <span className="text-[#8a8578]">PV:</span>
+                <span className="font-bold text-[#ece3d0]">{currentHp}/{maxHp}</span>
+                <div className="w-16 h-1 bg-[#131211] rounded-full overflow-hidden border border-[#3a3530]/60">
+                  <div className="h-full bg-[#b24a52]" style={{ width: `${hpPercent}%` }} />
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Zap className="w-3.5 h-3.5 text-[#5b8299]" />
-                <span className="text-[#9b9689]">PE:</span>
-                <span className="font-bold text-[#ebe7de]">{currentPe}/{maxPe}</span>
-                <div className="w-16 h-1 bg-[#141716] rounded-full overflow-hidden border border-[#343b37]/60">
-                  <div className="h-full bg-[#5b8299]" style={{ width: `${pePercent}%` }} />
+                <Zap className="w-3.5 h-3.5 text-[#4a7a8a]" />
+                <span className="text-[#8a8578]">PE:</span>
+                <span className="font-bold text-[#ece3d0]">{currentPe}/{maxPe}</span>
+                <div className="w-16 h-1 bg-[#131211] rounded-full overflow-hidden border border-[#3a3530]/60">
+                  <div className="h-full bg-[#4a7a8a]" style={{ width: `${pePercent}%` }} />
                 </div>
               </div>
 
               <div className="flex items-center space-x-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#6d9775]" />
-                <span className="text-[#9b9689]">Defesa:</span>
-                <span className="font-bold text-[#6d9775]">{defense}</span>
+                <Shield className="w-3.5 h-3.5 text-[#5a7a5a]" />
+                <span className="text-[#8a8578]">Defesa:</span>
+                <span className="font-bold text-[#5a7a5a]">{defense}</span>
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function CharacterDetails({ character, campaignId, onClose, onRol
           <button 
             type="button"
             onClick={onClose} 
-            className="w-8 h-8 rounded-lg bg-[#141716] text-[#9b9689] hover:text-[#ebe7de] border border-[#343b37] flex items-center justify-center text-sm transition-colors"
+            className="w-8 h-8 rounded-lg bg-[#131211] text-[#8a8578] hover:text-[#ece3d0] border border-[#3a3530] flex items-center justify-center text-sm transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -117,55 +117,55 @@ export default function CharacterDetails({ character, campaignId, onClose, onRol
         <div className="p-6 overflow-y-auto flex-1 flex flex-col md:flex-row gap-6">
           {/* Zona 1: Habilidades & Histórico (Principal) */}
           <div className="flex-1 min-w-0 space-y-4">
-            <div className="flex border-b border-[#343b37] text-xs font-serif">
+            <div className="flex border-b border-[#3a3530] text-xs font-serif">
               <button
                 type="button"
                 onClick={() => setActiveTab('abilities')}
                 className={`pb-2 px-3 font-bold transition-colors relative ${
-                  activeTab === 'abilities' ? 'text-[#c86d51]' : 'text-[#9b9689] hover:text-[#ebe7de]'
+                  activeTab === 'abilities' ? 'text-[#c9a04e]' : 'text-[#8a8578] hover:text-[#ece3d0]'
                 }`}
               >
                 <span>Habilidades ({abilitiesList.length})</span>
-                {activeTab === 'abilities' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />}
+                {activeTab === 'abilities' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c9a04e]" />}
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('background')}
                 className={`pb-2 px-3 font-bold transition-colors relative ${
-                  activeTab === 'background' ? 'text-[#c86d51]' : 'text-[#9b9689] hover:text-[#ebe7de]'
+                  activeTab === 'background' ? 'text-[#c9a04e]' : 'text-[#8a8578] hover:text-[#ece3d0]'
                 }`}
               >
                 <span>Histórico & Notas</span>
-                {activeTab === 'background' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c86d51]" />}
+                {activeTab === 'background' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#c9a04e]" />}
               </button>
             </div>
 
             {activeTab === 'abilities' && (
               <div className="space-y-2">
                 {abilitiesList.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-[#9b9689] border border-dashed border-[#343b37] rounded-lg">
+                  <div className="py-8 text-center text-xs text-[#8a8578] border border-dashed border-[#3a3530] rounded-lg">
                     Nenhuma habilidade listada.
                   </div>
                 ) : (
-                  <div className="divide-y divide-[#343b37]/50 border-t border-b border-[#343b37]/50">
+                  <div className="divide-y divide-[#3a3530]/50 border-t border-b border-[#3a3530]/50">
                     {abilitiesList.map((ability, idx) => (
                       <div key={idx} className="py-3 flex items-center justify-between gap-3">
                         <div>
                           <div className="flex items-center space-x-2">
-                            <span className="font-serif font-bold text-sm text-[#ebe7de]">{ability.name}</span>
+                            <span className="font-serif font-bold text-sm text-[#ece3d0]">{ability.name}</span>
                             {ability.cost && (
-                              <span className="text-[10px] font-mono text-[#5b8299]">{ability.cost}</span>
+                              <span className="text-[10px] font-mono text-[#4a7a8a]">{ability.cost}</span>
                             )}
                           </div>
-                          <p className="text-xs text-[#9b9689] mt-0.5">{ability.description || 'Habilidade ativa'}</p>
+                          <p className="text-xs text-[#8a8578] mt-0.5">{ability.description || 'Habilidade ativa'}</p>
                         </div>
 
                         <button
                           type="button"
                           disabled={rollingAbility === ability.name}
                           onClick={() => handleRollAbility(ability)}
-                          className="px-3 py-1 bg-[#c86d51] hover:bg-[#d67b5f] text-[#141716] font-bold rounded text-xs transition-all active:scale-95 disabled:opacity-50 shrink-0"
+                          className="px-3 py-1 bg-[#c9a04e] hover:bg-[#d67b5f] text-[#131211] font-bold rounded text-xs transition-all active:scale-95 disabled:opacity-50 shrink-0"
                         >
                           {rollingAbility === ability.name ? 'Rolando...' : ability.roll || 'Rolar'}
                         </button>
@@ -177,7 +177,7 @@ export default function CharacterDetails({ character, campaignId, onClose, onRol
             )}
 
             {activeTab === 'background' && (
-              <div className="p-4 bg-[#141716] border border-[#343b37] rounded-lg text-xs text-[#9b9689] leading-relaxed">
+              <div className="p-4 bg-[#131211] border border-[#3a3530] rounded-lg text-xs text-[#8a8578] leading-relaxed">
                 <p className="whitespace-pre-wrap">{backgroundText}</p>
               </div>
             )}
@@ -185,7 +185,7 @@ export default function CharacterDetails({ character, campaignId, onClose, onRol
 
           {/* Zona 2: Atributos em Lista Discreta (Lateral) */}
           <div className="w-full md:w-56 shrink-0 space-y-3 pt-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#9b9689] block">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8a8578] block">
               Atributos de Ficha
             </span>
             <div className="space-y-1.5">
@@ -195,11 +195,11 @@ export default function CharacterDetails({ character, campaignId, onClose, onRol
                 const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
 
                 return (
-                  <div key={key} className="p-2 bg-[#141716] border border-[#343b37] rounded flex items-center justify-between text-xs font-mono">
-                    <span className="text-[#9b9689] uppercase text-[10px]">{key}</span>
+                  <div key={key} className="p-2 bg-[#131211] border border-[#3a3530] rounded flex items-center justify-between text-xs font-mono">
+                    <span className="text-[#8a8578] uppercase text-[10px]">{key}</span>
                     <div className="flex items-center space-x-2">
-                      <span className="font-serif font-bold text-sm text-[#ebe7de]">{numVal}</span>
-                      <span className="text-[10px] text-[#c86d51] font-semibold">{modStr}</span>
+                      <span className="font-serif font-bold text-sm text-[#ece3d0]">{numVal}</span>
+                      <span className="text-[10px] text-[#c9a04e] font-semibold">{modStr}</span>
                     </div>
                   </div>
                 );

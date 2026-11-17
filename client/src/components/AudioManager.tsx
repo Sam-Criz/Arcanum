@@ -177,37 +177,37 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
 
       {/* Drawer / Painel Lateral de Controle de Áudio */}
       {isOpen && (
-        <div className="fixed inset-y-0 right-0 z-50 w-80 sm:w-96 bg-[#1c201e] border-l border-[#343b37] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+        <div className="fixed inset-y-0 right-0 z-50 w-80 sm:w-96 bg-[#1a1816] border-l border-[#3a3530] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-[#141716] border-b border-[#343b37]">
+          <div className="flex items-center justify-between px-4 py-3 bg-[#131211] border-b border-[#3a3530]">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded bg-[#252a27] border border-[#343b37] text-[#c86d51]">
+              <div className="p-1.5 rounded bg-[#2c2825] border border-[#3a3530] text-[#c9a04e]">
                 <Music className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-serif font-bold text-[#ebe7de]">Trilha Sonora & Clima</h3>
-                <p className="text-[10px] font-mono text-[#9b9689]">Áudio YouTube Sincronizado</p>
+                <h3 className="text-sm font-serif font-bold text-[#ece3d0]">Trilha Sonora & Clima</h3>
+                <p className="text-[10px] font-mono text-[#8a8578]">Áudio YouTube Sincronizado</p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="px-2 py-1 text-xs font-mono text-[#9b9689] hover:text-[#ebe7de] hover:bg-[#252a27] rounded transition-colors"
+              className="px-2 py-1 text-xs font-mono text-[#8a8578] hover:text-[#ece3d0] hover:bg-[#2c2825] rounded transition-colors"
             >
               Fechar ✕
             </button>
           </div>
 
           {/* Player Ativo / Em Execução */}
-          <div className="p-4 bg-[#141716]/60 border-b border-[#343b37]">
+          <div className="p-4 bg-[#131211]/60 border-b border-[#3a3530]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#9b9689]">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#8a8578]">
                 {isPlaying ? '● Tocando Agora na Mesa' : '○ Nenhum Áudio Ativo'}
               </span>
               <button
                 onClick={() => setIsLoop(!isLoop)}
                 className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${
-                  isLoop ? 'text-[#6d9775] bg-[#6d9775]/10 hover:bg-[#6d9775]/20' : 'text-[#9b9689] bg-[#252a27] hover:text-[#ebe7de]'
+                  isLoop ? 'text-[#5a7a5a] bg-[#5a7a5a]/10 hover:bg-[#5a7a5a]/20' : 'text-[#8a8578] bg-[#2c2825] hover:text-[#ece3d0]'
                 }`}
                 title="Alternar repetição contínua"
               >
@@ -217,11 +217,11 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
 
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0 pr-3">
-                <p className="font-serif font-semibold text-sm text-[#ebe7de] truncate">
+                <p className="font-serif font-semibold text-sm text-[#ece3d0] truncate">
                   {currentTrack ? currentTrack.title : 'Silêncio na Mesa'}
                 </p>
                 {currentTrack && (
-                  <p className="text-[11px] font-mono text-[#9b9689] flex items-center gap-1 mt-0.5">
+                  <p className="text-[11px] font-mono text-[#8a8578] flex items-center gap-1 mt-0.5">
                     Sugestão: {currentTrack.added_by_username || 'Aventureiro'}
                   </p>
                 )}
@@ -232,7 +232,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                   {isPlaying ? (
                     <button
                       onClick={handlePause}
-                      className="p-2.5 bg-[#b84a48]/20 hover:bg-[#b84a48]/30 border border-[#b84a48]/40 text-[#b84a48] rounded-full transition-all"
+                      className="p-2.5 bg-[#b24a52]/20 hover:bg-[#b24a52]/30 border border-[#b24a52]/40 text-[#b24a52] rounded-full transition-all"
                       title="Pausar Áudio na Mesa"
                     >
                       <Pause className="w-4 h-4" />
@@ -241,7 +241,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                     currentTrack && (
                       <button
                         onClick={() => handlePlay(currentTrack)}
-                        className="p-2.5 bg-[#6d9775]/20 hover:bg-[#6d9775]/30 border border-[#6d9775]/40 text-[#6d9775] rounded-full transition-all"
+                        className="p-2.5 bg-[#5a7a5a]/20 hover:bg-[#5a7a5a]/30 border border-[#5a7a5a]/40 text-[#5a7a5a] rounded-full transition-all"
                         title="Retomar Reprodução"
                       >
                         <Play className="w-4 h-4 ml-0.5" />
@@ -253,17 +253,17 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
             </div>
 
             {/* Controle de Volume Individual do Jogador */}
-            <div className="mt-4 pt-3 border-t border-[#343b37]/60">
-              <div className="flex items-center justify-between text-xs text-[#9b9689] mb-1.5 font-mono">
+            <div className="mt-4 pt-3 border-t border-[#3a3530]/60">
+              <div className="flex items-center justify-between text-xs text-[#8a8578] mb-1.5 font-mono">
                 <span className="flex items-center gap-1.5">
                   <button
                     onClick={() => setIsMuted(!isMuted)}
-                    className="hover:text-[#ebe7de] transition-colors"
+                    className="hover:text-[#ece3d0] transition-colors"
                   >
                     {isMuted || volume === 0 ? (
-                      <VolumeX className="w-4 h-4 text-[#b84a48]" />
+                      <VolumeX className="w-4 h-4 text-[#b24a52]" />
                     ) : (
-                      <Volume2 className="w-4 h-4 text-[#c86d51]" />
+                      <Volume2 className="w-4 h-4 text-[#c9a04e]" />
                     )}
                   </button>
                   <span>Volume Pessoal:</span>
@@ -276,7 +276,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                 max="100"
                 value={isMuted ? 0 : volume}
                 onChange={e => handleVolumeChange(Number(e.target.value))}
-                className="w-full accent-[#c86d51] bg-[#252a27] h-1.5 rounded-lg appearance-none cursor-pointer"
+                className="w-full accent-[#c9a04e] bg-[#2c2825] h-1.5 rounded-lg appearance-none cursor-pointer"
               />
             </div>
           </div>
@@ -284,12 +284,12 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
           {/* Lista de Trilhas da Campanha */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-mono text-[#9b9689] uppercase tracking-wider">
+              <span className="text-[11px] font-mono text-[#8a8578] uppercase tracking-wider">
                 Biblioteca de Trilhas ({tracks.length})
               </span>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs font-serif bg-[#c86d51]/15 hover:bg-[#c86d51]/25 text-[#c86d51] border border-[#c86d51]/30 rounded transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-serif bg-[#c9a04e]/15 hover:bg-[#c9a04e]/25 text-[#c9a04e] border border-[#c9a04e]/30 rounded transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Sugerir Trilha</span>
@@ -297,10 +297,10 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
             </div>
 
             {tracks.length === 0 ? (
-              <div className="py-12 text-center text-[#9b9689] border border-dashed border-[#343b37] rounded-lg p-4">
-                <Music className="w-8 h-8 text-[#343b37] mx-auto mb-2" />
-                <p className="font-serif text-[#ebe7de] text-xs">Nenhuma trilha cadastrada</p>
-                <p className="text-[11px] text-[#9b9689] mt-1">
+              <div className="py-12 text-center text-[#8a8578] border border-dashed border-[#3a3530] rounded-lg p-4">
+                <Music className="w-8 h-8 text-[#3a3530] mx-auto mb-2" />
+                <p className="font-serif text-[#ece3d0] text-xs">Nenhuma trilha cadastrada</p>
+                <p className="text-[11px] text-[#8a8578] mt-1">
                   Adicione links de taverna, combate ou suspense do YouTube para criar a atmosfera da sessão.
                 </p>
               </div>
@@ -312,23 +312,23 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                     key={t.id}
                     className={`p-3 rounded-lg border transition-all flex items-center justify-between gap-3 ${
                       isThisPlaying
-                        ? 'bg-[#c86d51]/10 border-[#c86d51]/40 shadow-sm'
-                        : 'bg-[#141716]/40 border-[#343b37] hover:border-[#343b37]/80'
+                        ? 'bg-[#c9a04e]/10 border-[#c9a04e]/40 shadow-sm'
+                        : 'bg-[#131211]/40 border-[#3a3530] hover:border-[#3a3530]/80'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-serif text-xs font-semibold text-[#ebe7de] truncate">
+                        <span className="font-serif text-xs font-semibold text-[#ece3d0] truncate">
                           {t.title}
                         </span>
                         {isThisPlaying && (
                           <span className="flex h-2 w-2 relative">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6d9775] opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6d9775]"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5a7a5a] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5a7a5a]"></span>
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] font-mono text-[#9b9689] mt-0.5 truncate">
+                      <p className="text-[10px] font-mono text-[#8a8578] mt-0.5 truncate">
                         Por: {t.added_by_username || 'Mesa'}
                       </p>
                     </div>
@@ -338,7 +338,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                         href={t.youtube_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-1 text-[#9b9689] hover:text-[#ebe7de] transition-colors"
+                        className="p-1 text-[#8a8578] hover:text-[#ece3d0] transition-colors"
                         title="Abrir no YouTube"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -349,7 +349,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                           {isThisPlaying ? (
                             <button
                               onClick={handlePause}
-                              className="p-1.5 bg-[#b84a48]/20 hover:bg-[#b84a48]/30 text-[#b84a48] rounded border border-[#b84a48]/30 transition-colors"
+                              className="p-1.5 bg-[#b24a52]/20 hover:bg-[#b24a52]/30 text-[#b24a52] rounded border border-[#b24a52]/30 transition-colors"
                               title="Pausar"
                             >
                               <Pause className="w-3.5 h-3.5" />
@@ -357,7 +357,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                           ) : (
                             <button
                               onClick={() => handlePlay(t)}
-                              className="p-1.5 bg-[#6d9775]/20 hover:bg-[#6d9775]/30 text-[#6d9775] rounded border border-[#6d9775]/30 transition-colors"
+                              className="p-1.5 bg-[#5a7a5a]/20 hover:bg-[#5a7a5a]/30 text-[#5a7a5a] rounded border border-[#5a7a5a]/30 transition-colors"
                               title="Tocar na Mesa"
                             >
                               <Play className="w-3.5 h-3.5 ml-0.5" />
@@ -366,7 +366,7 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
 
                           <button
                             onClick={() => handleDelete(t.id)}
-                            className="p-1.5 text-[#9b9689] hover:text-[#b84a48] hover:bg-[#252a27] rounded transition-colors"
+                            className="p-1.5 text-[#8a8578] hover:text-[#b24a52] hover:bg-[#2c2825] rounded transition-colors"
                             title="Excluir Trilha"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -385,23 +385,23 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
       {/* Modal de Adicionar/Sugerir Trilha */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-[#1c201e] border border-[#343b37] rounded-xl shadow-2xl p-5">
-            <h3 className="font-serif text-base font-bold text-[#ebe7de] mb-1">
+          <div className="w-full max-w-md bg-[#1a1816] border border-[#3a3530] rounded-xl shadow-2xl p-5">
+            <h3 className="font-serif text-base font-bold text-[#ece3d0] mb-1">
               Adicionar Trilha de Áudio (YouTube)
             </h3>
-            <p className="text-xs text-[#9b9689] mb-4">
+            <p className="text-xs text-[#8a8578] mb-4">
               Cole o link do YouTube com a trilha sonora ou efeito sonoro que deseja disponibilizar para a sessão.
             </p>
 
             {errorMsg && (
-              <div className="mb-3 p-2.5 bg-[#b84a48]/15 border border-[#b84a48]/30 rounded text-xs text-[#b84a48]">
+              <div className="mb-3 p-2.5 bg-[#b24a52]/15 border border-[#b24a52]/30 rounded text-xs text-[#b24a52]">
                 {errorMsg}
               </div>
             )}
 
             <form onSubmit={handleAddTrack} className="space-y-3">
               <div>
-                <label className="block text-xs font-mono text-[#9b9689] mb-1 uppercase tracking-wider">
+                <label className="block text-xs font-mono text-[#8a8578] mb-1 uppercase tracking-wider">
                   Título da Trilha
                 </label>
                 <input
@@ -410,12 +410,12 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                   onChange={e => setNewTitle(e.target.value)}
                   placeholder="Ex: Combate Épico no Fosso, Taverna Chuvosa"
                   required
-                  className="w-full bg-[#141716] border border-[#343b37] rounded px-3 py-2 text-xs text-[#ebe7de] focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#3a3530] rounded px-3 py-2 text-xs text-[#ece3d0] focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#9b9689] mb-1 uppercase tracking-wider">
+                <label className="block text-xs font-mono text-[#8a8578] mb-1 uppercase tracking-wider">
                   Link do YouTube
                 </label>
                 <input
@@ -424,22 +424,22 @@ export const AudioManager: React.FC<AudioManagerProps> = ({
                   onChange={e => setNewUrl(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=..."
                   required
-                  className="w-full bg-[#141716] border border-[#343b37] rounded px-3 py-2 text-xs text-[#ebe7de] focus:outline-none focus:border-[#c86d51]"
+                  className="w-full bg-[#131211] border border-[#3a3530] rounded px-3 py-2 text-xs text-[#ece3d0] focus:outline-none focus:border-[#c9a04e]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#343b37]">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#3a3530]">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-xs text-[#9b9689] hover:text-[#ebe7de]"
+                  className="px-3 py-1.5 text-xs text-[#8a8578] hover:text-[#ece3d0]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-1.5 text-xs font-semibold bg-[#c86d51] hover:bg-[#b0583e] text-[#141716] rounded transition-colors disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-semibold bg-[#c9a04e] hover:bg-[#b0583e] text-[#131211] rounded transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? 'Adicionando...' : 'Salvar Trilha'}
                 </button>
